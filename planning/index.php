@@ -401,7 +401,7 @@ $conn->close();
                                     <option value="">Sélectionner une activité</option>
                                     <?php foreach ($activites as $activite) : ?>
                                         <option value="<?php echo htmlspecialchars($activite['id']); ?>">
-                                            <?php echo htmlspecialchars($activite['nom']); ?> MAD
+                                            <?php echo htmlspecialchars($activite['nom']); ?> 
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
@@ -459,7 +459,7 @@ $conn->close();
                             <div class="form-group">
                                 <label for="gender">Genre</label>
                                 <select id="gender" name="gender" class="form-control select2" required>
-                                    <option value="Mix">Mixte</option>
+                                    <option value="Mix" selected>Mixte</option>
                                     <option value="Homme">Homme</option>
                                     <option value="Femme">Femme</option>
                                 </select>

@@ -1,4 +1,6 @@
 <?php
+ob_start(); // Start output buffering
+
 require "../inc/app.php";
 $servername = "localhost";
 $username = "root";
@@ -33,13 +35,11 @@ function uploadFile($file, $target_dir, $allowed_types = [])
 
     // Check file type
     if (!empty($allowed_types) && !in_array($file_type, $allowed_types)) {
-        echo "Sorry, only the following file types are allowed: " . implode(", ", $allowed_types);
         return false;
     }
 
     // Check file size (adjust as needed)
     if ($file["size"] > 5000000) { // 5MB
-        echo "Sorry, your file is too large.";
         return false;
     }
 
@@ -57,7 +57,6 @@ function uploadFile($file, $target_dir, $allowed_types = [])
     if (move_uploaded_file($file["tmp_name"], $target_file)) {
         return $new_file_name; // Return only the new file name
     } else {
-        echo "Sorry, there was an error uploading your file.";
         return false;
     }
 }
@@ -141,27 +140,20 @@ try {
         }
     }
 
-    // If there are missing fields, display them
+    // If there are missing fields, stop the process and redirect
     if (!empty($missingFields)) {
         $missingFieldsList = implode(', ', $missingFields);
-        echo "Les champs suivants sont manquants : " . $missingFieldsList . "<br>";
+        header("Location: ../error_page.php?missing=" . urlencode($missingFieldsList)); 
+        exit();
     }
-    $user_id = $_SESSION['user_insert'];
 
-    
-    $fetch_id="SELECT id from users where ";
-
-
+    $user_id = $_SESSION['last_user'];
 
     // Insert user details
-    $user_sql = "UPDATE `users` SET `etat` = 'actif' WHERE `users`.`CIN` = ?;";
+    $user_sql = "UPDATE `users` SET `etat` = 'actif' and photo=? WHERE `users`.`id` = ?;";
     $stmt = $conn->prepare($user_sql);
-    $stmt->bind_param(
-        "i",
-        $user_id
-    );
+    $stmt->bind_param("is", $user_id , $photo_name);
     $stmt->execute();
-    echo "User details added successfully. User ID: " . $user_id . "<br>";
     $stmt->close();
 
     // Insert subscription details
@@ -171,7 +163,6 @@ try {
     $stmt->bind_param("iss", $user_id, $_POST['type_abonnement'], $_POST['date_fin_abn']);
     $stmt->execute();
     $abonnement_id = $stmt->insert_id;
-    echo "Subscription details added successfully. Abonnement ID: " . $abonnement_id . "<br>";
     $stmt->close();
 
     // Insert user activities
@@ -181,7 +172,6 @@ try {
         $stmt = $conn->prepare($user_activites_sql);
         $stmt->bind_param("iii", $user_id, $activite_id, $abonnement_id);
         $stmt->execute();
-        echo "Activity added successfully. Activity ID: " . $activite_id . "<br>";
         $stmt->close();
     }
 
@@ -196,7 +186,6 @@ try {
         $stmt = $conn->prepare($doc_sql);
         $stmt->bind_param("iss", $user_id, $libelle_document, $file_name);
         $stmt->execute();
-        echo "Document added successfully. File Name: " . $file_name . "<br>";
         $stmt->close();
     }
 
@@ -205,23 +194,14 @@ try {
         // Convert string amounts to float
         $montant_paye = floatval($_POST['montant_paye'][$index]);
         $reste = floatval($_POST['reste'][$index]);
-        $total = floatval($_POST['total']); // Assuming 'total' is a single value
+        $total = floatval($_POST['total']);
 
         // Insert payment details
         $payment_sql = "INSERT INTO payments (user_id, abonnement_id, montant_paye, type_paiement_id, reste, total)
                         VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($payment_sql);
-        $stmt->bind_param(
-            "iidddd",
-            $user_id,
-            $abonnement_id,
-            $montant_paye,
-            $type_paiement_id,
-            $reste,
-            $total
-        );
+        $stmt->bind_param("iidddd", $user_id, $abonnement_id, $montant_paye, $type_paiement_id, $reste, $total);
         $stmt->execute();
-        $payment_id = $stmt->insert_id;
         $stmt->close();
 
         // If the payment type is cheque (id 3), insert cheque details
@@ -229,28 +209,30 @@ try {
             $cheque_sql = "INSERT INTO cheque (nomTitulaire, numeroCheque, dateEmission, banqueEmettrice, numeroCompte, id_utilisateur, abonnement_id)
                            VALUES (?, ?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($cheque_sql);
-            $stmt->bind_param(
-                "ssssssi",
-                $_POST['nomTitulaire'],
-                $_POST['numeroCheque'],
-                $_POST['dateEmission'],
-                $_POST['banqueEmettrice'],
-                $_POST['numeroCompte'],
-                $user_id,
-                $abonnement_id
-            );
+            $stmt->bind_param("ssssssi", $_POST['nomTitulaire'], $_POST['numeroCheque'], $_POST['dateEmission'], $_POST['banqueEmettrice'], $_POST['numeroCompte'], $user_id, $abonnement_id);
             $stmt->execute();
             $stmt->close();
         }
     }
 
+
+    
     // Commit transaction
     $conn->commit();
+
+    // Redirect on success
+    header("Location: ./");
+    exit();
+
 } catch (Exception $e) {
     // Rollback transaction on error
     $conn->rollback();
-    echo "Failed: " . $e->getMessage();
+    // Redirect to an error page with the error message
+    header("Location: ../error_page.php?error=" . urlencode($e->getMessage()));
+    exit();
 }
 
 // Close the connection
 $conn->close();
+ob_end_flush();
+;?>

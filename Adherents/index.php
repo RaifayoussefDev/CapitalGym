@@ -17,16 +17,25 @@ if ($conn->connect_error) {
 $activites_sql = "SELECT id, nom, prix FROM activites";
 $activites_result = $conn->query($activites_sql);
 
+$package_sql = "SELECT *  FROM `packages` ORDER BY `packages`.`pack_name` ASC";
+$package_result = $conn->query($package_sql);
+
 // Récupérer les types de paiement
 $type_paiements_sql = "SELECT id, type FROM type_paiements";
 $type_paiements_result = $conn->query($type_paiements_sql);
 
 $activites = [];
+$packages = [];
 $type_paiements = [];
 
 if ($activites_result->num_rows > 0) {
     while ($row = $activites_result->fetch_assoc()) {
         $activites[] = $row;
+    }
+}
+if ($package_result->num_rows > 0) {
+    while ($row = $package_result->fetch_assoc()) {
+        $packages[] = $row;
     }
 }
 
@@ -330,10 +339,26 @@ $conn->close();
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label>Catégorie d'adhésion</label>
-                                                        <select name="categorie_adherence" class="form-select form-control-lg">
-                                                            <option value="Platinum">Platinum</option>
-                                                            <option value="Gold">Gold</option>
-                                                            <option value="Silver">Silver</option>
+                                                        <select name="categorie_adherence" id="categorie_adherence" class="form-select form-control-lg" onchange="updateAbonnementOptions()">
+                                                            <?php
+                                                            foreach ($packages as $package) { ?>
+                                                                <option value="<?= $package['id']; ?>"
+                                                                    data-annual="<?= $package['annual_price']; ?>"
+                                                                    data-semestrial="<?= $package['semestrial_price']; ?>"
+                                                                    data-trimestrial="<?= $package['trimestrial_price']; ?>"
+                                                                    data-monthly="<?= $package['monthly_price']; ?>">
+                                                                    <?= $package['pack_name']; ?>
+                                                                </option>
+                                                            <?php
+                                                            }; ?>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Type d'abonnement</label>
+                                                        <select name="type_abonnement" id="type_abonnement" class="form-select form-control-lg">
+                                                            <!-- Options dynamically added by JavaScript -->
                                                         </select>
                                                     </div>
                                                 </div>
@@ -346,12 +371,14 @@ $conn->close();
                                                         </select>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-12">
+                                                <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label>Offres promotionnelles</label>
                                                         <input type="text" class="form-control" id="offre_promo" name="offre_promo" placeholder="Offre promotionnelle" />
                                                     </div>
                                                 </div>
+                                            </div>
+                                            <div class="row">
                                                 <div class="col-md-12">
                                                     <div class="form-group">
                                                         <label>Description</label>
@@ -359,6 +386,7 @@ $conn->close();
                                                     </div>
                                                 </div>
                                             </div>
+
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
@@ -366,17 +394,7 @@ $conn->close();
                                                         <input type="date" id="date_debut_paiement" name="date_debut_paiement" class="form-control" required />
                                                     </div>
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Type d'abonnement</label>
-                                                        <select name="type_abonnement" id="type_abonnement" class="form-select form-control-lg">
-                                                            <option value="1">Mensuel</option>
-                                                            <option value="3">Trimestriel</option>
-                                                            <option value="6">Semestriel</option>
-                                                            <option value="12">Annuel</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
+
                                                 <div class="col-md-6">
                                                     <label for="Type_dactivite">Type d’activité</label>
                                                     <div class="selectgroup selectgroup-pills">
@@ -729,7 +747,45 @@ $conn->close();
     </div>
 
 </div>
+<script>
+    // Function to update the "type_abonnement" options based on selected package
+    function updateAbonnementOptions() {
+        var selectedPackage = document.getElementById('categorie_adherence').selectedOptions[0];
+        var typeAbonnementSelect = document.getElementById('type_abonnement');
+        typeAbonnementSelect.innerHTML = ''; // Clear previous options
 
+        var monthly = selectedPackage.getAttribute('data-monthly');
+        var trimestrial = selectedPackage.getAttribute('data-trimestrial');
+        var semestrial = selectedPackage.getAttribute('data-semestrial');
+        var annual = selectedPackage.getAttribute('data-annual');
+
+        // Add options based on available prices
+        if (monthly) {
+            var option = new Option('Mensuel', '1');
+            typeAbonnementSelect.add(option);
+        }
+        if (trimestrial) {
+            var option = new Option('Trimestriel', '3');
+            typeAbonnementSelect.add(option);
+        }
+        if (semestrial) {
+            var option = new Option('Semestriel', '6');
+            typeAbonnementSelect.add(option);
+        }
+        if (annual) {
+            var option = new Option('Annuel', '12');
+            typeAbonnementSelect.add(option);
+        }
+
+
+    }
+
+    // Add event listener to update the abonnement options when the package changes
+    document.getElementById('categorie_adherence').addEventListener('change', updateAbonnementOptions);
+
+    // Call the function once to set the initial state
+    updateAbonnementOptions();
+</script>
 <script>
     // Function to generate the matricule based on the latest ID
     function generateMatricule() {

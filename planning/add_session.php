@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($stmt = $conn->prepare($sql)) {
         $stmt->bind_param(
-            "ssiisis",  // Adjust the type string for all 7 variables
+            "ssiisss",  // Adjust the type string for all 7 variables
             $libelle,        // string
             $target_file,    // string
             $coach,          // int

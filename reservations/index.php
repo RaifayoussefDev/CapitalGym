@@ -282,7 +282,7 @@ $conn->close();
     /* Table background with dark overlay */
     .table {
         position: relative;
-        background-image: url('../assets/img/capitalsoft/logo_light.png');
+        /* background-image: url('../assets/img/capitalsoft/logo_light.png'); */
         background-repeat: no-repeat;
         background-size: cover;
         /* Ensures the image covers the entire table */
