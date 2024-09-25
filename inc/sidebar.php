@@ -114,6 +114,12 @@
             </a>
           </li>
           <li class="nav-item">
+            <a href="../wallet/">
+              <i class="fas fa-users"></i>
+              <p>Wallet</p>
+            </a>
+          </li>
+          <li class="nav-item">
             <a data-bs-toggle="collapse" href="#sidebarLayouts1">
               <i class="fas fa-th-list"></i>
               <p>Planning</p>

@@ -15,73 +15,12 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Prepare and execute queries for activities
-$activites_sql = "SELECT id, nom, prix FROM activites";
-$activites_stmt = $conn->prepare($activites_sql);
-$activites_stmt->execute();
-$activites_result = $activites_stmt->get_result();
-
-// Prepare and execute queries for payment types
-$type_paiements_sql = "SELECT id, type FROM type_paiements";
-$type_paiements_stmt = $conn->prepare($type_paiements_sql);
-$type_paiements_stmt->execute();
-$type_paiements_result = $type_paiements_stmt->get_result();
-
-$activites = [];
-$type_paiements = [];
-
-if ($activites_result->num_rows > 0) {
-    while ($row = $activites_result->fetch_assoc()) {
-        $activites[] = $row;
-    }
-}
-
-if ($type_paiements_result->num_rows > 0) {
-    while ($row = $type_paiements_result->fetch_assoc()) {
-        $type_paiements[] = $row;
-    }
-}
-
 // Retrieve user ID from URL and user details
 if (isset($_GET['id_user'])) {
     $user_id = intval($_GET['id_user']);
 
-    $sql = "
-    SELECT 
-        u.id,
-        u.matricule,
-        u.nom,
-        u.prenom,
-        u.email,
-        u.phone,
-        u.cin,
-        u.photo,
-        u.date_naissance,
-        u.genre,
-        a.type AS abonnement_type,
-        GROUP_CONCAT(DISTINCT ua.activite_id ORDER BY ua.activite_id ASC SEPARATOR ',') AS activites_ids,
-        GROUP_CONCAT(DISTINCT act.nom ORDER BY act.nom ASC SEPARATOR ', ') AS activites,
-        COALESCE(a.date_fin, '') AS date_fin_abn,
-        COALESCE(SUM(p.montant_paye), 0) AS montant_paye,
-        tp.type AS type_paiement,
-        COALESCE(SUM(p.reste), 0) AS reste
-    FROM 
-        users u
-    JOIN 
-        abonnements a ON u.id = a.user_id
-    LEFT JOIN 
-        user_activites ua ON a.id = ua.abonnement_id
-    LEFT JOIN 
-        activites act ON ua.activite_id = act.id
-    LEFT JOIN 
-        payments p ON a.id = p.abonnement_id
-    LEFT JOIN 
-        type_paiements tp ON p.type_paiement_id = tp.id
-    WHERE 
-        u.id = ?
-    GROUP BY 
-        u.id, a.type, a.date_fin, tp.type;
-    ";
+    $sql = "SELECT * from users u, abonnements a , packages p , payments py , type_paiements tp WHERE u.id=a.user_id and p.id=a.type_abonnement and a.id=py.abonnement_id and py.type_paiement_id=tp.id and u.id=?;
+";
 
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('i', $user_id);
@@ -293,28 +232,13 @@ img {
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Type d'abonnement:</label>
-                                    <span><?= htmlspecialchars($user['abonnement_type']) ?></span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="Type_dactivite">Type d’activité:</label>
-                                <div class="selectgroup selectgroup-pills">
-                                    <?php
-                                    $user_activities = explode(',', $user['activites_ids']);
-                                    foreach ($activites as $activite) :
-                                        if (in_array($activite['id'], $user_activities)) :
-                                    ?>
-                                            <label class="selectgroup-item">
-                                                <span class="selectgroup-button"><?= htmlspecialchars($activite['nom']) ?></span>
-                                            </label>
-                                    <?php endif;
-                                    endforeach; ?>
+                                    <span><?= htmlspecialchars($user['pack_name']) ?></span>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Date de fin d’abonnement:</label>
-                                    <span><?= htmlspecialchars($user['date_fin_abn']) ?></span>
+                                    <span><?= htmlspecialchars($user['date_fin']) ?></span>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -326,15 +250,10 @@ img {
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Type de Paiement:</label>
-                                    <span><?= htmlspecialchars($user['type_paiement']) ?></span>
+                                    <span><?= htmlspecialchars($user['type']) ?></span>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Reste:</label>
-                                    <span><?= htmlspecialchars($user['reste']) ?></span>
-                                </div>
-                            </div>
+                            
                         </div>
                     </section>
                 </div>

@@ -15,6 +15,9 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Récupérer les activités
+$activites_sql = "SELECT id, nom, prix FROM activites";
+$activites_result = $conn->query($activites_sql);
 
 $package_sql = "SELECT *  FROM `packages` ORDER BY `packages`.`pack_name` ASC";
 $package_result = $conn->query($package_sql);
@@ -27,6 +30,11 @@ $activites = [];
 $packages = [];
 $type_paiements = [];
 
+if ($activites_result->num_rows > 0) {
+    while ($row = $activites_result->fetch_assoc()) {
+        $activites[] = $row;
+    }
+}
 if ($package_result->num_rows > 0) {
     while ($row = $package_result->fetch_assoc()) {
         $packages[] = $row;
@@ -41,7 +49,29 @@ if ($type_paiements_result->num_rows > 0) {
 
 // Récupérer les utilisateurs avec les détails de l'abonnement et les activités
 $sql = "
-SELECT u.id , etat , nom , prenom , matricule , email , phone , cin , photo , pack_name , date_fin from users u, abonnements a , packages p WHERE u.id=a.user_id and p.id=a.type_abonnement;;
+SELECT 
+    u.id,
+    u.nom,
+    u.prenom,
+    u.email,
+    u.phone,
+    u.etat,
+    u.photo,
+    a.type AS abonnement_type,
+    GROUP_CONCAT(DISTINCT act.nom ORDER BY act.nom ASC SEPARATOR ', ') AS activites,
+    GROUP_CONCAT(DISTINCT CONCAT(act.nom, ' (', act.prix, ')') ORDER BY act.nom ASC SEPARATOR ', ') AS activites_prix
+FROM 
+    users u
+JOIN 
+    user_activites ua ON u.id = ua.user_id
+JOIN 
+    abonnements a ON ua.abonnement_id = a.id
+LEFT JOIN 
+    activites act ON ua.activite_id = act.id
+GROUP BY 
+    u.id, a.type
+ORDER BY 
+    u.nom, u.prenom;
 ";
 
 $result = $conn->query($sql);
@@ -69,19 +99,6 @@ if ($resultp->num_rows > 0) {
 } else {
     $procePs = [];
 }
-
-
-
-$sqlc = "select * from users where role_id = 4";
-$resultc = $conn->query($sqlc);
-if ($resultc->num_rows > 0) {
-    while ($rowc = $resultc->fetch_assoc()) {
-        $commercials[] = $rowc;
-    }
-} else {
-    $commercials = [];
-}
-
 $conn->close();
 ?>
 <style>
@@ -114,53 +131,6 @@ $conn->close();
     #preview {
         display: block;
         margin-top: 10px;
-    }
-
-    .badge {
-        background-color: #fff;
-        border: 2px solid #007bff;
-        border-radius: 8px;
-        width: 8.6cm;
-        height: 5.4cm;
-        display: flex;
-        justify-content: space-between;
-        padding: 16px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .badge .badge-content {
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
-        align-items: center;
-    }
-
-    .badge .info {
-        flex: 1;
-    }
-
-    .badge .photo-container {
-        text-align: right;
-    }
-
-    .badge .photo {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        object-fit: cover;
-    }
-
-    .badge .name {
-        margin: 0;
-        font-size: 18px;
-        font-weight: bold;
-    }
-
-    .badge .matricule {
-        margin: 0;
-        color: #666;
-        font-size: 14px;
-        margin-top: 4px;
     }
 </style>
 <script>
@@ -242,8 +212,7 @@ $conn->close();
                                     <form id="example-form" action="add_user.php" method="post" class="tab-wizard wizard-circle wizard" enctype="multipart/form-data">
                                         <div class="col-md-3">
                                             <div class="form-group">
-                                                <H1 class="text-secondary d-none" id="matricule" name="matricule"></H1>
-                                                <input id="matricule_input" name="matricule_input" class="d-none" />
+                                                <H1 class="text-secondary" id="matricule" name="matricule"></H1>
                                             </div>
                                         </div>
                                         <h5>Information Personnel</h5>
@@ -293,8 +262,6 @@ $conn->close();
                                                     </div>
                                                 </div>
 
-
-
                                                 <div class="col-md-3">
                                                     <div class="form-group">
                                                         <label>Email <span class="text-danger">*</span></label>
@@ -323,18 +290,6 @@ $conn->close();
                                                         <select name="genre" class="form-select form-control-lg" id="genre" onchange="fetchActivitiesByGender()">
                                                             <option value="M" selected>Mâle</option>
                                                             <option value="F">Femelle</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <div class="form-group">
-                                                        <label>commercial <span class="text-danger">*</span></label>
-                                                        <select name="commercial" id="commercial" class="form-select form-control-lg">
-                                                            <?php
-                                                            foreach ($commercials as $commercial) {; ?>
-                                                                <option value="<?php echo $commercial['id']; ?>"><?php echo $commercial['nom']; ?> <?php echo $commercial['prenom']; ?></option>
-                                                            <?php
-                                                            }; ?>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -395,7 +350,6 @@ $conn->close();
                                                             <?php
                                                             foreach ($packages as $package) { ?>
                                                                 <option value="<?= $package['id']; ?>"
-                                                                    data-daily="<?= $package['Daily_price']; ?>"
                                                                     data-annual="<?= $package['annual_price']; ?>"
                                                                     data-semestrial="<?= $package['semestrial_price']; ?>"
                                                                     data-trimestrial="<?= $package['trimestrial_price']; ?>"
@@ -447,14 +401,22 @@ $conn->close();
                                                         <input type="date" id="date_debut_paiement" name="date_debut_paiement" class="form-control" required />
                                                     </div>
                                                 </div>
+
+                                                <div class="col-md-6">
+                                                    <label for="Type_dactivite">Type d’activité</label>
+                                                    <div class="selectgroup selectgroup-pills">
+                                                        <?php foreach ($activites as $activite) : ?>
+                                                            <label class="selectgroup-item">
+                                                                <input type="checkbox" name="activites[]" value="<?= $activite['id'] ?>" class="selectgroup-input" />
+                                                                <span class="selectgroup-button"><?= htmlspecialchars($activite['nom']) ?></span>
+                                                            </label>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label>Date de fin d’abonnement</label>
-                                                        <div class="input-group">
-                                                            <input type="date" name="date_fin_abn" id="date_fin_abn" class="form-control" readonly />
-                                                            <button type="button" class="btn btn-dark" onclick="adjustEndDate(1)">+</button>
-                                                            <button type="button" class="btn btn-dark" onclick="adjustEndDate(-1)">-</button>
-                                                        </div>
+                                                        <input type="date" name="date_fin_abn" id="date_fin_abn" class="form-control" readonly />
                                                     </div>
                                                 </div>
                                             </div>
@@ -475,24 +437,15 @@ $conn->close();
                                                         <input type="text" name="reste" id="reste" class="form-control" readonly />
                                                     </div>
                                                 </div>
-                                                <div class="col-md-4 d-flex align-items-end">
+                                                <div class="col-md-4">
                                                     <div class="form-group">
+                                                        <label for=""></label>
                                                         <button type="button" class="btn btn-secondary" id="add_mode_payement">Ajouter un mode de paiement</button>
                                                     </div>
                                                 </div>
                                             </div>
+
                                             <div id="payment_modes_container"></div>
-                                        </section>
-
-
-                                        <h5>Badge</h5>
-                                        <section>
-                                            <div class="alert alert-info d-flex align-items-center" role="alert">
-                                                <i class="fas fa-thumbs-up me-2" aria-hidden="true"></i>
-                                                <div>
-                                                    Merci de déposer le badge à lecteur.
-                                                </div>
-                                            </div>
                                         </section>
 
                                         <template id="payment_mode_template">
@@ -688,7 +641,7 @@ $conn->close();
                                                             <input type="text" class="form-control" id="employeur" name="employeur" placeholder="Employeur" />
                                                         </div>
                                                     </div>
-
+                                                    
                                                 </div>
                                             </div>
                                         </div>
@@ -714,7 +667,7 @@ $conn->close();
                                     <th>Email</th>
                                     <th>Télephone</th>
                                     <th>Type d'abonnement</th>
-                                    <th>Date Fin d'abonnement</th>
+                                    <th>Activités</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -725,7 +678,7 @@ $conn->close();
                                     <th>Email</th>
                                     <th>Télephone</th>
                                     <th>Type d'abonnement</th>
-                                    <th>Date Fin d'abonnement</th>
+                                    <th>Activités</th>
                                     <th>Actions</th>
                                 </tr>
                             </tfoot>
@@ -738,12 +691,12 @@ $conn->close();
                                             </td>
 
                                             <td>
-                                                <?php echo htmlspecialchars($user['nom']); ?> <?php echo htmlspecialchars($user['prenom']); ?> (<?php echo htmlspecialchars($user['matricule']); ?>)
+                                                <?php echo htmlspecialchars($user['nom']); ?> <?php echo htmlspecialchars($user['prenom']); ?>
                                             </td>
                                             <td><?php echo htmlspecialchars($user['email']); ?></td>
                                             <td><?php echo htmlspecialchars($user['phone']); ?></td>
-                                            <td><?php echo htmlspecialchars($user['pack_name']); ?></td>
-                                            <td><?php echo htmlspecialchars($user['date_fin']); ?></td>
+                                            <td><?php echo htmlspecialchars($user['abonnement_type']); ?></td>
+                                            <td><?php echo htmlspecialchars($user['activites']); ?></td>
                                             <td>
                                                 <a href="consult.php?id_user=<?php echo htmlspecialchars($user['id']); ?>" class="btn btn-info btn-consult">
                                                     <i class="fas fa-eye"></i>
@@ -860,13 +813,37 @@ $conn->close();
                         </div>
                     </div>
                     <div class="card-list py-4">
-                        <input type="text" id="search" class="form-control mb-3" placeholder="Search users...">
-
-                        <div class="card-list py-4" id="user-list"></div>
-
-                        <nav aria-label="Page navigation">
-                            <ul class="pagination" id="pagination"></ul>
-                        </nav>
+                        <?php if (count($users) > 0) : ?>
+                            <?php foreach ($users as $user) : ?>
+                                <div class="item-list">
+                                    <div class="avatar">
+                                        <img src="../assets/img/capitalsoft/profils/<?php echo !empty($user['photo']) ? htmlspecialchars($user['photo']) : 'admin.webp'; ?>" alt="Profile Picture" class="avatar-img rounded-circle border border-white">
+                                    </div>
+                                    <div class="info-user ms-3">
+                                        <div class="username"><?php echo htmlspecialchars($user['nom']); ?> <?php echo htmlspecialchars($user['prenom']); ?></div>
+                                        <div class="status"><?php echo htmlspecialchars($user['activites']); ?></div>
+                                    </div>
+                                    <a class="btn btn-icon btn-link op-8 me-1" href="mailto:<?php echo htmlspecialchars($user['email']); ?>">
+                                        <i class="far fa-envelope"></i>
+                                    </a>
+                                    <?php if (htmlspecialchars($user['etat']) == 'actif') : ?>
+                                        <a class="btn btn-icon btn-link btn-danger op-8" href="block.php?id_user=<?php echo htmlspecialchars($user['id']); ?>">
+                                            <i class="fas fa-ban"></i>
+                                        </a>
+                                    <?php else : ?>
+                                        <a class="btn btn-icon btn-link btn-success op-8" href="deblock.php?id_user=<?php echo htmlspecialchars($user['id']); ?>">
+                                            <i class="fas fa-check"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else : ?>
+                            <div class="item-list">
+                                <div class="info-user ms-3">
+                                    <div class="username">Aucun utilisateur trouvé.</div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                     </div>
 
                 </div>
@@ -921,146 +898,18 @@ $conn->close();
 
 </div>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const itemsPerPage = 6;
-        let currentPage = 1;
-        let usersData = [];
-        let filteredUsers = [];
-
-        // Fetch user data from the server
-        fetch('users.php')
-            .then(response => response.json())
-            .then(users => {
-                usersData = users;
-                filteredUsers = usersData; // Initially no filter applied
-                displayUsers();
-                setupPagination();
-            })
-            .catch(error => console.error('Error fetching users:', error));
-
-        // Search functionality
-        document.getElementById('search').addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            filteredUsers = usersData.filter(user =>
-                `${user.nom} ${user.prenom}`.toLowerCase().includes(searchTerm)
-            );
-            currentPage = 1; // Reset to first page after search
-            displayUsers();
-            setupPagination();
-        });
-
-        // Display users on the current page
-        function displayUsers() {
-            const userContainer = document.getElementById('user-list');
-            userContainer.innerHTML = '';
-
-            const start = (currentPage - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const usersToShow = filteredUsers.slice(start, end);
-
-            if (usersToShow.length === 0) {
-                userContainer.innerHTML = '<div class="item-list"><div class="info-user ms-3"><div class="username">Aucun utilisateur trouvé.</div></div></div>';
-                return;
-            }
-
-            usersToShow.forEach(user => {
-                const userItem = `
-                    <div class="item-list d-flex align-items-center mb-2">
-                        <div class="avatar">
-                            <img src="../assets/img/capitalsoft/profils/${user.photo || 'admin.webp'}" alt="Profile Picture" class="avatar-img rounded-circle border border-white" width="50" height="50">
-                        </div>
-                        <div class="info-user ms-3">
-                            <div class="username">${user.nom} ${user.prenom}</div>
-                            <div class="status">${user.pack_name}</div>
-                        </div>
-                        <a class="btn btn-icon btn-link op-8 me-1" href="mailto:${user.email}">
-                            <i class="far fa-envelope"></i>
-                        </a>
-                        ${user.etat === 'actif' ? `
-                            <a class="btn btn-icon btn-link btn-danger op-8" href="block.php?id_user=${user.id}">
-                                <i class="fas fa-ban"></i>
-                            </a>` : `
-                            <a class="btn btn-icon btn-link btn-success op-8" href="deblock.php?id_user=${user.id}">
-                                <i class="fas fa-check"></i>
-                            </a>`}
-                    </div>
-                `;
-                userContainer.insertAdjacentHTML('beforeend', userItem);
-            });
-        }
-
-        // Set up pagination
-        function setupPagination() {
-            const paginationContainer = document.getElementById('pagination');
-            paginationContainer.innerHTML = '';
-
-            const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-
-            if (totalPages <= 1) return; // No need for pagination if only 1 page
-
-            // Create Previous button
-            const prevClass = currentPage === 1 ? 'disabled' : '';
-            paginationContainer.insertAdjacentHTML('beforeend', `
-                <li class="page-item ${prevClass}">
-                    <a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a>
-                </li>
-            `);
-
-            // Create page numbers
-            for (let i = 1; i <= totalPages; i++) {
-                const activeClass = currentPage === i ? 'active' : '';
-                paginationContainer.insertAdjacentHTML('beforeend', `
-                    <li class="page-item ${activeClass}">
-                        <a class="page-link" href="#" data-page="${i}">${i}</a>
-                    </li>
-                `);
-            }
-
-            // Create Next button
-            const nextClass = currentPage === totalPages ? 'disabled' : '';
-            paginationContainer.insertAdjacentHTML('beforeend', `
-                <li class="page-item ${nextClass}">
-                    <a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>
-                </li>
-            `);
-
-            // Add event listeners to pagination links
-            document.querySelectorAll('.page-link').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const newPage = parseInt(this.getAttribute('data-page'));
-                    if (newPage > 0 && newPage <= totalPages) {
-                        currentPage = newPage;
-                        displayUsers();
-                        setupPagination();
-                    }
-                });
-            });
-        }
-    });
-</script>
-<script>
     // Function to update the "type_abonnement" options based on selected package
     function updateAbonnementOptions() {
         var selectedPackage = document.getElementById('categorie_adherence').selectedOptions[0];
         var typeAbonnementSelect = document.getElementById('type_abonnement');
         typeAbonnementSelect.innerHTML = ''; // Clear previous options
 
-        // Get package price attributes
-        var daily = selectedPackage.getAttribute('data-daily');
         var monthly = selectedPackage.getAttribute('data-monthly');
         var trimestrial = selectedPackage.getAttribute('data-trimestrial');
         var semestrial = selectedPackage.getAttribute('data-semestrial');
         var annual = selectedPackage.getAttribute('data-annual');
 
-        const totalInput = document.getElementById('total');
-        const resteInput = document.getElementById('reste');
-
         // Add options based on available prices
-        if (daily) {
-            var option = new Option('Journée', '0.03');
-            typeAbonnementSelect.add(option);
-        }
         if (monthly) {
             var option = new Option('Mensuel', '1');
             typeAbonnementSelect.add(option);
@@ -1078,165 +927,15 @@ $conn->close();
             typeAbonnementSelect.add(option);
         }
 
-        // Update total amount calculation when abonnement is selected
-        typeAbonnementSelect.addEventListener('change', calculateTotal);
 
-        calculateTotal();
-        generateMatricule();
-        calculateDateFin();
     }
 
-    // Function to calculate the total amount based on the selected abonnement type and package
-    function calculateTotal() {
-        var selectedPackage = document.getElementById('categorie_adherence').selectedOptions[0];
-        var selectedAbonnement = document.getElementById('type_abonnement').value;
+    // Add event listener to update the abonnement options when the package changes
+    document.getElementById('categorie_adherence').addEventListener('change', updateAbonnementOptions);
 
-        // Get the selected package prices
-        var price;
-        if (selectedAbonnement === '0.03') {
-            price = selectedPackage.getAttribute('data-daily');
-        } else if (selectedAbonnement === '1') {
-            price = selectedPackage.getAttribute('data-monthly');
-        } else if (selectedAbonnement === '3') {
-            price = selectedPackage.getAttribute('data-trimestrial');
-        } else if (selectedAbonnement === '6') {
-            price = selectedPackage.getAttribute('data-semestrial');
-        } else if (selectedAbonnement === '12') {
-            price = selectedPackage.getAttribute('data-annual');
-        }
-
-        // If price is available, update the total and reste fields
-        if (price) {
-            document.getElementById('total').value = price;
-            document.getElementById('reste').value = price;
-        } else {
-            document.getElementById('total').value = '';
-            document.getElementById('reste').value = '';
-        }
-    }
-
-    function toggleChequeSection(typePaiementSelect, sectionCheque, labelCheque) {
-        if (!typePaiementSelect || !sectionCheque || !labelCheque) return;
-
-        if (typePaiementSelect.value === "3") { // Assuming "3" is the value for cheque payment
-            sectionCheque.classList.remove("d-none");
-            labelCheque.classList.remove("d-none");
-        } else {
-            sectionCheque.classList.add("d-none");
-            labelCheque.classList.add("d-none");
-        }
-    }
-
-    function calculateReste() {
-        const totalInput = document.getElementById('total');
-        const resteInput = document.getElementById('reste');
-        const montantPayeInputs = document.querySelectorAll('.montant_paye');
-
-        if (!totalInput || !resteInput) return;
-
-        const totalText = totalInput.value.replace(' MAD', '');
-        const total = parseFloat(totalText) || 0;
-
-        let totalPaid = 0;
-        montantPayeInputs.forEach(input => {
-            const value = parseFloat(input.value) || 0;
-            totalPaid += value;
-        });
-
-        const remaining = total - totalPaid;
-        resteInput.value = remaining.toFixed(2) + ' MAD';
-    }
-
-    function generateMatricule() {
-        const matriculeInput = document.getElementById('matricule'); // Matricule display (for visual purposes)
-        const matriculeHiddenInput = document.getElementById('matricule_input'); // Hidden input to store matricule
-        const selectedPackage = document.getElementById('categorie_adherence').selectedOptions[0]; // Package selection
-
-        fetch('get_latest_id.php')
-            .then(response => response.json())
-            .then(data => {
-                const latestId = parseInt(data.latest_id, 10); // Ensure latestId is treated as an integer
-                const baseMatricule = 1000 + latestId; // Add 1000 to the latest ID
-                const newMatricule = selectedPackage.textContent.trim().charAt(0).toUpperCase();
-
-                if (latestId) {
-                    const matricule = baseMatricule + newMatricule;
-                    matriculeInput.innerHTML = matricule;
-                    matriculeHiddenInput.value = matricule;
-                } else {
-                    console.error('Error generating matricule.');
-                }
-            })
-            .catch(error => console.error('Error:', error));
-    }
-
-    function calculateDateFin() {
-        var typeAbonnement = document.getElementById('type_abonnement');
-        var dateDebutPaiement = document.getElementById('date_debut_paiement');
-        var dateFinAbn = document.getElementById('date_fin_abn');
-
-        if (!typeAbonnement || !dateDebutPaiement || !dateFinAbn) return;
-
-        var months = parseFloat(typeAbonnement.value) || 1; // Default to 1 month if no abonnement is selected
-        var startDate = new Date(dateDebutPaiement.value);
-
-        if (!isNaN(startDate.getTime())) {
-            startDate.setMonth(startDate.getMonth() + months);
-            dateFinAbn.value = startDate.toISOString().split('T')[0]; // Set date_fin_abn in 'YYYY-MM-DD' format
-        }
-    }
-
-    function setTodayAsDefaultDate() {
-        var dateDebutPaiement = document.getElementById('date_debut_paiement');
-        var today = new Date().toISOString().split('T')[0]; // Get today's date in 'YYYY-MM-DD' format
-        dateDebutPaiement.value = today;
-        calculateDateFin(); // Automatically calculate the end date
-    }
-
-    // Function to adjust the end date by a number of months
-    // Global variable to keep track of the number of months added
-    let monthsAdded = 0;
-
-    function adjustEndDate(months) {
-        var dateFinAbn = document.getElementById('date_fin_abn');
-        var endDate = new Date(dateFinAbn.value);
-
-        // Adding months
-        if (months > 0) {
-            if (monthsAdded < 12) { // Limit to a maximum of 12 months
-                endDate.setMonth(endDate.getMonth() + months); // Adjust the month
-                monthsAdded++; // Increment the counter for added months
-            } else {
-                alert("Vous ne pouvez pas ajouter plus de 12 mois."); // Alert for exceeding 12 months
-            }
-        }
-        // Subtracting months
-        else {
-            if (monthsAdded > 0) { // Only allow decrease if at least one month was added
-                endDate.setMonth(endDate.getMonth() + months); // Adjust the month
-                monthsAdded--; // Decrement the counter for added months
-            } else {
-                alert("Aucune mois à diminuer."); // Alert if no months were added
-            }
-        }
-        dateFinAbn.value = endDate.toISOString().split('T')[0]; // Update the input value
-    }
-
-
-
-    // Add event listeners when the DOM is fully loaded
-    document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('type_abonnement').addEventListener('change', calculateDateFin);
-        document.getElementById('date_debut_paiement').addEventListener('change', calculateDateFin);
-        document.getElementById('categorie_adherence').addEventListener('change', updateAbonnementOptions);
-
-        setTodayAsDefaultDate(); // Set today's date when the page loads
-        updateAbonnementOptions(); // Set the abonnement options on page load
-    });
+    // Call the function once to set the initial state
+    updateAbonnementOptions();
 </script>
-
-
-
 <?php
 if ($profil == 4) {; ?>
     <script>
@@ -1250,7 +949,7 @@ if ($profil == 4) {; ?>
                 .then(data => {
                     if (data.exists) {
                         // Show the error message and change the text to "already exists"
-                        document.getElementById('cinCom').style.border = '1 px solid red';
+                        document.getElementById('cinCom').style.border='1 px solid red';
                         errorMessage.style.display = 'block';
                         errorMessage.textContent = `Cin existe déjà !`;
                         valid = false
@@ -1267,6 +966,23 @@ if ($profil == 4) {; ?>
 <?php
 }; ?>
 <script>
+    // Function to generate the matricule based on the latest ID
+    function generateMatricule() {
+        // Fetch the latest ID via an AJAX call to a PHP script
+        fetch('get_latest_id.php')
+            .then(response => response.json())
+            .then(data => {
+                const latestId = parseInt(data.latest_id, 10); // Ensure latestId is treated as an integer
+                const matricule = 1000 + latestId; // Add 1000 to the latest ID
+                document.getElementById('matricule').innerHTML = matricule;
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+
+
+
+
     // Function to validate the entire form before submission
     function validateForm() {
         const cin = document.getElementById('cin').value;
@@ -1304,13 +1020,99 @@ if ($profil == 4) {; ?>
         const paymentModeTemplate = document.getElementById('payment_mode_template').content;
         const dateDebutPaiement = document.getElementById('date_debut_paiement');
         const type_abonnement = document.getElementById('')
-        const latest_id = document.getElementById('matricule_input');
-        var selectedPackage = document.getElementById('categorie_adherence').selectedOptions[0];
-
-
 
         let paymentModeIndex = 0;
 
+        // Object for storing activity costs
+        const activityCosts = {
+            <?php foreach ($activites as $activite) : ?> '<?= $activite['id'] ?>': <?= number_format($activite['prix'], 2, '.', '') ?>,
+            <?php endforeach; ?>
+        };
+
+        function calculateTotal() {
+            if (!typeAbonnement || !totalInput) return;
+
+            let total = 0;
+            const months = parseInt(typeAbonnement.value) || 1;
+
+            activities.forEach(activity => {
+                if (activity.checked) {
+                    total += (activityCosts[activity.value] || 0) * months;
+                }
+            });
+
+            totalInput.value = total.toFixed(2) + ' MAD';
+            calculateReste(); // Update the remaining amount after calculating the total
+        }
+
+        function calculateReste() {
+            const totalInput = document.getElementById('total');
+
+            if (!totalInput || !resteInput) return;
+
+            const totalText = totalInput.value.replace(' MAD', '');
+            const total = parseFloat(totalText) || 0;
+
+            let totalPaid = 0;
+            montantPayeInputs.forEach(input => {
+                const value = parseFloat(input.value) || 0;
+                totalPaid += value;
+            });
+
+            const remaining = total - totalPaid;
+            resteInput.value = remaining.toFixed(2) + ' MAD';
+        }
+
+        function toggleChequeSection(typePaiementSelect, sectionCheque, labelCheque) {
+            if (!typePaiementSelect || !sectionCheque || !labelCheque) return;
+
+            if (typePaiementSelect.value === "3") { // Assuming "3" is the value for cheque payment
+                sectionCheque.classList.remove("d-none");
+                labelCheque.classList.remove("d-none");
+            } else {
+                sectionCheque.classList.add("d-none");
+                labelCheque.classList.add("d-none");
+            }
+        }
+
+        function calculateDateFin() {
+            if (!dateDebutPaiement || !dateFinAbn) return;
+
+            const months = parseInt(typeAbonnement.value) || 1;
+            let startDate = new Date();
+
+            if (dateDebutPaiement.value) {
+                startDate = new Date(dateDebutPaiement.value);
+            }
+
+            startDate.setMonth(startDate.getMonth() + months);
+            dateFinAbn.value = startDate.toISOString().split('T')[0];
+        }
+
+        function formatNumeroCompte() {
+            const input = document.getElementById('numeroCompte');
+            if (!input) return;
+
+            let value = input.value.replace(/\s+/g, '').replace(/\D/g, '');
+            let formattedValue = '';
+
+            if (value.length > 0) formattedValue += value.substring(0, 3) + ' ';
+            if (value.length > 3) formattedValue += value.substring(3, 6) + ' ';
+            if (value.length > 6) formattedValue += value.substring(6, 22) + ' ';
+            if (value.length > 22) formattedValue += value.substring(22, 24);
+
+            input.value = formattedValue.trim();
+        }
+
+        function generateMatricule() {
+            if (!cinInput || !nomInput || !matriculeInput) return;
+
+            const cin = cinInput.value.trim();
+            const nom = nomInput.value.trim();
+            if (cin && nom) {
+                matriculeInput.innerHTML = cin + nom.charAt(0).toUpperCase();
+            }
+        }
 
         function addPaymentMode() {
             if (!resteInput || !paymentModesContainer) return;

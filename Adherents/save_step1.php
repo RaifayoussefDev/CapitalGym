@@ -105,7 +105,6 @@ function uploadDocuments($files)
 $conn->autocommit(FALSE);
 
 if ($_SESSION['user_insert'] == 0) {
-    try {
         // Handle profile photo upload
         $photo_name = "";
         if (isset($_FILES["profile_photo"]) && $_FILES["profile_photo"]["error"] == 0) {
@@ -142,16 +141,25 @@ if ($_SESSION['user_insert'] == 0) {
         $date_naissance = !empty($_POST['date_naissance']) ? $_POST['date_naissance'] : date('Y-m-d');
         $genre = !empty($_POST['genre']) ? $_POST['genre'] : 'M';
 
+
+        if (!isset($_POST['commercial']) || empty($_POST['commercial'])) {
+            throw new Exception("Commercial value is missing");
+        }
+
         // If there are missing required fields, handle the error
         if (empty($missingFields)) {
             // All required fields are present; Insert user details
-            $user_sql = "INSERT INTO users (cin, nom, prenom, email, phone, date_naissance, genre, password, photo, etat, role_id)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'proceP', 3)";
+            $user_sql = "INSERT INTO users (cin, nom, prenom, email, phone, date_naissance, genre, password, photo, etat, role_id, saisie_par, created_date)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'proceP', 3, ?,?)";
+
             $stmt = $conn->prepare($user_sql);
+
+            // Get the current date and time for created_date
+            $created_date = date("Y-m-d H:i:s");
 
             // The correct number of 's' should match the number of parameters
             $stmt->bind_param(
-                "sssssssss", // 10 's' for 10 parameters
+                "sssssssssis", // 11 parameters: 10 's' + 1 's' for created_date
                 $_POST['cin'],
                 $_POST['nom'],
                 $_POST['prenom'],
@@ -161,13 +169,15 @@ if ($_SESSION['user_insert'] == 0) {
                 $genre,
                 $hashed_password,
                 $photo_name,
+                $_POST['commercial'],
+                $created_date // Add created_date to the parameters
             );
 
             $stmt->execute();
 
             // Get the user ID from the insert operation
             $user_id = $stmt->insert_id;
-            $_SESSION['last_user']=$user_id;
+            $_SESSION['last_user'] = $user_id;
             echo "User details added successfully. User ID: " . $user_id . "<br>";
             $stmt->close();
 
@@ -177,12 +187,10 @@ if ($_SESSION['user_insert'] == 0) {
             $stmt = $conn->prepare($update_sql);
             $stmt->bind_param("si", $matricule, $user_id);
             $stmt->execute();
-            
+
             $stmt->close();
 
-            $_SESSION['user_insert']=1;
-            echo  "-------------".$_SESSION['last_user']."<br>";
-
+            $_SESSION['user_insert'] = 1;
 
             echo "Matricule updated successfully. Matricule: " . $matricule . "<br>";
         } else {
@@ -226,11 +234,6 @@ if ($_SESSION['user_insert'] == 0) {
 
         // Commit the transaction
         $conn->commit();
-    } catch (Exception $e) {
-        // Rollback the transaction in case of an error
-        $conn->rollback();
-        echo "Failed to insert data: " . $e->getMessage();
-    }
 }
 
 
