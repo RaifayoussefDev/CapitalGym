@@ -1,23 +1,22 @@
 
 </div>
 
-<footer class="footer">
-  <div class="container-fluid d-flex justify-content-between">
-    <nav class="pull-left">
-      <ul class="nav">
-        
-        <li class="nav-item">
-          <a class="nav-link" href="#"> Help </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#"> Licenses </a>
-        </li>
-      </ul>
-    </nav>
-
-
+<footer class="footer bg-dark text-white py-3">
+  <div class="container-fluid d-flex justify-content-center align-items-center">
+    <p class="mb-0 text-center">
+      Créé par <strong>Capitalsoft</strong> | 
+      Site officiel : <a href="https://www.capitalsoft.ma" class="text-white">capitalsoft.ma</a> | 
+      &copy; <span id="currentYear"></span> Capitalsoft. Tous droits réservés.
+      
+    </p>
   </div>
 </footer>
+
+<script>
+  // Script pour mettre à jour l'année actuelle
+  document.getElementById("currentYear").textContent = new Date().getFullYear();
+</script>
+
 </div>
 
 
