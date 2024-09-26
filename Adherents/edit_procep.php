@@ -154,6 +154,34 @@ if (isset($_GET['id_user'])) {
 }
 
 
+$type_abonnement = $_POST['categorie_adherence'];
+
+// Requête SQL pour récupérer l'ID et le pack_name du type d'abonnement
+$sql = "SELECT id, pack_name FROM packages WHERE id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $type_abonnement); // Lier l'ID d'abonnement en tant que paramètre
+$stmt->execute();
+$result = $stmt->get_result();
+
+// Vérifier si le résultat existe
+if ($result->num_rows > 0) {
+    // Récupérer les données
+    $row = $result->fetch_assoc();
+    
+    $pack_id = $row['id']; // Récupérer l'ID du pack
+    $pack_name = $row['pack_name']; // Récupérer le nom du pack
+
+    // Obtenir la première lettre du pack_name en majuscule
+    $premiere_lettre = strtoupper(substr($pack_name, 0, 1));
+
+    // Calculer le matricule (première lettre + user_id + 1000)
+    $matricule = $premiere_lettre . ($user_id + 1000);
+
+    // Afficher ou utiliser le matricule
+} else {
+    $matricule = '';
+}
+
 // Retrieve the user_id from envoi_app table based on valeur
 $user_id_sql = "SELECT valeur FROM envoi_app";
 $stmt_user_id = $conn->prepare($user_id_sql);
@@ -179,6 +207,7 @@ $employeur = $_POST['employeur']; // employeur
 
 // Update user details in the database
 $user_sql = "UPDATE `users` SET 
+    `matricule` = ? ,
     `etat` = 'actif', 
     `photo` = ?, 
     `date_naissance` = ?, 
@@ -196,7 +225,7 @@ if ($stmt === false) {
 }
 
 // Remplacez les variables par les valeurs appropriées
-$stmt->bind_param("ssssssssi", $photo_name, $date_naissance, $genre, $adresse, $fonction, $num_urgence, $employeur, $rmsvalue, $user_id);
+$stmt->bind_param("sssssssssi",$matricule, $photo_name, $date_naissance, $genre, $adresse, $fonction, $num_urgence, $employeur, $rmsvalue, $user_id);
 
 if (!$stmt->execute()) {
     throw new Exception("Failed to execute statement: " . $stmt->error);

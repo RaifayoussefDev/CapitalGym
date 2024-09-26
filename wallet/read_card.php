@@ -2,7 +2,7 @@
 $servername = "localhost";
 $username = "root";
 $password = ""; // Replace with your password
-$dbname = "privilage"; 
+$dbname = "privilage";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -48,6 +48,7 @@ if ($result->num_rows > 0) {
             'message' => "Utilisateur non trouvé"
         ]);
     }
+   
 } else {
     // If no card is found, return success as false
     echo json_encode([
@@ -55,4 +56,3 @@ if ($result->num_rows > 0) {
         'message' => "Aucune carte détectée"
     ]);
 }
-?>
