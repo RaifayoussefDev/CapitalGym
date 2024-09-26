@@ -209,7 +209,7 @@ $conn->close();
     </div>
     <div class="row">
         <!-- Your existing cards here -->
-        <div class="col-sm-6 col-md-12">
+        <div class="col-sm- col-md-12">
             <div class="card card-stats card-round">
                 <div class="card-header">
                     <div class="d-flex align-items-center">
@@ -772,7 +772,7 @@ $conn->close();
 
             </div>
         </div>
-        <div class="col-sm-6 col-md-8">
+        <div class="col-sm-12 col-md-8">
             <div class="card card-stats card-round">
                 <div class="card-header">
                     <div class="d-flex align-items-center">
