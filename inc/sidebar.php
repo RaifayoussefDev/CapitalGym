@@ -97,6 +97,53 @@
       </div>
     </div>
   <?php
+  } elseif ($session_profil == 4) {; ?>
+    <div class="sidebar-wrapper scrollbar scrollbar-inner">
+      <div class="sidebar-content">
+        <ul class="nav nav-secondary">
+          <li class="nav-item active">
+            <a href="../Dashboards">
+              <i class="fas fa-home"></i>
+              <p>Dashboard</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="../adherents/">
+              <i class="fas fa-users"></i>
+              <p>Liste des adherents</p>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  <?php
+  } elseif ($session_profil == 5) {; ?>
+    <div class="sidebar-wrapper scrollbar scrollbar-inner">
+      <div class="sidebar-content">
+        <ul class="nav nav-secondary">
+          <li class="nav-item active">
+            <a href="../Dashboards">
+              <i class="fas fa-home"></i>
+              <p>Dashboard</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="../adherents/">
+              <i class="fas fa-users"></i>
+              <p>Liste des adherents</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="../wallet/">
+              <i class="fas fa-users"></i>
+              <p>Wallet</p>
+            </a>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+  <?php
   } else {; ?>
     <div class="sidebar-wrapper scrollbar scrollbar-inner">
       <div class="sidebar-content">
