@@ -1216,7 +1216,7 @@ $conn->close();
                 endDate.setMonth(endDate.getMonth() + months); // Adjust the month
                 monthsAdded--; // Decrement the counter for added months
             } else {
-                alert("Aucune mois à diminuer."); // Alert if no months were added
+                alert("Aucun mois à diminuer."); // Alert if no months were added
             }
         }
         dateFinAbn.value = endDate.toISOString().split('T')[0]; // Update the input value
