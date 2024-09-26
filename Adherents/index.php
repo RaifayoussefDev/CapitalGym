@@ -815,7 +815,7 @@ $conn->close();
                                                 <?php echo htmlspecialchars($proceP['saisie_par_nom']); ?> <?php echo htmlspecialchars($proceP['saisie_par_prenom']); ?> <!-- Affiche le nom et prénom de la personne qui a saisi -->
                                             </td>
                                             <td>
-                                                <a href="consult.php?id_user=<?php echo htmlspecialchars($proceP['id']); ?>" class="btn btn-info btn-consult">
+                                                <a href="consultprocep.php?id_user=<?php echo htmlspecialchars($proceP['id']); ?>" class="btn btn-info btn-consult">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                                 <?php if ($profil == 4): ?>
