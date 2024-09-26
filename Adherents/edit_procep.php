@@ -147,22 +147,21 @@ if (!empty($missingFields)) {
 }
 
 // Retrieve user ID from session
-if (isset($_SESSION['last_user'])) {
-    $user_id = $_SESSION['last_user'];
+if (isset($_GET['id_user'])) {
+    $user_id = $_GET['id_user'];
 } else {
     throw new Exception("User ID not found in session.");
 }
 
 
 // Retrieve the user_id from envoi_app table based on valeur
-$user_id_sql = "SELECT valeur FROM envoi_app WHERE user_id = ?";
+$user_id_sql = "SELECT valeur FROM envoi_app";
 $stmt_user_id = $conn->prepare($user_id_sql);
 if ($stmt_user_id === false) {
     throw new Exception("Failed to prepare statement: " . $conn->error);
 }
 
 // Bind the valeur parameter
-$stmt_user_id->bind_param("s", $user_id);
 $stmt_user_id->execute();
 $stmt_user_id->bind_result($rmsvalue); // Bind the result to user_id
 $stmt_user_id->fetch(); // Fetch the result

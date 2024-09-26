@@ -50,11 +50,27 @@ if ($type_paiements_result->num_rows > 0) {
 
 // Fetch users with their subscription details and activities
 $sql = "
-    SELECT u.id, etat, nom, prenom, matricule, email, phone, cin, photo, pack_name, date_fin 
-    FROM users u
-    JOIN abonnements a ON u.id = a.user_id
-    JOIN packages p ON p.id = a.type_abonnement;
-";
+SELECT 
+    u.id, 
+    u.etat, 
+    u.nom, 
+    u.prenom, 
+    u.matricule, 
+    u.email, 
+    u.phone, 
+    u.cin, 
+    u.photo, 
+    p.pack_name, 
+    a.date_fin, 
+    w.balance 
+FROM 
+    users u
+JOIN 
+    abonnements a ON u.id = a.user_id
+JOIN 
+    packages p ON p.id = a.type_abonnement
+LEFT JOIN 
+    wallet w ON w.user_id = u.id;";
 
 $result = $conn->query($sql);
 
@@ -83,7 +99,6 @@ $conn->close();
                         </button>
                     </div>
                 </div>
-
                 <div class="modal fade custom-modal" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-md">
                         <div class="modal-content">
@@ -91,10 +106,12 @@ $conn->close();
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
+                                <!-- Display the user's name and current balance -->
+                                <p id="userName"></p> <!-- User's name -->
+                                <p id="userBalance" class="fw-bold"></p> <!-- User's current balance -->
                                 <!-- Form to Add Balance -->
                                 <form id="balanceForm">
                                     <input type="hidden" id="userId" name="user_id">
-                                    <p id="userName"></p>
                                     <div class="mb-3">
                                         <label for="balance" class="form-label">Ajouter Balance</label>
                                         <input type="number" id="balance" name="balance" class="form-control" placeholder="Enter amount" required>
@@ -110,6 +127,7 @@ $conn->close();
                 </div>
 
 
+
                 <!-- Table to Display Users -->
                 <div class="card-body">
                     <div class="table-responsive">
@@ -120,6 +138,7 @@ $conn->close();
                                     <th>Nom et Prénom</th>
                                     <th>Email</th>
                                     <th>Télephone</th>
+                                    <th>wallet</th>
                                     <th>Type d'abonnement</th>
                                     <th>Date Fin d'abonnement</th>
                                     <th>Actions</th>
@@ -128,18 +147,19 @@ $conn->close();
                             <tbody>
                                 <?php if (count($users) > 0) : ?>
                                     <?php foreach ($users as $user) : ?>
-                                        <tr>
+                                        <tr data-user-id="<?php echo $user['id']; ?>">
                                             <td>
                                                 <img src="../assets/img/capitalsoft/profils/<?php echo !empty($user['photo']) ? htmlspecialchars($user['photo']) : 'admin.webp'; ?>" alt="Profile Picture" class="img-thumbnail" style="width: 50px; height: 50px; border-radius: 50%;">
                                             </td>
                                             <td><?php echo htmlspecialchars($user['nom']) . " " . htmlspecialchars($user['prenom']) . " (" . htmlspecialchars($user['matricule']) . ")"; ?></td>
                                             <td><?php echo htmlspecialchars($user['email']); ?></td>
                                             <td><?php echo htmlspecialchars($user['phone']); ?></td>
+                                            <td><?php echo isset($user['balance']) ? htmlspecialchars($user['balance']) . " MAD" : "0 MAD"; ?></td>
                                             <td><?php echo htmlspecialchars($user['pack_name']); ?></td>
                                             <td><?php echo htmlspecialchars($user['date_fin']); ?></td>
                                             <td>
                                                 <!-- Button to open modal and add balance -->
-                                                <button class="btn btn-info" onclick="openBalanceModal(<?php echo $user['id']; ?>, '<?php echo $user['nom']; ?>', '<?php echo $user['prenom']; ?>')">Ajouter Balance</button>
+                                                <button class="btn btn-info" onclick="openBalanceModal(<?php echo $user['id']; ?>, '<?php echo htmlspecialchars($user['nom']); ?>', '<?php echo htmlspecialchars($user['prenom']); ?>', <?php echo $user['balance']; ?>)">Ajouter Balance</button>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -159,14 +179,28 @@ $conn->close();
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
-    // Function to open balance modal with user data
-    function openBalanceModal(userId, nom, prenom) {
-        $('#userId').val(userId);
-        $('#userName').text(`Nom: ${nom} ${prenom}`);
+    let isModalOpen = false; // Flag to check if the modal is already open
 
-        // Use Bootstrap 5's JavaScript API to show the modal
-        var myModal = new bootstrap.Modal(document.getElementById('userModal'));
-        myModal.show(); // Show the modal
+    // Function to open balance modal with user data
+    function openBalanceModal(userId, nom, prenom, balance) {
+        if (!isModalOpen) { // Only open if no modal is currently open
+            $('#userId').val(userId);
+            $('#userName').text(`Nom: ${nom} ${prenom}`);
+            $('#userBalance').text(`Balance: ${balance} MAD`); // Display balance
+
+            // Use Bootstrap 5's JavaScript API to show the modal
+            var myModal = new bootstrap.Modal(document.getElementById('userModal'));
+            myModal.show(); // Show the modal
+
+            isModalOpen = true; // Set flag to true when modal is opened
+
+            // Listen for when the modal is closed to reset the flag
+            $('#userModal').on('hidden.bs.modal', function() {
+                isModalOpen = false; // Reset the flag when the modal is closed
+            });
+        } else {
+            console.log("Modal is already open, not opening another one.");
+        }
     }
 
     // Function to add balance via form submission
@@ -191,6 +225,9 @@ $conn->close();
 
                     // Clear the envoi_app table after successful update
                     clearEnvoiAppTable();
+
+                    // Fetch updated user data to refresh the balance
+                    fetchUpdatedUserBalance(data.userId); // Pass the user ID to fetch the updated balance
                 } else {
                     alert('Error updating balance: ' + data.message);
                 }
@@ -202,7 +239,34 @@ $conn->close();
         });
     });
 
-    // Function to check card status and clean envoi_app
+    // Function to fetch updated user balance and refresh the table
+    function fetchUpdatedUserBalance(userId) {
+        console.log("Fetching updated balance for user ID:", userId);
+        $.ajax({
+            url: 'get_user_balance.php', // PHP script to retrieve updated user data
+            method: 'POST',
+            data: {
+                user_id: userId // Send the user ID to get the updated balance
+            },
+            success: function(response) {
+                let data = JSON.parse(response);
+                console.log(data); // Log the response for debugging
+                if (data.success) {
+                    // Update the balance in the table
+                    let userRow = $(`#multi-filter-select tbody tr[data-user-id="${userId}"]`);
+                    userRow.find('td:nth-child(5)').text(data.balance + ' MAD'); // Update the balance cell
+                } else {
+                    console.error('Error fetching updated balance:', data.message);
+                }
+            },
+            error: function(error) {
+                console.error('Error fetching updated balance.', error);
+            }
+        });
+    }
+
+
+    // Function to check card status and potentially open the modal
     function checkCardStatus() {
         $.ajax({
             url: 'read_card.php', // PHP script to check if the card exists
@@ -214,7 +278,7 @@ $conn->close();
                     let user = data.data;
                     // If card data is found, display user details and clean the table
                     clearEnvoiAppTable();
-                    openBalanceModal(user.id, user.nom, user.prenom);
+                    openBalanceModal(user.id, user.nom, user.prenom, user.balance); // Pass balance
                 } else {
                     console.log("Aucune carte détectée.");
                 }

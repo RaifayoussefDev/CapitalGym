@@ -807,7 +807,7 @@ $conn->close();
                                     <?php foreach ($procePs as $proceP) : ?>
                                         <tr>
                                             <td>
-                                                <?php echo htmlspecialchars($proceP['nom']); ?> <?php echo htmlspecialchars($proceP['prenom']); ?>
+                                                <?php echo htmlspecialchars($proceP['nom']); ?> <?php echo htmlspecialchars($proceP['prenom']); ?>(<?php echo htmlspecialchars($proceP['cin']); ?>)
                                             </td>
                                             <td><?php echo htmlspecialchars($proceP['email']); ?></td>
                                             <td><?php echo htmlspecialchars($proceP['phone']); ?></td>
@@ -820,7 +820,7 @@ $conn->close();
                                                 </a>
                                                 <?php if ($profil == 4): ?>
                                                 <?php elseif ($profil == 1 || $profil == 5): ?>
-                                                    <a href="modif.php?id_user=<?php echo htmlspecialchars($user['id']); ?>" class="btn btn-warning btn-modify">
+                                                    <a href="modif_procp.php?id_user=<?php echo htmlspecialchars($proceP['id']); ?>" class="btn btn-warning btn-modify">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
                                                 <?php else: ?>
