@@ -89,7 +89,7 @@ $conn->close();
         <h3 class="fw-bold mb-3">Adhérents</h3>
     </div>
     <div class="row">
-        <div class="col-sm-6 col-md-12">
+        <div class="col-sm-12 col-md-12">
             <div class="card card-stats card-round">
                 <div class="card-header">
                     <div class="d-flex align-items-center">
