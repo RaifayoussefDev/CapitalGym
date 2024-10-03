@@ -1,20 +1,8 @@
 <?php
 require "../inc/app.php";
-$servername = "localhost";
-$username = "root";
-$password = ""; // Remplacez par votre mot de passe
-$dbname = "privilage"; // Remplacez par le nom de votre base de données
+require "../inc/conn_db.php";
 
 $profil = $_SESSION['profil'];
-
-// Créer une connexion
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Vérifier la connexion
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
 // Récupérer les activités
 $activites_sql = "SELECT id, nom, prix FROM activites";
 $activites_result = $conn->query($activites_sql);

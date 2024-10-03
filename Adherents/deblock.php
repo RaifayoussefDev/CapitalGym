@@ -4,17 +4,7 @@ require "../inc/app.php";
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "privilage";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    echo json_encode(['status' => 'error', 'message' => 'Connection failed: ' . $conn->connect_error]);
-    exit();
-}
+require "../inc/conn_db.php";
 
 $id_user = $_GET['id_user'];
 

@@ -41,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['email'] = $email;
             $_SESSION['id'] = $row['id']; // Assuming 'id' is the column name in your 'users' table
             $_SESSION['profil']=$row['role_id'];
+            $_SESSION['current_page']='';
 
             // Return success response
             echo json_encode(['success' => true]);

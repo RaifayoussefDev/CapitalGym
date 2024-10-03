@@ -5,18 +5,7 @@ if (isset($_GET['id'])) {
     $session_id = $_GET['id'];
     $session_idsp = $_GET['id_sp'];
 
-    $servername = "localhost";
-    $username = "root";
-    $password = ""; // Replace with your password
-    $dbname = "privilage"; // Replace with your database name
-
-    // Create a connection
-    $conn = new mysqli($servername, $username, $password, $dbname);
-
-    // Check the connection
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
+    require "../inc/conn_db.php";
 
     $sql = "
  SELECT 

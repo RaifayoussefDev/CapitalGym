@@ -1,17 +1,6 @@
 <?php
 
-$servername = "localhost";
-$username = "root";
-$password = ""; // Replace with your actual password
-$dbname = "privilage";
-
-// Create a connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require "../inc/conn_db.php";
 
 // Clear the envoi_app table
 $clear_sql = "DELETE FROM envoi_app";

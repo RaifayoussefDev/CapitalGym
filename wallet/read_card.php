@@ -1,11 +1,5 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = ""; // Replace with your password
-$dbname = "privilage";
-
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+require "../inc/conn_db.php";
 // Récupérer la valeur de la carte ou vérifiez simplement si une entrée existe
 $sql = "SELECT ip, valeur FROM envoi_app LIMIT 1"; // Check for the latest card data
 $result = $conn->query($sql);

@@ -1,20 +1,8 @@
 <?php
 require "../inc/app.php";
-$servername = "localhost";
-$username = "root";
-$password = ""; // Remplacez par votre mot de passe
-$dbname = "privilage"; // Remplacez par le nom de votre base de données
-
+require "../inc/conn_db.php";
 $profil = $_SESSION['profil'];
-
-// Créer une connexion
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Vérifier la connexion
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
+$_SESSION['current_page']='adherent';
 
 $package_sql = "SELECT *  FROM `packages` ORDER BY `packages`.`pack_name` ASC";
 $package_result = $conn->query($package_sql);
@@ -41,7 +29,7 @@ if ($type_paiements_result->num_rows > 0) {
 
 // Récupérer les utilisateurs avec les détails de l'abonnement et les activités
 $sql = "
-SELECT u.id , etat , nom , prenom , matricule , email , phone , cin , photo , pack_name , date_fin from users u, abonnements a , packages p WHERE u.id=a.user_id and p.id=a.type_abonnement;;
+SELECT u.id , etat , nom , prenom , matricule , email , phone , cin , photo , pack_name , date_fin from users u, abonnements a , packages p WHERE u.id=a.user_id and p.id=a.type_abonnement and role_id = 3;
 ";
 
 $result = $conn->query($sql);

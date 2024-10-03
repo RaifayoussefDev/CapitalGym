@@ -1,17 +1,6 @@
 <?php
 require "../inc/app.php";
-$servername = "localhost";
-$username = "root";
-$password = ""; // Remplacez par votre mot de passe
-$dbname = "privilage"; // Remplacez par votre nom de base de données
-
-// Créer une connexion
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Vérifier la connexion
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require "../inc/conn_db.php";
 
 // Requête SQL corrigée avec s.id
 $sessions_sql = "

@@ -1,17 +1,6 @@
 <?php
 require "../inc/app.php";
-$servername = "localhost";
-$username = "root";
-$password = ""; // Replace with your password
-$dbname = "privilage"; // Replace with your database name
-
-// Create a connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check the connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require "../inc/conn_db.php";
 
 // Fetch materiels
 $materiels_sql = "SELECT m.id, m.nom, l.name as location_name, l.id as location_id , m.date_achat FROM materiel m LEFT JOIN locations l ON m.emplacement = l.id;";

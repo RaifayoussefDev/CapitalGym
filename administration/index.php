@@ -1,17 +1,6 @@
 <?php
 require "../inc/app.php";
-$servername = "localhost";
-$username = "root";
-$password = ""; // Replace with your password
-$dbname = "privilage"; // Replace with your database name
-
-// Create a connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check the connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require "../inc/conn_db.php";
 
 // Fetch activities
 $activites_sql = "SELECT id, nom, prix,sex FROM activites";
@@ -52,37 +41,6 @@ $conn->close();
 </script>
 
 <style>
-    @keyframes fadeInRight {
-        from {
-            opacity: 0;
-            transform: translateX(50px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-
-    @keyframes fadeOutLeft {
-        from {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        to {
-            opacity: 0;
-            transform: translateX(-50px);
-        }
-    }
-
-    .fade-in-right {
-        animation: fadeInRight 1s ease-in-out;
-    }
-
-    .fade-out-left {
-        animation: fadeOutLeft 1s ease-in-out;
-    }
 </style>
 <div class="page-inner">
     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
@@ -109,7 +67,7 @@ $conn->close();
             <div class="card card-stats card-round">
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table id="activityTable" class="display table table-striped table-hover">
+                        <table id="multi-filter-select" class=" table table-striped">
                             <thead>
                                 <tr>
                                     <th>Nom</th>
@@ -122,9 +80,9 @@ $conn->close();
                                 <?php if (count($activites) > 0) : ?>
                                     <?php foreach ($activites as $activite) : ?>
                                         <tr>
-                                            <td style="width: 40%;"><?php echo htmlspecialchars($activite['nom']); ?></td>
-                                            <td style="width: 40%;"><?php echo htmlspecialchars($activite['prix']); ?> MAD</td>
-                                            <td style="width: 40%;">
+                                            <td><?php echo htmlspecialchars($activite['nom']); ?></td>
+                                            <td><?php echo htmlspecialchars($activite['prix']); ?> MAD</td>
+                                            <td>
                                                 <?php
                                                 if ($activite['sex'] === 'M') {
                                                     echo 'Hommes';
@@ -137,7 +95,7 @@ $conn->close();
                                                 }
                                                 ?>
                                             </td>
-                                            <td>
+                                            <td style="width: 13%;">
                                                 <button class="btn btn-warning btn-edit" data-id="<?php echo $activite['id']; ?>" data-nom="<?php echo htmlspecialchars($activite['nom']); ?>" data-prix="<?php echo htmlspecialchars($activite['prix']); ?>" data-sex="<?php echo htmlspecialchars($activite['sex']); ?>" data-bs-toggle="modal" data-bs-target="#editActivityModal">
                                                     <i class="fas fa-edit"></i>
                                                 </button>

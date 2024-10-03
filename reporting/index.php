@@ -1,17 +1,6 @@
 <?php
 require "../inc/app.php";
-$servername = "localhost";
-$username = "root";
-$password = ""; // Replace with your password
-$dbname = "privilage"; // Replace with your database name
-
-// Create a connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check the connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require "../inc/conn_db.php";
 
 // Fetch chèques
 $cheques_sql = "SELECT nomTitulaire, numeroCheque, dateEmission, banqueEmettrice, numeroCompte, u.nom , u.prenom , a.type FROM cheque c , users u , abonnements a WHERE c.id_utilisateur=u.id and c.abonnement_id=a.id;";

@@ -1,20 +1,7 @@
 <?php
 require "../inc/app.php";
-$servername = "localhost";
-$username = "root";
-$password = ""; // Replace with your password
-$dbname = "privilage";
-
-// Start session and get the profile
+require "../inc/conn_db.php";
 $profil = $_SESSION['profil'];
-
-// Create a database connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
 
 // Fetch activities
 $activites_sql = "SELECT id, nom, prix FROM activites";
@@ -216,7 +203,17 @@ $conn->close();
             success: function(response) {
                 let data = JSON.parse(response);
                 if (data.success) {
-                    alert('Balance updated successfully!');
+                    // Display a success notification
+                    $.notify({
+                        message: 'Balance updated successfully!'
+                    }, {
+                        type: 'success',
+                        delay: 2000,
+                        placement: {
+                            from: "top",
+                            align: "right"
+                        }
+                    });
 
                     // Hide modal after successful balance update
                     var myModalEl = document.getElementById('userModal');
@@ -229,15 +226,37 @@ $conn->close();
                     // Fetch updated user data to refresh the balance
                     fetchUpdatedUserBalance(data.userId); // Pass the user ID to fetch the updated balance
                 } else {
-                    alert('Error updating balance: ' + data.message);
+                    // Display an error notification
+                    $.notify({
+                        message: 'Error updating balance: ' + data.message
+                    }, {
+                        type: 'danger',
+                        delay: 2000,
+                        placement: {
+                            from: "top",
+                            align: "right"
+                        }
+                    });
                 }
             },
             error: function(error) {
-                alert('Error updating balance.');
+                // Display an error notification in case of a failure
+                $.notify({
+                    message: 'Error updating balance. Please try again later.'
+                }, {
+                    type: 'danger',
+                    delay: 2000,
+                    placement: {
+                        from: "top",
+                        align: "right"
+                    }
+                });
+
                 console.error('Balance update error:', error);
             }
         });
     });
+
 
     // Function to fetch updated user balance and refresh the table
     function fetchUpdatedUserBalance(userId) {

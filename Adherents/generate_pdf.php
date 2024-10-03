@@ -4,16 +4,7 @@ require('../vendors/Fpdf/fpdf.php');
 // Set up the PDF dimensions (width: 86mm, height: 54mm)
 $pdf = new FPDF('L', 'mm', array(86, 54)); // 'L' for landscape orientation
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "privilage";
-
-// Create a database connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require "../inc/conn_db.php";
 
 // Retrieve user data after insertion
 $user_id = $_GET['user_id']; // Ensure to pass the user ID in the URL

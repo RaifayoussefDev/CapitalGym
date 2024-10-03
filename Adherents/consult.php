@@ -1,19 +1,8 @@
 <?php
 require "../inc/app.php";
 
-// Database credentials
-$servername = "localhost";
-$username = "root";
-$password = ""; // Replace with your password
-$dbname = "privilage"; // Replace with your database name
+require "../inc/conn_db.php";
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
 
 // Retrieve user ID from URL and user details
 if (isset($_GET['id_user'])) {

@@ -1,14 +1,16 @@
 <?php
 session_start();
+
 if(!isset($_SESSION['email'])){
     header('location:../connexion');
 }
+
 ;?>
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Privélage - Application Gestion Club Sportifs</title>
+    <title>Privilége - Application Gestion Club Sportifs</title>
     <meta
       content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
       name="viewport"
@@ -24,6 +26,7 @@ if(!isset($_SESSION['email'])){
 			type="text/css"
 			href="../src/plugins/jquery-steps/jquery.steps.css"
 		/>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- Fonts and icons -->
     <script src="../assets//js/plugin/webfont/webfont.min.js"></script>

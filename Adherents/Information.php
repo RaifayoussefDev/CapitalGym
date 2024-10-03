@@ -2,17 +2,7 @@
 require('../vendors/Fpdf/fpdf.php');
 
 // Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "privilage";
-
-// Establish database connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require "../inc/conn_db.php";
 
 // Retrieve user ID from URL
 if (isset($_GET['id_user'])) {

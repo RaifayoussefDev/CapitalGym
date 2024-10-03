@@ -1,19 +1,10 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "privilage";
+require "../inc/conn_db.php";
 
 session_start();
 
 
 $_SESSION['user_insert'] = 0;
-// Establish database connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
 
 // Function to generate a secure random password
 function generateRandomPassword($length = 8)
