@@ -3,7 +3,7 @@
     <!-- Logo Header -->
     <div class="logo-header" data-background-color="dark">
       <a href="index.html" class="logo">
-        <img src="../assets/img/capitalsoft/logo_light.png" alt="navbar brand" class="navbar-brand" height="90" />
+        <img src="../assets/img/capitalsoft/logo_light.png" alt="navbar brand" class="navbar-brand" height="120" />
       </a>
       <div class="nav-toggle">
         <button class="btn btn-toggle toggle-sidebar">
