@@ -3,7 +3,7 @@ require "../inc/app.php";
 require "../inc/conn_db.php";
 
 // Fetch users using your SQL query
-$users_sql = "SELECT u.id, u.nom, u.prenom, p.pack_name, a.date_abonnement, u.matricule, a.date_debut, a.date_fin,
+$users_sql = "SELECT u.id, u.nom, u.prenom,u.phone, p.pack_name, a.date_abonnement,tp.type, py.date_paiement, u.matricule, a.date_debut, a.date_fin,
     SUM(
         CASE 
             -- If payment is by cheque and cheque status is 'payer' or 'en cours', include montant_paye in the sum
@@ -19,6 +19,7 @@ FROM users u
 JOIN abonnements a ON u.id = a.user_id
 JOIN packages p ON a.type_abonnement = p.id
 JOIN payments py ON a.id = py.abonnement_id
+JOIN type_paiements tp ON py.type_paiement_id=tp.id
 LEFT JOIN cheque ch ON py.id = ch.payment_id -- Join with cheque table to check status for cheque payments
 LEFT JOIN users sp ON u.saisie_par = sp.id -- Self join to get the 'saisie_par' user details
 GROUP BY u.id, u.nom, u.prenom, p.pack_name, u.matricule, a.date_debut, a.date_fin, sp.nom, sp.prenom;";
