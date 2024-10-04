@@ -32,7 +32,7 @@ $conn->close();
                                 <tr>
                                     <th>Numéro de Chèque</th>
                                     <th>Adhérent</th>
-                                    <th>Date d'Émission</th>
+                                    <th>Date d'encaissement</th>
                                     <th>Banque</th>
                                     <th>Montant Payer</th>
                                     <th>Status</th>
@@ -83,7 +83,7 @@ $conn->close();
                                 <tr>
                                     <th>Numéro de Chèque</th>
                                     <th>Adhérent</th>
-                                    <th>Date d'Émission</th>
+                                    <th>Date d'encaissement</th>
                                     <th>Banque</th>
                                     <th>Status</th>
                                     <th style="visibility: hidden;">Actions</th>

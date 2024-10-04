@@ -109,6 +109,41 @@
                 });
             }
         });
+        $("#multi-filter-select-planning").DataTable({
+            pageLength: 12,
+            dom: 'Bfrtip', // Enable buttons
+            buttons: [{
+                    extend: 'excelHtml5',
+                    text: '<i class="fas fa-file-excel"></i>', // Excel Icon
+                    className: 'btn btn-success'
+                },
+                {
+                    extend: 'pdfHtml5',
+                    text: '<i class="fas fa-file-pdf"></i>', // PDF Icon
+                    className: 'btn btn-danger'
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="fas fa-print"></i>', // Print Icon
+                    className: 'btn btn-primary'
+                }
+            ],
+            initComplete: function() {
+                this.api().columns().every(function() {
+                    var column = this;
+                    var select = $('<select class="form-select"><option value=""></option></select>')
+                        .appendTo($(column.footer()).empty())
+                        .on("change", function() {
+                            var val = $.fn.dataTable.util.escapeRegex($(this).val());
+                            column.search(val ? "^" + val + "$" : "", true, false).draw();
+                        });
+
+                    column.data().unique().sort().each(function(d, j) {
+                        select.append('<option value="' + d + '">' + d + "</option>");
+                    });
+                });
+            }
+        });
     });
 </script>
 
