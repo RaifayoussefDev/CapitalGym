@@ -224,7 +224,7 @@ $conn->close();
                                                 <div id="drop-area" class="drop-area">
                                                     <p>Glissez et déposez une photo ici ou cliquez pour sélectionner une photo</p>
                                                     <input type="file" class="form-control" id="profile-photo" name="profile_photo" accept="image/*" onchange="displayPhoto(this)" />
-                                                    <button type="button" class="btn btn-dark mt-2" id="capture-button">Prendre une photo avec la caméra</button>
+                                                    <button type="button" class="btn btn-dark mt-2" id="capture-button">Prendre une photo</button>
                                                     <button type="button" id="save-photo" class="btn btn-dark mt-2" style="display:none;">Sauvegarder la photo</button>
                                                 </div>
                                             </div>
