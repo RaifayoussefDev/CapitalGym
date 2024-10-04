@@ -152,7 +152,7 @@
           <li class="nav-item">
             <a href="../wallet/">
               <i class="fas fa-wallet"></i>
-              <p>Wallet</p>
+              <p>Wallet Privilège</p>
             </a>
           </li>
         <?php } ?>
