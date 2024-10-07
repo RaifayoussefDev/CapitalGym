@@ -32,8 +32,7 @@ if ($result->num_rows > 0) {
         LEFT JOIN 
             wallet w ON u.id = w.user_id
         WHERE 
-            u.id_card = '009D0B43E3';
-
+            u.id_card = ? ;
             ";
 
     $user_stmt = $conn->prepare($user_sql);
