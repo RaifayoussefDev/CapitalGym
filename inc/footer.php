@@ -78,7 +78,7 @@
             title: "Détails de l'utilisateur:",
             message: `
                         <div style="display: flex; align-items: center;">
-                            <img src="assets/img/capitalsoft/profils/${user.photo || 'default.jpg'}" 
+                            <img src="../assets/img/capitalsoft/profils/${user.photo || 'default.jpg'}" 
                                  alt="Photo de ${user.nom}" 
                                  style="width: 50px; height: 50px; border-radius: 50%; margin-right: 10px;">
                             <div>
