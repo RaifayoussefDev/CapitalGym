@@ -77,12 +77,19 @@
             // options
             title: "Détails de l'utilisateur:",
             message: `
-                        <strong>ID:</strong> ${user.id}<br>
-                        <strong>CIN:</strong> ${user.cin}<br>
-                        <strong>Matricule:</strong> ${user.matricule}<br>
-                        <strong>Nom:</strong> ${user.nom}<br>
-                        <strong>Prénom:</strong> ${user.prenom}<br>
-                        <strong>Solde:</strong> ${user.balance} MAD
+                        <div style="display: flex; align-items: center;">
+                            <img src="assets/img/capitalsoft/profils/${user.photo || 'default.jpg'}" 
+                                 alt="Photo de ${user.nom}" 
+                                 style="width: 50px; height: 50px; border-radius: 50%; margin-right: 10px;">
+                            <div>
+                                <strong>ID:</strong> ${user.id}<br>
+                                <strong>CIN:</strong> ${user.cin}<br>
+                                <strong>Matricule:</strong> ${user.matricule}<br>
+                                <strong>Nom:</strong> ${user.nom}<br>
+                                <strong>Prénom:</strong> ${user.prenom}<br>
+                                <strong>Solde:</strong> ${user.balance} MAD
+                            </div>
+                        </div>
                     `
           }, {
             // settings
