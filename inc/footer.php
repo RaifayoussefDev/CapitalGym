@@ -94,19 +94,6 @@
             time: 5000, // Duration to show the notification
             z_index: 1051, // Adjust z-index if needed
           });
-        } else {
-          // Notify when no card is detected
-          $.notify({
-            title: "Erreur!",
-            message: "Aucune carte détectée."
-          }, {
-            type: 'danger',
-            placement: {
-              from: "top",
-              align: "right"
-            },
-            time: 5000,
-          });
         }
       },
       error: function(xhr, status, error) {
