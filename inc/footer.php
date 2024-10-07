@@ -57,7 +57,7 @@
   });
 </script>
 
-<script>
+<!-- <script>
     // Function to check card status and potentially open the modal
     function checkCardStatus() {
         $.ajax({
@@ -102,7 +102,7 @@
 
     // Check for card status every 1 second (1000ms)
     setInterval(checkCardStatus, 1000);
-</script>
+</script> -->
 
 
 <script src="../assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js"></script>
