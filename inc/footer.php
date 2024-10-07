@@ -101,7 +101,7 @@
     }
 
     // Check for card status every 1 second (1000ms)
-    setInterval(checkCardStatus, 1000);
+    setInterval(checkCardStatus, 2000);
 </script>
 
 
