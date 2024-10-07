@@ -61,7 +61,7 @@
     // Function to check card status and potentially open the modal
     function checkCardStatus() {
         $.ajax({
-            url: 'actions/read_card.php', // PHP script to check if the card exists
+            url: '../actions/read_card.php', // PHP script to check if the card exists
             method: 'POST',
             success: function(response) {
                 let data = JSON.parse(response);
@@ -84,7 +84,7 @@
     // Function to clear envoi_app table
     function clearEnvoiAppTable() {
         $.ajax({
-            url: 'actions/clear_envoi_app.php', // PHP script to clear envoi_app table
+            url: '../actions/clear_envoi_app.php', // PHP script to clear envoi_app table
             method: 'POST',
             success: function(response) {
                 let data = JSON.parse(response);
