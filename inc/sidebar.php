@@ -50,7 +50,7 @@
         <!-- Dashboard (menu item id: 1) -->
         <?php if (hasAccess('Dashboard', $menu_permissions)) { ?>
           <li class="nav-item">
-            <a href="../Dashboards">
+            <a href="../Dashboards/">
               <i class="fas fa-home"></i>
               <p>Dashboard</p>
             </a>

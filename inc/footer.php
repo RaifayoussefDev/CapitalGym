@@ -23,7 +23,7 @@
 </script>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("DOMContentLoaded", function() {
     // Get the current URL path
     const currentPath = window.location.pathname;
 
@@ -58,50 +58,85 @@
 </script>
 
 <script>
-    // Function to check card status and potentially open the modal
-    function checkCardStatus() {
-        $.ajax({
-            url: '../actions/read_card.php', // PHP script to check if the card exists
-            method: 'POST',
-            success: function(response) {
-                let data = JSON.parse(response);
+  // Function to check card status and potentially open the modal
+  function checkCardStatus() {
+    $.ajax({
+      url: '../actions/read_card.php', // PHP script to check if the card exists
+      method: 'POST',
+      success: function(response) {
+        let data = JSON.parse(response);
 
-                if (data.success) {
-                    let user = data.data;
-                    // If card data is found, display user details and clean the table
-                    clearEnvoiAppTable();
-                    openBalanceModal(user.id, user.nom, user.prenom, user.balance); // Pass balance
-                } else {
-                    console.log("Aucune carte détectée.");
-                }
+        if (data.success) {
+          let user = data.data;
+
+          // Clear the table if necessary
+          clearEnvoiAppTable();
+
+          // Display user details using Bootstrap Notify
+          $.notify({
+            // options
+            title: "Détails de l'utilisateur:",
+            message: `
+                        <strong>ID:</strong> ${user.id}<br>
+                        <strong>CIN:</strong> ${user.cin}<br>
+                        <strong>Matricule:</strong> ${user.matricule}<br>
+                        <strong>Nom:</strong> ${user.nom}<br>
+                        <strong>Prénom:</strong> ${user.prenom}<br>
+                        <strong>Solde:</strong> ${user.balance} MAD
+                    `
+          }, {
+            // settings
+            type: 'success',
+            placement: {
+              from: "top",
+              align: "right"
             },
-            error: function(xhr, status, error) {
-                console.error('Erreur lors de la requête:', error);
-            }
-        });
-    }
-
-    // Function to clear envoi_app table
-    function clearEnvoiAppTable() {
-        $.ajax({
-            url: '../actions/clear_envoi_app.php', // PHP script to clear envoi_app table
-            method: 'POST',
-            success: function(response) {
-                let data = JSON.parse(response);
-                if (data.success) {
-                    console.log('envoi_app table cleared successfully.');
-                } else {
-                    console.error('Failed to clear envoi_app table:', data.message);
-                }
+            time: 5000, // Duration to show the notification
+            z_index: 1051, // Adjust z-index if needed
+          });
+        } else {
+          // Notify when no card is detected
+          $.notify({
+            title: "Erreur!",
+            message: "Aucune carte détectée."
+          }, {
+            type: 'danger',
+            placement: {
+              from: "top",
+              align: "right"
             },
-            error: function(error) {
-                console.error('Error clearing envoi_app table:', error);
-            }
-        });
-    }
+            time: 5000,
+          });
+        }
+      },
+      error: function(xhr, status, error) {
+        console.error('Erreur lors de la requête:', error);
+      }
+    });
+  }
 
-    // Check for card status every 1 second (1000ms)
-    setInterval(checkCardStatus, 2000);
+
+  // Function to clear envoi_app table
+  function clearEnvoiAppTable() {
+    $.ajax({
+      url: '../actions/clear_envoi_app.php', // PHP script to clear envoi_app table
+      method: 'POST',
+      success: function(response) {
+        let data = JSON.parse(response);
+        if (data.success) {
+          console.log('envoi_app table cleared successfully.');
+        } else {
+          console.error('Failed to clear envoi_app table:', data.message);
+        }
+      },
+      error: function(error) {
+        console.error('Error clearing envoi_app table:', error);
+      }
+    });
+  }
+
+  // Check for card status every 1 second (1000ms)
+  setInterval(checkCardStatus, 2000);
 </script>
 
 
