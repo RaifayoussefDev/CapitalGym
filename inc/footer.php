@@ -57,7 +57,52 @@
   });
 </script>
 
+<script>
+    // Function to check card status and potentially open the modal
+    function checkCardStatus() {
+        $.ajax({
+            url: '../wallet/read_card.php', // PHP script to check if the card exists
+            method: 'POST',
+            success: function(response) {
+                let data = JSON.parse(response);
 
+                if (data.success) {
+                    let user = data.data;
+                    // If card data is found, display user details and clean the table
+                    clearEnvoiAppTable();
+                    openBalanceModal(user.id, user.nom, user.prenom, user.balance); // Pass balance
+                } else {
+                    console.log("Aucune carte détectée.");
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Erreur lors de la requête:', error);
+            }
+        });
+    }
+
+    // Function to clear envoi_app table
+    function clearEnvoiAppTable() {
+        $.ajax({
+            url: '../wallet/clear_envoi_app.php', // PHP script to clear envoi_app table
+            method: 'POST',
+            success: function(response) {
+                let data = JSON.parse(response);
+                if (data.success) {
+                    console.log('envoi_app table cleared successfully.');
+                } else {
+                    console.error('Failed to clear envoi_app table:', data.message);
+                }
+            },
+            error: function(error) {
+                console.error('Error clearing envoi_app table:', error);
+            }
+        });
+    }
+
+    // Check for card status every 1 second (1000ms)
+    setInterval(checkCardStatus, 1000);
+</script>
 
 
 <script src="../assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js"></script>

@@ -2,9 +2,9 @@
 require "../inc/app.php";
 require "../inc/conn_db.php";
 $profil = $_SESSION['profil'];
-$_SESSION['current_page']='adherent';
+$_SESSION['current_page'] = 'adherent';
 
-$package_sql = "SELECT *  FROM `packages` ORDER BY `packages`.`pack_name` ASC";
+$package_sql = "SELECT * FROM `packages` ORDER BY packages.annual_price DESC";
 $package_result = $conn->query($package_sql);
 
 // Récupérer les types de paiement
@@ -309,8 +309,8 @@ $conn->close();
                                                     <div class="form-group">
                                                         <label>Genre</label>
                                                         <select name="genre" class="form-select form-control-lg" id="genre" onchange="fetchActivitiesByGender()">
-                                                            <option value="M" selected>Mâle</option>
-                                                            <option value="F">Femelle</option>
+                                                            <option value="M" selected>Homme</option>
+                                                            <option value="F">Femme</option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -378,6 +378,15 @@ $conn->close();
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
+                                                        <label>Conventions d'adhésion</label>
+                                                        <select name="convention" id="convention" class="form-select form-control-lg" onchange="filterCategories()">
+                                                            <option value="YES">Oui</option>
+                                                            <option value="NO" selected>Non</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
                                                         <label>Catégorie d'adhésion</label>
                                                         <select name="categorie_adherence" id="categorie_adherence" class="form-select form-control-lg" onchange="updateAbonnementOptions()">
                                                             <?php
@@ -387,7 +396,8 @@ $conn->close();
                                                                     data-annual="<?= $package['annual_price']; ?>"
                                                                     data-semestrial="<?= $package['semestrial_price']; ?>"
                                                                     data-trimestrial="<?= $package['trimestrial_price']; ?>"
-                                                                    data-monthly="<?= $package['monthly_price']; ?>">
+                                                                    data-monthly="<?= $package['monthly_price']; ?>"
+                                                                    data-type="<?= $package['package_type_id']; ?>">
                                                                     <?= $package['pack_name']; ?>
                                                                 </option>
                                                             <?php
@@ -403,15 +413,7 @@ $conn->close();
                                                         </select>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Conventions d'adhésion</label>
-                                                        <select name="convention" class="form-select form-control-lg">
-                                                            <option value="YES">Oui</option>
-                                                            <option value="NO">Non</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
+
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label>Offres promotionnelles</label>
@@ -647,8 +649,8 @@ $conn->close();
                                                         <div class="form-group">
                                                             <label>Genre</label>
                                                             <select name="genre" class="form-select form-control-lg" id="genre" onchange="fetchActivitiesByGender()">
-                                                                <option value="M" selected>Mâle</option>
-                                                                <option value="F">Femelle</option>
+                                                                <option value="M" selected>Homme</option>
+                                                                <option value="F">Femme</option>
                                                             </select>
                                                         </div>
                                                     </div>
@@ -1073,6 +1075,56 @@ $conn->close();
         generateMatricule();
         calculateDateFin();
     }
+
+    function filterCategories() {
+        var conventionSelect = document.getElementById('convention');
+        var categorieSelect = document.getElementById('categorie_adherence');
+        var options = categorieSelect.options;
+
+        // Get the selected value
+        var selectedConvention = conventionSelect.value;
+
+        for (var i = 0; i < options.length; i++) {
+            var option = options[i];
+
+            if (selectedConvention === "YES") {
+                // Show only options with package_type_id = 8 when "Oui" is selected
+                if (option.getAttribute('data-type') === '8') {
+                    option.style.display = 'block'; // Show package type 8
+                } else {
+                    option.style.display = 'none'; // Hide all other options
+                }
+            } else {
+                // Show all options except those with package_type_id = 8 when "Non" is selected
+                if (option.getAttribute('data-type') === '8') {
+                    option.style.display = 'none'; // Hide package type 8
+                } else {
+                    option.style.display = 'block'; // Show all other options
+                }
+            }
+        }
+
+        // Optionally, reset the selected value to the first visible option
+        resetSelectedCategory();
+    }
+
+    function resetSelectedCategory() {
+        var categorieSelect = document.getElementById('categorie_adherence');
+        // Reset selected value to the first visible option
+        for (var i = 0; i < categorieSelect.options.length; i++) {
+            if (categorieSelect.options[i].style.display !== 'none') {
+                categorieSelect.selectedIndex = i;
+                break;
+            }
+        }
+        updateAbonnementOptions(); // Update abonnement options
+    }
+
+    // Call filterCategories on page load to set initial state based on the default selection
+    document.addEventListener('DOMContentLoaded', function() {
+        filterCategories();
+    });
+
 
     // Function to calculate the total amount based on the selected abonnement type and package
     function calculateTotal() {
