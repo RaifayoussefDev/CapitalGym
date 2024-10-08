@@ -22,7 +22,8 @@ if ($result->num_rows > 0) {
             a.date_abonnement,
             a.date_debut,
             a.date_fin, 
-            w.balance 
+            w.balance,
+            u.etat
         FROM 
             users u
         LEFT JOIN 
