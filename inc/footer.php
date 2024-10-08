@@ -80,7 +80,7 @@
                 <div style="display: flex; align-items: center;">
                     <img src="../assets/img/capitalsoft/profils/${user.photo || 'default.jpg'}" 
                          alt="Photo de ${user.nom}" 
-                         style="width: 90px; height: 90px; border-radius: 50%; margin-right: 10px;">
+                         style="width: 100px; height: 100px; border-radius: 50%; margin-right: 10px;">
                     <div>
                         <strong>ID:</strong> ${user.id}<br>
                         <strong>CIN:</strong> ${user.cin}<br>
