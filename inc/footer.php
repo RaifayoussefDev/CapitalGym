@@ -77,32 +77,44 @@
             // options
             title: "Détails de l'utilisateur:",
             message: `<a href="../Adherents/consult.php?id_user=${user.id}" style="text-decoration: none; color: inherit;">
-                        <div style="display: flex; align-items: center;">
-                            <img src="../assets/img/capitalsoft/profils/${user.photo || 'default.jpg'}" 
-                                 alt="Photo de ${user.nom}" 
-                                 style="width: 90px; height: 90px; border-radius: 50%; margin-right: 10px;">
-                            <div>
-                                <strong>ID:</strong> ${user.id}<br>
-                                <strong>CIN:</strong> ${user.cin}<br>
-                                <strong>Matricule:</strong> ${user.matricule}<br>
-                                <strong>Nom:</strong> ${user.nom}<br>
-                                <strong>Prénom:</strong> ${user.prenom}<br>
-                                <strong>Solde:</strong> ${user.balance} MAD
-                            </div>
-                        </div>
-                        </a>
-                    `
+                <div style="display: flex; align-items: center;">
+                    <img src="../assets/img/capitalsoft/profils/${user.photo || 'default.jpg'}" 
+                         alt="Photo de ${user.nom}" 
+                         style="width: 90px; height: 90px; border-radius: 50%; margin-right: 10px;">
+                    <div>
+                        <strong>ID:</strong> ${user.id}<br>
+                        <strong>CIN:</strong> ${user.cin}<br>
+                        <strong>Matricule:</strong> ${user.matricule}<br>
+                        <strong>Nom:</strong> ${user.nom}<br>
+                        <strong>Prénom:</strong> ${user.prenom}<br>
+                        <strong>Solde:</strong> ${user.balance} MAD <br>
+                        <strong>Date Debut D'abonnement:</strong> ${user.date_debut} <br>
+                        <strong>Date Fin D'abonnement:</strong> ${user.date_fin}
+                    </div>
+                </div>
+            </a>`
           }, {
             // settings
-
-            type: 'success',
+            type: user.etat === 'actif' ? 'success' : 'danger', // Green for "actif", red otherwise
             placement: {
               from: "top",
               align: "right"
             },
             time: 10000, // Duration to show the notification
             z_index: 1051, // Adjust z-index if needed
+            // Add custom styling for larger green/red bar
+            template: `<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0}" role="alert" style="min-height: 150px;">
+                <button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>
+                <span data-notify="icon"></span>
+                <span data-notify="title">{1}</span>
+                <span data-notify="message">{2}</span>
+                <div class="progress" data-notify="progressbar">
+                    <div class="progress-bar progress-bar-{0}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>
+                </div>
+                <a href="{3}" target="{4}" data-notify="url"></a>
+               </div>`
           });
+
         }
       },
       error: function(xhr, status, error) {
