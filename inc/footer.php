@@ -75,7 +75,7 @@
           // Display user details using Bootstrap Notify
           $.notify({
             // options
-            title: "Détails de l'utilisateur:",
+            title: "<h1>Passage du tourniquet</h1>",
             message: `<a href="../Adherents/consult.php?id_user=${user.id}" style="text-decoration: none; color: inherit;">
                 <div style="display: flex; align-items: center;">
                     <img src="../assets/img/capitalsoft/profils/${user.photo || 'default.jpg'}" 
