@@ -75,13 +75,13 @@
           // Display user details using Bootstrap Notify
           $.notify({
             // options
-            title: "<h1>Passage du tourniquet</h1>",
+            title: "<h3>Passage du tourniquet</h3>",
             message: `<a href="../Adherents/consult.php?id_user=${user.id}" style="text-decoration: none; color: inherit;">
                 <div style="display: flex; align-items: center;">
                     <img src="../assets/img/capitalsoft/profils/${user.photo || 'default.jpg'}" 
                          alt="Photo de ${user.nom}" 
                          style="width: 100px; height: 100px; border-radius: 50%; margin-right: 10px;">
-                    <div>
+                    <div style="font-size: 16px;"> 
                         <strong>ID:</strong> ${user.id}<br>
                         <strong>CIN:</strong> ${user.cin}<br>
                         <strong>Matricule:</strong> ${user.matricule}<br>
