@@ -100,7 +100,7 @@
               from: "top",
               align: "right"
             },
-            time: 5000, // Duration to show the notification
+            time: 10000, // Duration to show the notification
             z_index: 1051, // Adjust z-index if needed
           });
         }
