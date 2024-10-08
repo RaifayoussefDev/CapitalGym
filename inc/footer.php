@@ -83,11 +83,13 @@
                          style="width: 100px; height: 100px; border-radius: 50%; margin-right: 10px;">
                     <div style="font-size: 16px;"> 
                         <strong>CIN:</strong> ${user.cin}<br>
+                        <strong>CIN:</strong> ${user.cin}<br>
                         <strong>Matricule:</strong> ${user.matricule}<br>
                         <strong>Nom et Prénom</strong> ${user.nom} ${user.prenom}<br>
                         <strong>Wallet Privilège</strong> ${user.balance} MAD <br>
                         <strong>Type D'abonnement</strong> ${user.pack_name} MAD <br>
-                        <strong>Période D'abonnement:</strong> ${user.date_debut} - ${user.date_fin}<br>
+                        <strong>Date Debut D'abonnement:</strong> ${user.date_debut} <br>
+                        <strong>Date Fin D'abonnement:</strong> ${user.date_fin}
                     </div>
                 </div>
             </a>`
