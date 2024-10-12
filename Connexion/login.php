@@ -3,10 +3,7 @@ session_start();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'];
-    $password = $_POST['password'];
 
-    // Hash the password using SHA-256 (if your passwords are stored hashed in the database)
-    $hashedPassword = hash('sha256', $password);
 
     // Database connection details
     $servername = "localhost"; // Replace with your server name
@@ -24,11 +21,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Sanitize inputs
     $email = $conn->real_escape_string($email);
-    $hashedPassword = $conn->real_escape_string($hashedPassword);
+    $password = stripslashes($_REQUEST['password']);
+    $password = mysqli_real_escape_string($conn,$password);
 
-    // Prepare SQL query (use prepared statements to prevent SQL injection)
-    $query = "SELECT * FROM users WHERE email = '$email' AND password = '$password'";
-    $result = $conn->query($query);
+    // Prepare SQL query using prepared statements to prevent SQL injection
+    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? or matricule = ?");
+    $stmt->bind_param('ss', $email , $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     // Check if query executed successfully
     if ($result) {
@@ -37,16 +37,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Fetch the user details
             $row = $result->fetch_assoc();
 
-            // Start session and store user ID
-            $_SESSION['email'] = $email;
-            $_SESSION['id'] = $row['id']; // Assuming 'id' is the column name in your 'users' table
-            $_SESSION['profil']=$row['role_id'];
-            $_SESSION['current_page']='';
+            
+            if (password_verify($password, $row['password'])) {
+                // Start session and store user details
+                $_SESSION['email'] = $email;
+                $_SESSION['id'] = $row['id']; // Assuming 'id' is the column name in your 'users' table
+                $_SESSION['profil'] = $row['role_id'];
+                $_SESSION['nom'] = $row['nom'];
+                $_SESSION['prenom'] = $row['prenom'];
+                $_SESSION['current_page'] = '';
+                $_SESSION['user_insert'] = 0;
 
-            // Return success response
-            echo json_encode(['success' => true]);
+
+                // Return success response
+                echo json_encode(['success' => true]);
+            } else {
+                // Password verification failed
+                echo json_encode(['success' => false, 'message' => 'Invalid password.']);
+            }
         } else {
-            // Login failed
+            // No user found or multiple users with the same email (unlikely but a check)
             echo json_encode(['success' => false, 'message' => 'Invalid email or password.']);
         }
     } else {
@@ -55,6 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Close database connection
+    $stmt->close();
     $conn->close();
 } else {
     // Invalid request method

@@ -100,8 +100,8 @@ if (isset($_FILES["profile_photo"]) && $_FILES["profile_photo"]["error"] == 0) {
 
 
 // Generate a random password
-$password = generateRandomPassword();
-$hashed_password = password_hash($password, PASSWORD_DEFAULT); // Hash the password
+$passwordGENERATED = generateRandomPassword();
+$hashed_password = password_hash($passwordGENERATED, PASSWORD_DEFAULT); // Hash the password
 
 // Initialize an array to store missing fields
 $missingFields = [];
@@ -309,6 +309,28 @@ if ($conn->query($clear_sql) === TRUE) {
     // Optional: You can log or echo a message if needed
     // echo "Table envoi_app has been cleared.";
 }
+
+
+
+require "../actions/phpmailer/mail.php";
+// Example usage
+$to = "raifadev@gmail.com";
+$subject = "Test Email";
+$message = '<table role="presentation" border="0" cellpadding="0" cellspacing="0" class="main">
+        <tr>
+            <td class="wrapper">
+                <img src="http://51.77.194.236:434/privilage/assets/img/capitalsoft/logo_light.png" alt="Logo Privilège" style="width: 100px; margin-bottom: 20px;">
+                <p>Bonjour,</p>
+                <p>Nous sommes ravis de vous accueillir au Club Privilège !</p>
+                <p>Voici vos identifiants pour vous connecter à notre application mobile :</p>
+                <p><strong>Votre mot de passe : '.$passwordGENERATED.' </strong></p>
+                <p>Vous pouvez le changer après votre première connexion.</p>
+                <p>Merci de faire partie de la communauté du Club Privilège. Restez à l`écoute pour plus de mises à jour.</p>
+            </td>
+        </tr>
+    </table>';
+
+sendEmail($to, $subject, $message);
 
 
 

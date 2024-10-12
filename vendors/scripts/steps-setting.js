@@ -77,8 +77,8 @@ $(".tab-wizard").steps({
             genre: $("#genre").val(), // Add gender field
             password: $("#password").val(), // Add password field if needed
             photo: $("#photo").val(), // Add photo field if needed
-            commercial: $("#commercial").val(), // Ensure commercial field is included
-            // Add any other fields here
+            commercial: $("#commercial").val(), 
+            note :$("#note").val()
           },
           success: function (response) {
             // Gérer la réponse (optionnel)

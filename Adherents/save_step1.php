@@ -3,22 +3,6 @@ require "../inc/conn_db.php";
 
 session_start();
 
-
-$_SESSION['user_insert'] = 0;
-
-// Function to generate a secure random password
-function generateRandomPassword($length = 8)
-{
-    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    $password = '';
-    $max = strlen($characters) - 1;
-    for ($i = 0; $i < $length; $i++) {
-        $password .= $characters[random_int(0, $max)];
-    }
-    return $password;
-}
-
-
 // Function to upload files
 function uploadFile($file, $target_dir, $allowed_types = [])
 {
@@ -91,11 +75,12 @@ function uploadDocuments($files)
 
     return $uploaded_files;
 }
-
+$already_insert=$_SESSION['user_insert'];
+echo $already_insert;
 // Start transaction
 $conn->autocommit(FALSE);
 
-if ($_SESSION['user_insert'] == 0) {
+if ($already_insert == 0) {
         // Handle profile photo upload
         $photo_name = "";
         if (isset($_FILES["profile_photo"]) && $_FILES["profile_photo"]["error"] == 0) {
@@ -104,10 +89,6 @@ if ($_SESSION['user_insert'] == 0) {
                 throw new Exception("Failed to upload profile photo.");
             }
         }
-
-        // Generate a random password
-        $password = generateRandomPassword();
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT); // Hash the password
 
         // Initialize an array to store missing fields
         $missingFields = [];
@@ -140,8 +121,8 @@ if ($_SESSION['user_insert'] == 0) {
         // If there are missing required fields, handle the error
         if (empty($missingFields)) {
             // All required fields are present; Insert user details
-            $user_sql = "INSERT INTO users (cin, nom, prenom, email, phone, date_naissance, genre, password, photo, etat, role_id, saisie_par, created_date)
-                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'proceP', 3, ?,?)";
+            $user_sql = "INSERT INTO users (cin, nom, prenom, email, phone, date_naissance, genre,photo, etat, role_id, saisie_par, created_date,Note)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'proceP', 3, ?,?,?)";
 
             $stmt = $conn->prepare($user_sql);
 
@@ -150,7 +131,7 @@ if ($_SESSION['user_insert'] == 0) {
 
             // The correct number of 's' should match the number of parameters
             $stmt->bind_param(
-                "sssssssssis", // 11 parameters: 10 's' + 1 's' for created_date
+                "ssssssssiss", // 11 parameters: 10 's' + 1 's' for created_date
                 $_POST['cin'],
                 $_POST['nom'],
                 $_POST['prenom'],
@@ -158,10 +139,10 @@ if ($_SESSION['user_insert'] == 0) {
                 $_POST['phone'],
                 $date_naissance,
                 $genre,
-                $hashed_password,
                 $photo_name,
                 $_POST['commercial'],
-                $created_date // Add created_date to the parameters
+                $created_date, // Add created_date to the parameters
+                $_POST['note']
             );
 
             $stmt->execute();
@@ -180,8 +161,6 @@ if ($_SESSION['user_insert'] == 0) {
             $stmt->execute();
 
             $stmt->close();
-
-            $_SESSION['user_insert'] = 1;
 
             echo "Matricule updated successfully. Matricule: " . $matricule . "<br>";
         } else {
@@ -222,9 +201,13 @@ if ($_SESSION['user_insert'] == 0) {
                 throw new Exception("User not found for CIN: " . $cin);
             }
         }
+        $_SESSION['user_insert'] = 1;
 
         // Commit the transaction
         $conn->commit();
+}
+else{
+    echo 'already';
 }
 
 

@@ -17,6 +17,19 @@
 
 <!-- End Custom template -->
 </div>
+
+<script>
+  $(document).ready(function() {
+    // Hide the loader once the content is loaded
+    $('#custom-loader').fadeOut('slow');
+  });
+
+  // Show the loader on page load
+  $(window).on('beforeunload', function() {
+    $('#custom-loader').fadeIn('slow');
+  });
+</script>
+
 <script>
   // Script pour mettre à jour l'année actuelle
   document.getElementById("currentYear").textContent = new Date().getFullYear();
@@ -56,27 +69,28 @@
     });
   });
 </script>
+<?php
+if ($profil == 5) {; ?>
+  <script>
+    // Function to check card status and potentially open the modal
+    function checkCardStatus() {
+      $.ajax({
+        url: '../actions/read_card.php', // PHP script to check if the card exists
+        method: 'POST',
+        success: function(response) {
+          let data = JSON.parse(response);
 
-<script>
-  // Function to check card status and potentially open the modal
-  function checkCardStatus() {
-    $.ajax({
-      url: '../actions/read_card.php', // PHP script to check if the card exists
-      method: 'POST',
-      success: function(response) {
-        let data = JSON.parse(response);
+          if (data.success) {
+            let user = data.data;
 
-        if (data.success) {
-          let user = data.data;
+            // Clear the table if necessary
+            clearEnvoiAppTable();
 
-          // Clear the table if necessary
-          clearEnvoiAppTable();
-
-          // Display user details using Bootstrap Notify
-          $.notify({
-            // options
-            title: "<h3>Passage du tourniquet</h3>",
-            message: `<a href="../Adherents/consult.php?id_user=${user.id}" style="text-decoration: none; color: inherit;">
+            // Display user details using Bootstrap Notify
+            $.notify({
+              // options
+              title: "<h3>Passage du tourniquet</h3>",
+              message: `<a href="../Adherents/consult.php?id_user=${user.id}" style="text-decoration: none; color: inherit;">
                 <div style="display: flex; align-items: center;">
                     <img src="../assets/img/capitalsoft/profils/${user.photo || 'default.jpg'}" 
                          alt="Photo de ${user.nom}" 
@@ -92,17 +106,17 @@
                     </div>
                 </div>
             </a>`
-          }, {
-            // settings
-            type: user.etat === 'actif' ? 'success' : 'danger', // Green for "actif", red otherwise
-            placement: {
-              from: "top",
-              align: "right"
-            },
-            time: 10000, // Duration to show the notification
-            z_index: 1051, // Adjust z-index if needed
-            // Add custom styling for larger green/red bar
-            template: `<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0}" role="alert" style="min-height: 150px;">
+            }, {
+              // settings
+              type: user.etat === 'actif' ? 'success' : 'danger', // Green for "actif", red otherwise
+              placement: {
+                from: "top",
+                align: "right"
+              },
+              time: 10000, // Duration to show the notification
+              z_index: 1051, // Adjust z-index if needed
+              // Add custom styling for larger green/red bar
+              template: `<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0}" role="alert" style="min-height: 150px;">
                 <button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>
                 <span data-notify="icon"></span>
                 <span data-notify="title">{1}</span>
@@ -112,40 +126,40 @@
                 </div>
                 <a href="{3}" target="{4}" data-notify="url"></a>
                </div>`
-          });
+            });
 
+          }
+        },
+        error: function(xhr, status, error) {
+          console.error('Erreur lors de la requête:', error);
         }
-      },
-      error: function(xhr, status, error) {
-        console.error('Erreur lors de la requête:', error);
-      }
-    });
-  }
+      });
+    }
 
 
-  // Function to clear envoi_app table
-  function clearEnvoiAppTable() {
-    $.ajax({
-      url: '../actions/clear_envoi_app.php', // PHP script to clear envoi_app table
-      method: 'POST',
-      success: function(response) {
-        let data = JSON.parse(response);
-        if (data.success) {
-          console.log('envoi_app table cleared successfully.');
-        } else {
-          console.error('Failed to clear envoi_app table:', data.message);
+    // Function to clear envoi_app table
+    function clearEnvoiAppTable() {
+      $.ajax({
+        url: '../actions/clear_envoi_app.php', // PHP script to clear envoi_app table
+        method: 'POST',
+        success: function(response) {
+          let data = JSON.parse(response);
+          if (data.success) {
+            console.log('envoi_app table cleared successfully.');
+          } else {
+            console.error('Failed to clear envoi_app table:', data.message);
+          }
+        },
+        error: function(error) {
+          console.error('Error clearing envoi_app table:', error);
         }
-      },
-      error: function(error) {
-        console.error('Error clearing envoi_app table:', error);
-      }
-    });
-  }
+      });
+    }
 
-  // Check for card status every 1 second (1000ms)
-  setInterval(checkCardStatus, 2000);
-</script>
-
+    // Check for card status every 1 second (1000ms)
+    setInterval(checkCardStatus, 2000);
+  </script>
+<?php }; ?>
 
 <script src="../assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js"></script>
 
@@ -283,6 +297,14 @@
       $("#addRowModal").modal("hide");
     });
   });
+</script>
+
+<script type="text/javascript">
+    $.extend($.fn.dataTable.defaults, {
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.10.21/i18n/French.json'
+        }
+    });
 </script>
 </body>
 

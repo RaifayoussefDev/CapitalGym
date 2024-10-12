@@ -21,7 +21,17 @@
     // Script pour mettre à jour l'année actuelle
     document.getElementById("currentYear").textContent = new Date().getFullYear();
 </script>
+<script>
+  $(document).ready(function() {
+    // Hide the loader once the content is loaded
+    $('#custom-loader').fadeOut('slow');
+  });
 
+  // Show the loader on page load
+  $(window).on('beforeunload', function() {
+    $('#custom-loader').fadeIn('slow');
+  });
+</script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         // Get the current URL path
@@ -157,7 +167,17 @@
 
 <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script> -->
 
+<script>
+  $(document).ready(function() {
+    // Hide the loader once the content is loaded
+    $('#custom-loader').fadeOut('slow');
+  });
 
+  // Show the loader on page load
+  $(window).on('beforeunload', function() {
+    $('#custom-loader').fadeIn('slow');
+  });
+</script>
 </body>
 
 </html>

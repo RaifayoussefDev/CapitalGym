@@ -3,6 +3,7 @@ require "../inc/app.php";
 require "../inc/conn_db.php";
 $profil = $_SESSION['profil'];
 $_SESSION['current_page'] = 'adherent';
+$_SESSION['user_insert'] = 0;
 
 $package_sql = "SELECT * FROM `packages` ORDER BY packages.annual_price DESC";
 $package_result = $conn->query($package_sql);
@@ -192,7 +193,7 @@ $conn->close();
 <div class="page-inner">
     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
         <div>
-            <h3 class="fw-bold mb-3">Adhérents</h3>
+            <h3 class="fw-bold mb-3">Listes des Adhérents</h3>
         </div>
     </div>
     <div class="row">
@@ -201,7 +202,7 @@ $conn->close();
             <div class="card card-stats card-round">
                 <div class="card-header">
                     <div class="d-flex align-items-center">
-                        <h4 class="card-title"></h4>
+                        <div class="card-title">Adherents</div>
                         <button class="btn btn-dark btn-round ms-auto" data-bs-toggle="modal"
                             <?php if ($profil == 4): ?>
                             data-bs-target="#addRowModalcommercial"
@@ -351,6 +352,12 @@ $conn->close();
                                                         <input type="text" class="form-control" id="employeur" name="employeur" placeholder="Employeur" />
                                                     </div>
                                                 </div>
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label>Note</label>
+                                                        <textarea class="form-control" id="note" name="note" placeholder="Note"></textarea>
+                                                    </div>
+                                                </div>
 
                                                 <div class="col-md-6">
                                                     <button type="button" class="btn btn-dark" id="add-document">Ajouter Un Document</button>
@@ -442,8 +449,10 @@ $conn->close();
                                                         <label>Date de fin d’abonnement</label>
                                                         <div class="input-group">
                                                             <input type="date" name="date_fin_abn" id="date_fin_abn" class="form-control" readonly />
-                                                            <button type="button" class="btn btn-dark" onclick="adjustEndDate(1)">+</button>
-                                                            <button type="button" class="btn btn-dark" onclick="adjustEndDate(-1)">-</button>
+                                                            <div id="adjustButtons">
+                                                                <button type="button" class="btn btn-dark" onclick="adjustEndDate(1)">+</button>
+                                                                <button type="button" class="btn btn-dark" onclick="adjustEndDate(-1)">-</button>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -678,6 +687,12 @@ $conn->close();
                                                             <input type="text" class="form-control" id="employeur" name="employeur" placeholder="Employeur" />
                                                         </div>
                                                     </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Note</label>
+                                                            <textarea class="form-control" id="note" name="note" placeholder="Note"></textarea>
+                                                        </div>
+                                                    </div>
 
                                                 </div>
                                             </div>
@@ -716,7 +731,7 @@ $conn->close();
                                     <th>Télephone</th>
                                     <th>Type d'abonnement</th>
                                     <th>Date Fin d'abonnement</th>
-                                    <th>Actions</th>
+                                    <th style="visibility: hidden;">Actions</th>
                                 </tr>
                             </tfoot>
                             <tbody>
@@ -766,7 +781,7 @@ $conn->close();
             <div class="card card-stats card-round">
                 <div class="card-header">
                     <div class="d-flex align-items-center">
-                        <h4 class="card-title"></h4>
+                        <div class="card-title">Prospect</div>
                     </div>
                 </div>
                 <div class="card-body">
@@ -819,10 +834,7 @@ $conn->close();
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
-                                <?php else : ?>
-                                    <tr>
-                                        <td colspan="5">No data available</td> <!-- Ajuster le colspan pour correspondre au nombre de colonnes -->
-                                    </tr>
+
                                 <?php endif; ?>
                             </tbody>
                         </table>
@@ -850,7 +862,7 @@ $conn->close();
                         </div>
                     </div>
                     <div class="card-list py-4">
-                        <input type="text" id="search" class="form-control mb-3" placeholder="Search users...">
+                        <input type="text" id="search" class="form-control mb-3" placeholder="Rechercher un Adhérent">
 
                         <div class="card-list py-4" id="user-list"></div>
 
@@ -1034,6 +1046,8 @@ $conn->close();
     function updateAbonnementOptions() {
         var selectedPackage = document.getElementById('categorie_adherence').selectedOptions[0];
         var typeAbonnementSelect = document.getElementById('type_abonnement');
+        var adjustButtons = document.getElementById('adjustButtons'); // Get the button container
+
         typeAbonnementSelect.innerHTML = ''; // Clear previous options
 
         // Get package price attributes
@@ -1042,9 +1056,6 @@ $conn->close();
         var trimestrial = selectedPackage.getAttribute('data-trimestrial');
         var semestrial = selectedPackage.getAttribute('data-semestrial');
         var annual = selectedPackage.getAttribute('data-annual');
-
-        const totalInput = document.getElementById('total');
-        const resteInput = document.getElementById('reste');
 
         // Add options based on available prices
         if (daily) {
@@ -1068,13 +1079,27 @@ $conn->close();
             typeAbonnementSelect.add(option);
         }
 
-        // Update total amount calculation when abonnement is selected
-        typeAbonnementSelect.addEventListener('change', calculateTotal);
+        // Add event listener to handle abonnement selection and adjust button visibility
+        typeAbonnementSelect.addEventListener('change', function() {
+            if (typeAbonnementSelect.value === '12') { // 12 represents 'Annuel'
+                adjustButtons.style.display = 'inline'; // Hide buttons
+            } else {
+                adjustButtons.style.display = 'none'; // Show buttons
+            }
+        });
+
+        // Initialize the button visibility when loading the page
+        if (typeAbonnementSelect.value === '12') {
+            adjustButtons.style.display = 'inline'; // Hide buttons if 'Annuel' is selected by default
+        } else {
+            adjustButtons.style.display = 'none'; // Show buttons otherwise
+        }
 
         calculateTotal();
         generateMatricule();
         calculateDateFin();
     }
+
 
     function filterCategories() {
         var conventionSelect = document.getElementById('convention');

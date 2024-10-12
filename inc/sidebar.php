@@ -127,7 +127,7 @@
           <li class="nav-item">
             <a data-bs-toggle="collapse" href="#sidebarLayouts3">
               <i class="fas fa-spa"></i>
-              <p>Services Spa et Massage</p>
+              <p>Services</p>
               <span class="caret"></span>
             </a>
             <div class="collapse" id="sidebarLayouts3">

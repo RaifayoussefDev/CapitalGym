@@ -15,6 +15,9 @@ function generateRandomPassword($length = 8)
     }
     return $password;
 }
+// Generate a random password
+$passwordGenerated = generateRandomPassword();
+$hashed_password = password_hash($passwordGenerated, PASSWORD_DEFAULT); 
 
 // Function to upload files
 function uploadFile($file, $target_dir, $allowed_types = [])
@@ -99,10 +102,7 @@ if (isset($_FILES["profile_photo"]) && $_FILES["profile_photo"]["error"] == 0) {
 }
 
 
-// Generate a random password
-$password = generateRandomPassword();
-$hashed_password = password_hash($password, PASSWORD_DEFAULT); // Hash the password
-
+// Hash the password
 // Initialize an array to store missing fields
 $missingFields = [];
 
@@ -164,7 +164,12 @@ if ($result->num_rows > 0) {
     $premiere_lettre = strtoupper(substr($pack_name, 0, 1));
 
     // Calculer le matricule (première lettre + user_id + 1000)
+    
+
+    $premiere_lettre = ($premiere_lettre == 'F' || $premiere_lettre == 'G') ? 'S' : $premiere_lettre;
     $matricule = $premiere_lettre . ($user_id + 1000);
+    
+
 
     // Afficher ou utiliser le matricule
 } else {
@@ -195,6 +200,9 @@ $fonction = $_POST['fonction']; // fonction
 $num_urgence = $_POST['num_urgence']; // numéro d'urgence
 $employeur = $_POST['employeur']; // employeur
 
+$nom = $_POST['nom'];
+$prenom = $_POST['prenom'];
+$email = $_POST['email'];
 
 // Update user details in the database
 $user_sql = "UPDATE `users` SET
@@ -207,7 +215,8 @@ $user_sql = "UPDATE `users` SET
     `fonction` = ?, 
     `num_urgence` = ?, 
     `employeur` = ?,
-    `id_card`=? 
+    `id_card`=? ,
+    `password`=?
 WHERE `id` = ?;";
 
 $stmt = $conn->prepare($user_sql);
@@ -216,7 +225,7 @@ if ($stmt === false) {
 }
 
 // Remplacez les variables par les valeurs appropriées
-$stmt->bind_param("sssssssssi", $matricule, $photo_name, $date_naissance, $genre, $adresse, $fonction, $num_urgence, $employeur, $rmsvalue, $user_id);
+$stmt->bind_param("ssssssssssi", $matricule, $photo_name, $date_naissance, $genre, $adresse, $fonction, $num_urgence, $employeur, $rmsvalue,$hashed_password, $user_id);
 
 if (!$stmt->execute()) {
     throw new Exception("Failed to execute statement: " . $stmt->error);
@@ -311,7 +320,29 @@ if ($conn->query($clear_sql) === TRUE) {
     // echo "Table envoi_app has been cleared.";
 }
 
+$_SESSION['user_insert'] = 0;
 
+
+require "../actions/phpmailer/mail.php";
+// Example usage
+$to = $email;
+$subject = "Bienvenue au Club Privilège";
+$message = '<table role="presentation" border="0" cellpadding="0" cellspacing="0" class="main">
+        <tr>
+            <td class="wrapper">
+                <img src="http://51.77.194.236:434/privilage/assets/img/capitalsoft/logo_light.png" alt="Logo Privilège" style="width: 100px; margin-bottom: 20px;">
+                <p>Bonjour '.ucfirst($nom) .' '.ucfirst($prenom)  .',</p>
+                <p>Nous sommes ravis de vous accueillir au Club Privilège !</p>
+                <p>Voici vos identifiants pour vous connecter à notre application mobile :</p>
+                <p><strong>Votre Matricule : '.$matricule.' </strong></p>
+                <p><strong>Votre mot de passe : '.$passwordGenerated.' </strong></p>
+                <p>Vous pouvez le changer après votre première connexion.</p>
+                <p>Merci de faire partie de la communauté du Club Privilège. Restez à l`écoute pour plus de mises à jour.</p>
+            </td>
+        </tr>
+    </table>';
+
+sendEmail($to, $subject, $message);
 
 
 // Commit transaction

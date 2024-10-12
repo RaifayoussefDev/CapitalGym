@@ -4,10 +4,10 @@ require "../inc/app.php";
 require "../inc/conn_db.php";
 
 $profil = $_SESSION['profil'];
-$user_id=$_GET['id_user'];
+$user_id = $_GET['id_user'];
 
 // Retrieve packages
-$package_sql = "SELECT * FROM `packages` ORDER BY `pack_name` ASC";
+$package_sql = "SELECT * FROM `packages` ORDER BY packages.annual_price DESC";
 $package_result = $conn->query($package_sql);
 $packages = [];
 if ($package_result->num_rows > 0) {
@@ -201,7 +201,7 @@ $conn->close();
                 </div>
                 <div class="card-body">
                     <div class="wizard-content" id="tab-wizard">
-                        <form id="example-form" action="edit_procep.php?id_user=<?php echo $user_id;?>" method="post" class="tab-wizardProce wizard-circle wizard" enctype="multipart/form-data">
+                        <form id="example-form" action="edit_procep.php?id_user=<?php echo $user_id; ?>" method="post" class="tab-wizardProce wizard-circle wizard" enctype="multipart/form-data">
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <H1 class="text-secondary d-none" id="matricule" name="matricule"></H1>
@@ -306,26 +306,32 @@ $conn->close();
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Adresse</label>
-                                            <input type="text" class="form-control" id="adresse" name="adresse" placeholder="Adresse" />
+                                            <input type="text" class="form-control" id="adresse" name="adresse" placeholder="Adresse" value="<?php echo $user['adresse']; ?>" />
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Fonction</label>
-                                            <input type="text" class="form-control" id="fonction" name="fonction" placeholder="Fonction" />
+                                            <input type="text" class="form-control" id="fonction" name="fonction" placeholder="Fonction" value="<?php echo $user['fonction']; ?>" />
                                         </div>
                                     </div>
 
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Numéro de GSM en cas d’urgence</label>
-                                            <input type="tel" class="form-control" id="num_urgence" name="num_urgence" placeholder="Numéro d'urgence" />
+                                            <input type="tel" class="form-control" id="num_urgence" name="num_urgence" placeholder="Numéro d'urgence" value="<?php echo $user['num_urgence']; ?>" />
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Employeur</label>
-                                            <input type="text" class="form-control" id="employeur" name="employeur" placeholder="Employeur" />
+                                            <input type="text" class="form-control" id="employeur" name="employeur" placeholder="Employeur" value="<?php echo $user['employeur']; ?>" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Note</label>
+                                            <textarea class="form-control" id="note" name="note" placeholder="Note"><?php echo htmlspecialchars($user['Note']); ?></textarea>
                                         </div>
                                     </div>
 
@@ -349,10 +355,18 @@ $conn->close();
 
                                 </div>
                             </section>
-
                             <h5>Abonnement</h5>
                             <section>
                                 <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Conventions d'adhésion</label>
+                                            <select name="convention" id="convention" class="form-select form-control-lg" onchange="filterCategories()">
+                                                <option value="YES">Oui</option>
+                                                <option value="NO" selected>Non</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Catégorie d'adhésion</label>
@@ -364,7 +378,8 @@ $conn->close();
                                                         data-annual="<?= $package['annual_price']; ?>"
                                                         data-semestrial="<?= $package['semestrial_price']; ?>"
                                                         data-trimestrial="<?= $package['trimestrial_price']; ?>"
-                                                        data-monthly="<?= $package['monthly_price']; ?>">
+                                                        data-monthly="<?= $package['monthly_price']; ?>"
+                                                        data-type="<?= $package['package_type_id']; ?>">
                                                         <?= $package['pack_name']; ?>
                                                     </option>
                                                 <?php
@@ -380,15 +395,7 @@ $conn->close();
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Conventions d'adhésion</label>
-                                            <select name="convention" class="form-select form-control-lg">
-                                                <option value="YES">Oui</option>
-                                                <option value="NO">Non</option>
-                                            </select>
-                                        </div>
-                                    </div>
+
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Offres promotionnelles</label>
@@ -708,6 +715,56 @@ $conn->close();
         calculateDateFin();
     }
 
+    function filterCategories() {
+        var conventionSelect = document.getElementById('convention');
+        var categorieSelect = document.getElementById('categorie_adherence');
+        var options = categorieSelect.options;
+
+        // Get the selected value
+        var selectedConvention = conventionSelect.value;
+
+        for (var i = 0; i < options.length; i++) {
+            var option = options[i];
+
+            if (selectedConvention === "YES") {
+                // Show only options with package_type_id = 8 when "Oui" is selected
+                if (option.getAttribute('data-type') === '8') {
+                    option.style.display = 'block'; // Show package type 8
+                } else {
+                    option.style.display = 'none'; // Hide all other options
+                }
+            } else {
+                // Show all options except those with package_type_id = 8 when "Non" is selected
+                if (option.getAttribute('data-type') === '8') {
+                    option.style.display = 'none'; // Hide package type 8
+                } else {
+                    option.style.display = 'block'; // Show all other options
+                }
+            }
+        }
+
+        // Optionally, reset the selected value to the first visible option
+        resetSelectedCategory();
+    }
+
+    function resetSelectedCategory() {
+        var categorieSelect = document.getElementById('categorie_adherence');
+        // Reset selected value to the first visible option
+        for (var i = 0; i < categorieSelect.options.length; i++) {
+            if (categorieSelect.options[i].style.display !== 'none') {
+                categorieSelect.selectedIndex = i;
+                break;
+            }
+        }
+        updateAbonnementOptions(); // Update abonnement options
+    }
+
+    // Call filterCategories on page load to set initial state based on the default selection
+    document.addEventListener('DOMContentLoaded', function() {
+        filterCategories();
+    });
+
+
     // Function to calculate the total amount based on the selected abonnement type and package
     function calculateTotal() {
         var selectedPackage = document.getElementById('categorie_adherence').selectedOptions[0];
@@ -838,7 +895,7 @@ $conn->close();
                 endDate.setMonth(endDate.getMonth() + months); // Adjust the month
                 monthsAdded--; // Decrement the counter for added months
             } else {
-                alert("Aucune mois à diminuer."); // Alert if no months were added
+                alert("Aucun mois à diminuer."); // Alert if no months were added
             }
         }
         dateFinAbn.value = endDate.toISOString().split('T')[0]; // Update the input value
@@ -1130,7 +1187,6 @@ if ($profil == 4) {; ?>
         });
     });
 </script>
-
 <?php
 require "../inc/footer.php";
 ?>

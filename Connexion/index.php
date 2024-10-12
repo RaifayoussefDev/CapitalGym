@@ -25,11 +25,11 @@
                 <div class="form" id="loginForm">
                     <div class="inputBox">
                         <input type="text" id="email" required>
-                        <i>Email</i>
+                        <i>Email ou Matricule</i>
                     </div>
                     <div class="inputBox">
                         <input type="password" id="password" required>
-                        <i>Password</i>
+                        <i>Mot de passe</i>
                     </div>
                     <div class="links">
                         <a href="#">Forgot Password</a>

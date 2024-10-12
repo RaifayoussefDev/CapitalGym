@@ -52,6 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fonction = mysqli_real_escape_string($conn, $_POST['fonction']);
     $num_urgence = mysqli_real_escape_string($conn, $_POST['num_urgence']);
     $employeur = mysqli_real_escape_string($conn, $_POST['employeur']);
+    $note = mysqli_real_escape_string($conn, $_POST['note']);
     $saissie_par=$_SESSION['id'];
     $password=generateRandomPassword();
     $hashed_password = password_hash($password, PASSWORD_DEFAULT); // Hash the password
@@ -67,8 +68,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // }
 
     // Insert data into database
-    $sql = "INSERT INTO users (cin, nom, prenom, email, phone, date_naissance, genre, adresse, fonction, num_urgence, employeur , saisie_par , `role_id` , `etat` ,`password`)
-            VALUES ('$cin', '$nom', '$prenom', '$email', '$phone', '$date_naissance', '$genre', '$adresse', '$fonction', '$num_urgence', '$employeur',$saissie_par,3,'proceP','$hashed_password')";
+    $sql = "INSERT INTO users (cin, nom, prenom, email, phone, date_naissance, genre, adresse, fonction, num_urgence, employeur , saisie_par , `role_id` , `etat` ,`password`,`Note`)
+            VALUES ('$cin', '$nom', '$prenom', '$email', '$phone', '$date_naissance', '$genre', '$adresse', '$fonction', '$num_urgence', '$employeur',$saissie_par,3,'proceP','$hashed_password','$note')";
 
     if ($conn->query($sql) === TRUE) {
         header('location:./');
