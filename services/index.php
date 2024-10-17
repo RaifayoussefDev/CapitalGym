@@ -731,7 +731,7 @@
                                                 </a>
                                                 <?php if ($profil == 4): ?>
                                                 <?php elseif ($profil == 1 || $profil == 5): ?>
-                                                    <a href="modif.php?id_user=<?php echo htmlspecialchars($user['id']); ?>" class="btn btn-warning btn-modify">
+                                                    <a href="renouvelement.php?id_user=<?php echo htmlspecialchars($user['id']); ?>" class="btn btn-warning btn-modify">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
                                                 <?php else: ?>

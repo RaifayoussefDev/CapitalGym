@@ -4,7 +4,7 @@ require "../inc/conn_db.php";
 $profil = $_SESSION['profil'];
 $_SESSION['current_page'] = 'adherent';
 $_SESSION['user_insert'] = 0;
-
+$id_user = $_GET['id_user'];
 $package_sql = "SELECT * FROM `packages` ORDER BY packages.annual_price DESC";
 $package_result = $conn->query($package_sql);
 
@@ -31,7 +31,7 @@ if ($type_paiements_result->num_rows > 0) {
 
 // Récupérer les utilisateurs avec les détails de l'abonnement et les activités
 $sql = "
-SELECT u.id ,u.matricule ,u.id_card ,nom,prenom, Note,email,phone,adresse,num_urgence,photo,fonction,employeur,date_naissance,a.type_abonnement ,cin,genre,p.package_type_id ,a.offres_promotionnelles , a.description, a.id as id_abonnement , p.id as id_pack , py.id as payement_id , py.total ,p.pack_name , py.reste , a.date_debut, a.date_fin from users u, abonnements a , packages p , payments py WHERE u.id=a.user_id and p.id=a.type_abonnement and a.id=py.abonnement_id and role_id = 3 and u.id = 316;
+SELECT u.id ,u.matricule ,u.id_card ,nom,prenom, Note,email,phone,adresse,num_urgence,photo,fonction,employeur,date_naissance,a.type_abonnement ,cin,genre,p.package_type_id ,a.offres_promotionnelles , a.description, a.id as id_abonnement , p.id as id_pack , py.id as payement_id , py.total ,p.pack_name , py.reste , a.date_debut, a.date_fin from users u, abonnements a , packages p , payments py WHERE u.id=a.user_id and p.id=a.type_abonnement and a.id=py.abonnement_id and role_id = 3 and u.id = $id_user;
 ";
 
 $result = $conn->query($sql);
