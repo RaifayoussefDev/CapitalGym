@@ -1208,7 +1208,7 @@ body {
             padding-top: 30px;
             padding-bottom: 7px;
             margin-right: 0px;
-            width: 150PX;
+            width: 144PX;
             height: auto;
         }
 
@@ -7050,7 +7050,7 @@ label.error {
     position: relative;
     cursor: pointer;
     border-radius: 3px;
-    color: #9aa0ac;
+    color: #262a2d;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;

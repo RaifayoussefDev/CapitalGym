@@ -77,8 +77,8 @@ $(".tab-wizard").steps({
             genre: $("#genre").val(), // Add gender field
             password: $("#password").val(), // Add password field if needed
             photo: $("#photo").val(), // Add photo field if needed
-            commercial: $("#commercial").val(), 
-            note :$("#note").val()
+            commercial: $("#commercial").val(),
+            note: $("#note").val(),
           },
           success: function (response) {
             // Gérer la réponse (optionnel)
@@ -221,12 +221,11 @@ $(".tab-wizardProce").steps({
       } else {
         $("#phone").removeClass("is-invalid");
       }
-
     }
 
     // Validate Step 2: Abonnement
     if (currentIndex === 1) {
-      // Step 2
+      // Step 2: Validate type_abonnement
       if (!$("#type_abonnement").val().trim()) {
         $("#type_abonnement").addClass("is-invalid");
         valid = false;
@@ -234,6 +233,39 @@ $(".tab-wizardProce").steps({
         $("#type_abonnement").removeClass("is-invalid");
         valid = true;
       }
+
+      // Check for total_activites and reste_activites
+      const totalActivitesInput = $("#total_activites");
+      const resteActivitesInput = $("#reste_activites");
+
+      let totalActivites = 0;
+      let resteActivites = 0;
+
+      if (
+        totalActivitesInput.length &&
+        totalActivitesInput.val().trim() !== ""
+      ) {
+        totalActivites = parseFloat(totalActivitesInput.val()) || 0;
+      }
+
+      if (
+        resteActivitesInput.length &&
+        resteActivitesInput.val().trim() !== ""
+      ) {
+        resteActivites = parseFloat(resteActivitesInput.val()) || 0;
+      }
+
+      // Get current total and reste values
+      const total = parseFloat($("#total").val()) || 0;
+      const reste = parseFloat($("#reste").val()) || 0;
+
+      // Update total and reste with activites values if they exist
+      const updatedTotal = total + totalActivites;
+      const updatedReste = reste + resteActivites;
+
+      // Set updated values back to inputs
+      $("#total").val(updatedTotal.toFixed(2));
+      $("#reste").val(updatedReste.toFixed(2));
     }
 
     if (currentIndex === 2) {

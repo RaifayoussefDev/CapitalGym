@@ -252,7 +252,7 @@ var world_map = new jsVectorMap({
 });
 
 //Chart
-var ctx = document.getElementById('statisticsChart').getContext('2d');
+var ctx = document.getElementById('statisticsChart').getContext('2d');X
 
 var statisticsChart = new Chart(ctx, {
 	type: 'line',

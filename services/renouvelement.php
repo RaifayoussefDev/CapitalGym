@@ -16,6 +16,7 @@ $activites = [];
 $packages = [];
 $type_paiements = [];
 
+
 if ($package_result->num_rows > 0) {
     while ($row = $package_result->fetch_assoc()) {
         $packages[] = $row;
@@ -30,7 +31,8 @@ if ($type_paiements_result->num_rows > 0) {
 
 // Récupérer les utilisateurs avec les détails de l'abonnement et les activités
 $sql = "
-SELECT u.id ,nom,prenom,email,phone,adresse,num_urgence,photo,fonction,employeur,date_naissance,cin,genre, a.id as id_abonnement , p.id as id_pack , py.id as payement_id , py.total , py.reste , a.date_debut, a.date_fin from users u, abonnements a , packages p , payments py WHERE u.id=a.user_id and p.id=a.type_abonnement and a.id=py.abonnement_id and role_id = 3 and u.id = 316;";
+SELECT u.id ,u.matricule ,u.id_card ,nom,prenom, Note,email,phone,adresse,num_urgence,photo,fonction,employeur,date_naissance,a.type_abonnement ,cin,genre,p.package_type_id ,a.offres_promotionnelles , a.description, a.id as id_abonnement , p.id as id_pack , py.id as payement_id , py.total ,p.pack_name , py.reste , a.date_debut, a.date_fin from users u, abonnements a , packages p , payments py WHERE u.id=a.user_id and p.id=a.type_abonnement and a.id=py.abonnement_id and role_id = 3 and u.id = 316;
+";
 
 $result = $conn->query($sql);
 
@@ -52,6 +54,15 @@ if ($resultc->num_rows > 0) {
     }
 } else {
     $commercials = [];
+}
+
+
+$sqla = "SELECT * FROM `activites`";
+$resulta = $conn->query($sqla);
+if ($resulta->num_rows > 0) {
+    while ($rowa = $resulta->fetch_assoc()) {
+        $activites[] = $rowa;
+    }
 }
 
 $conn->close();
@@ -116,8 +127,8 @@ $conn->close();
     }
 
     .badge .photo {
-        width: 60px;
-        height: 60px;
+        width: 120px;
+        height: 120px;
         border-radius: 50%;
         object-fit: cover;
     }
@@ -134,45 +145,87 @@ $conn->close();
         font-size: 14px;
         margin-top: 4px;
     }
-</style>
-<script>
-    function displayPhoto(input) {
-        if (input.files && input.files[0]) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var preview = document.getElementById('preview');
-                preview.src = e.target.result;
-                preview.style.display = 'block';
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
+
+    .credit-card {
+        border-radius: 15px;
+        padding: 20px;
+        max-width: 350px;
+        height: 200px;
+        position: relative;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
     }
 
-    document.getElementById('drop-area').addEventListener('click', function() {
-        document.getElementById('profile-photo').click();
-    });
+    .credit-card .logo {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 50px;
+    }
 
-    document.getElementById('drop-area').addEventListener('dragover', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.classList.add('dragover');
-    });
+    .credit-card .card-details {
+        margin-top: 50px;
+    }
 
-    document.getElementById('drop-area').addEventListener('dragleave', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.classList.remove('dragover');
-    });
+    .credit-card .card-details .name {
+        font-size: 18px;
+        font-weight: bold;
+    }
 
-    document.getElementById('drop-area').addEventListener('drop', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.classList.remove('dragover');
-        var files = e.dataTransfer.files;
-        document.getElementById('profile-photo').files = files;
-        displayPhoto(document.getElementById('profile-photo'));
+    .credit-card .card-details .info {
+        font-size: 14px;
+    }
+</style>
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        function displayPhoto(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var preview = document.getElementById('preview');
+                    if (preview) {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                    }
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        var dropArea = document.getElementById('drop-area');
+        var profilePhotoInput = document.getElementById('profile-photo');
+
+        if (dropArea && profilePhotoInput) {
+            dropArea.addEventListener('click', function() {
+                profilePhotoInput.click();
+            });
+
+            dropArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.add('dragover');
+            });
+
+            dropArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.remove('dragover');
+            });
+
+            dropArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.remove('dragover');
+                var files = e.dataTransfer.files;
+                profilePhotoInput.files = files;
+                displayPhoto(profilePhotoInput);
+            });
+        } else {
+            console.error("Drop area or profile photo input not found.");
+        }
     });
 </script>
+
 <div class="page-inner">
     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
         <div>
@@ -184,7 +237,7 @@ $conn->close();
         <div class="col-sm-12 col-md-12">
             <div class="card card-stats card-round">
                 <div class="wizard-content" id="tab-wizard">
-                    <form id="example-form" action="add_user.php" method="post" class="tab-wizard wizard-circle wizard" enctype="multipart/form-data">
+                    <form id="example-form" action="add_user.php" method="post" class="tab-wizardProce wizard-circle wizard" enctype="multipart/form-data">
                         <div class="col-md-3">
                             <div class="form-group">
                                 <H1 class="text-secondary d-none" id="matricule" name="matricule"></H1>
@@ -220,7 +273,7 @@ $conn->close();
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label>CIN <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" id="cin" name="cin" value="<?php echo $user['cin']; ?>" required readonly/>
+                                            <input type="text" class="form-control" id="cin" name="cin" value="<?php echo $user['cin']; ?>" required readonly />
                                             <small class="text-danger" id="cin-error" style="display:none;">Ce champ est obligatoire</small>
                                         </div>
                                     </div>
@@ -228,7 +281,7 @@ $conn->close();
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Nom <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" id="nom" name="nom" value="<?php echo $user['nom']; ?>" required readonly/>
+                                            <input type="text" class="form-control" id="nom" name="nom" value="<?php echo $user['nom']; ?>" required readonly />
                                             <small class="text-danger" id="nom-error" style="display:none;">Ce champ est obligatoire</small>
                                         </div>
                                     </div>
@@ -236,7 +289,7 @@ $conn->close();
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Prénom <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" id="prenom" name="prenom" value="<?php echo $user['prenom']; ?>" required readonly/>
+                                            <input type="text" class="form-control" id="prenom" name="prenom" value="<?php echo $user['prenom']; ?>" required readonly />
                                             <small class="text-danger" id="prenom-error" style="display:none;">Ce champ est obligatoire</small>
                                         </div>
                                     </div>
@@ -260,7 +313,7 @@ $conn->close();
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Date de naissance</label>
-                                            <input type="date" class="form-control" id="date_n" name="date_naissance" value="<?php echo $user['date_naissance']; ?>" readonly/>
+                                            <input type="date" class="form-control" id="date_n" name="date_naissance" value="<?php echo $user['date_naissance']; ?>" readonly />
                                         </div>
                                     </div>
 
@@ -301,7 +354,12 @@ $conn->close();
                                             <input type="text" class="form-control" id="employeur" name="employeur" value="<?php echo $user['employeur']; ?>" />
                                         </div>
                                     </div>
-
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Note</label>
+                                            <textarea class="form-control" id="note" name="note" placeholder="Note"><?php echo htmlspecialchars($user['Note']); ?></textarea>
+                                        </div>
+                                    </div>
                                     <!-- Ajoutez ici des informations supplémentaires comme les abonnements, packs, paiements etc. -->
 
                                 </div>
@@ -313,36 +371,64 @@ $conn->close();
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Conventions d'adhésion</label>
-                                            <select name="convention" id="convention" class="form-select form-control-lg" onchange="filterCategories()">
-                                                <option value="YES">Oui</option>
-                                                <option value="NO" selected>Non</option>
+                                            <select disabled name="convention" id="convention" class="form-select form-control-lg" onchange="filterCategories()">
+                                                <option value="YES" <?= $user['package_type_id'] == 8 ? 'selected' : '' ?>>Oui</option>
+                                                <option value="NO" <?= $user['package_type_id'] != 8 ? 'selected' : '' ?>>Non</option>
                                             </select>
+
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Catégorie d'adhésion</label>
-                                            <select name="categorie_adherence" id="categorie_adherence" class="form-select form-control-lg" onchange="updateAbonnementOptions()">
+                                            <select disabled name="categorie_adherence" id="categorie_adherence" class="form-select form-control-lg" onchange="updateAbonnementOptions()">
                                                 <?php
-                                                foreach ($packages as $package) { ?>
-                                                    <option value="<?= $package['id']; ?>"
-                                                        data-daily="<?= $package['Daily_price']; ?>"
-                                                        data-annual="<?= $package['annual_price']; ?>"
-                                                        data-semestrial="<?= $package['semestrial_price']; ?>"
-                                                        data-trimestrial="<?= $package['trimestrial_price']; ?>"
-                                                        data-monthly="<?= $package['monthly_price']; ?>"
-                                                        data-type="<?= $package['package_type_id']; ?>">
-                                                        <?= $package['pack_name']; ?>
+                                                // Séparer l'option sélectionnée des autres
+                                                $selectedOption = null;
+                                                foreach ($packages as $package) {
+                                                    if ($package['id'] == $user['type_abonnement']) {
+                                                        $selectedOption = $package;
+                                                        break;
+                                                    }
+                                                }
+
+                                                // Afficher l'option sélectionnée en premier
+                                                if ($selectedOption): ?>
+                                                    <option value="<?= $selectedOption['id']; ?>"
+                                                        data-daily="<?= $selectedOption['Daily_price']; ?>"
+                                                        data-annual="<?= $selectedOption['annual_price']; ?>"
+                                                        data-semestrial="<?= $selectedOption['semestrial_price']; ?>"
+                                                        data-trimestrial="<?= $selectedOption['trimestrial_price']; ?>"
+                                                        data-monthly="<?= $selectedOption['monthly_price']; ?>"
+                                                        data-type="<?= $selectedOption['package_type_id']; ?>"
+                                                        selected>
+                                                        <?= $selectedOption['pack_name']; ?>
                                                     </option>
+                                                <?php endif; ?>
+
                                                 <?php
-                                                }; ?>
+                                                // Afficher les autres options
+                                                foreach ($packages as $package):
+                                                    if ($package['id'] != $user['type_abonnement']): ?>
+                                                        <option value="<?= $package['id']; ?>"
+                                                            data-daily="<?= $package['Daily_price']; ?>"
+                                                            data-annual="<?= $package['annual_price']; ?>"
+                                                            data-semestrial="<?= $package['semestrial_price']; ?>"
+                                                            data-trimestrial="<?= $package['trimestrial_price']; ?>"
+                                                            data-monthly="<?= $package['monthly_price']; ?>"
+                                                            data-type="<?= $package['package_type_id']; ?>">
+                                                            <?= $package['pack_name']; ?>
+                                                        </option>
+                                                <?php endif;
+                                                endforeach; ?>
                                             </select>
+
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Type d'abonnement</label>
-                                            <select name="type_abonnement" id="type_abonnement" class="form-select form-control-lg">
+                                            <select name="type_abonnement" id="type_abonnement" disabled class="form-select form-control-lg">
                                                 <!-- Options dynamically added by JavaScript -->
                                             </select>
                                         </div>
@@ -351,7 +437,7 @@ $conn->close();
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Offres promotionnelles</label>
-                                            <input type="text" class="form-control" id="offre_promo" name="offre_promo" placeholder="Offre promotionnelle" />
+                                            <input type="text" class="form-control" id="offre_promo" name="offre_promo" placeholder="Offre promotionnelle" readonly value="<?php echo $user['offres_promotionnelles']; ?>" />
                                         </div>
                                     </div>
                                 </div>
@@ -359,46 +445,71 @@ $conn->close();
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label>Description</label>
-                                            <textarea name="description" id="description" class="form-control" placeholder="Ajouter une description"></textarea>
+                                            <textarea name="description" id="description" class="form-control" placeholder="Ajouter une description" readonly><?php echo $user['description']; ?></textarea>
                                         </div>
                                     </div>
                                 </div>
-
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Activités</label>
+                                            <div class="selectgroup selectgroup-pills" id="activites-container">
+                                                <?php foreach ($activites as $activite) { ?>
+                                                    <label class="selectgroup-item">
+                                                        <input
+                                                            type="checkbox"
+                                                            name="value[]"
+                                                            value="<?php echo $activite['id']; ?>"
+                                                            data-price="<?php echo $activite['prix']; ?>"
+                                                            class="selectgroup-input activite-checkbox" />
+                                                        <span class="selectgroup-button"><?php echo $activite['nom']; ?></span>
+                                                    </label>
+                                                <?php } ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Période d'activité</label>
+                                            <select name="periode_activite" class="form-select form-control-lg" id="periode_activite">
+                                                <option value="1">Mensuel</option>
+                                                <option value="3">Trimestriel</option>
+                                                <option value="6">Semestriel</option>
+                                                <option value="12">Annuel</option> <!-- Annuel avec la valeur correcte -->
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Date Début d'abonnement</label>
-                                            <input type="date" id="date_debut_paiement" name="date_debut_paiement" class="form-control" required />
+                                            <input type="date" name="date_debut_paiement" class="form-control" value="<?php echo $user['date_debut']; ?>" required readonly />
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Date de fin d’abonnement</label>
                                             <div class="input-group">
-                                                <input type="date" name="date_fin_abn" id="date_fin_abn" class="form-control" readonly />
-                                                <div id="adjustButtons">
-                                                    <button type="button" class="btn btn-dark" onclick="adjustEndDate(1)">+</button>
-                                                    <button type="button" class="btn btn-dark" onclick="adjustEndDate(-1)">-</button>
-                                                </div>
+                                                <input type="date" name="date_fin_abn" class="form-control" value="<?php echo $user['date_fin']; ?>" readonly />
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </section>
-
                             <h5>Paiement</h5>
                             <section>
                                 <div class="row">
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Total :</label>
-                                            <input type="text" name="total" id="total" class="form-control" readonly />
+                                            <input type="text" name="total" id="total" value="<?php echo $user['total']; ?>" class="form-control" readonly />
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Reste :</label>
-                                            <input type="text" name="reste" id="reste" class="form-control" readonly />
+                                            <input type="text" name="reste" id="reste" value="<?php echo $user['reste']; ?>" class="form-control" readonly />
                                         </div>
                                     </div>
                                     <div class="col-md-4 d-flex align-items-end">
@@ -408,15 +519,91 @@ $conn->close();
                                     </div>
                                 </div>
                                 <div id="payment_modes_container"></div>
+                                <div class="row d-none">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Total des activites :</label>
+                                            <input type="text" name="total_activites" id="total_activites" class="form-control" readonly />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Reste des activites</label>
+                                            <input type="text" name="reste_activites" id="reste_activites" class="form-control" readonly />
+                                        </div>
+                                    </div>
+                                </div>
                             </section>
 
 
                             <h5>Badge</h5>
                             <section>
-                                <div class="alert alert-info d-flex align-items-center" role="alert">
-                                    <i class="fas fa-thumbs-up me-2" aria-hidden="true"></i>
-                                    <div>
-                                        Merci de déposer le badge à lecteur.
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="container">
+                                            <?php
+                                            // Determine the background color and text color based on the user's pack
+                                            $backgroundColor = 'gray'; // Default for 'Platinum'
+                                            $textColor = 'white';      // Default for 'Platinum'
+
+                                            if ($user['pack_name'] == 'platinium') {
+                                                $backgroundColor = 'black';
+                                                $textColor = 'white';
+                                            } elseif ($user['pack_name'] == 'gold') {
+                                                $backgroundColor = 'gold';
+                                                $textColor = 'black';
+                                            }
+                                            ?>
+
+                                            <div class="credit-card" style="background-color: <?php echo $backgroundColor; ?>; color: <?php echo $textColor; ?>;">
+                                                <!-- Logo -->
+                                                <img src="../assets/img/capitalsoft/logo_light.png" alt="Logo" class="logo" style="width: 80px; position: absolute; top: 20px; right: 20px;">
+
+                                                <!-- Card details -->
+                                                <div class="card-details" style="margin-top: 50px;">
+                                                    <div class="row">
+                                                        <div class="col-md-12 name" style="text-transform: capitalize;">
+                                                            <?php echo $user['nom']; ?> <?php echo $user['prenom']; ?>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-12 info">
+                                                            <?php echo $user['matricule']; ?>
+                                                        </div>
+                                                    </div>
+                                                    <?php
+                                                    if ($user['id_card'] != null or $user['id_card'] != '') { ?>
+                                                        <div class="row">
+                                                            <div class="col-md-12 info">
+                                                                Badge: <?php echo $user['id_card']; ?>
+                                                            </div>
+                                                        </div>
+                                                    <?php
+                                                    }
+                                                    ?>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="container">
+                                            <!-- Input field for the badge number -->
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <label for="badge-number">Badge Number:</label>
+                                                    <input type="text" id="badge-number" class="form-control" placeholder="Enter badge number" readonly>
+                                                </div>
+                                            </div>
+
+                                            <!-- Button to change the badge number -->
+                                            <div class="row mt-3">
+                                                <div class="col-md-12">
+                                                    <button id="change-badge-btn" class="btn btn-primary">Change Badge</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                     </div>
                                 </div>
                             </section>
@@ -505,22 +692,141 @@ $conn->close();
     </div>
 </div>
 <script>
+    $(document).ready(function() {
+        // Button to trigger badge change
+        $('#change-badge-btn').click(function() {
+            // Ask the user for the new badge number
+            let newBadgeNumber = prompt("Enter the new badge number:");
+
+            // If a number is provided, update the input field
+            if (newBadgeNumber) {
+                $('#badge-number').val(newBadgeNumber);
+            }
+        });
+
+        // Function to check card status and update user details
+        function checkCardStatus() {
+            $.ajax({
+                url: '../actions/read_card.php', // PHP script to check if the card exists
+                method: 'POST',
+                success: function(response) {
+                    let data = JSON.parse(response);
+
+                    if (data.success) {
+                        let user = data.data;
+
+                        // Update the badge number input with the user's badge
+                        $('#badge-number').val(user.id_card);
+
+                        // Clear the table if necessary
+                        clearEnvoiAppTable();
+
+                        // Display user details using Bootstrap Notify
+                        $.notify({
+                            // options
+                            title: "<h3>Passage du tourniquet</h3>",
+                            message: `<a href="../Adherents/consult.php?id_user=${user.id}" style="text-decoration: none; color: inherit;">
+              <div style="display: flex; align-items: center;">
+                  <img src="../assets/img/capitalsoft/profils/${user.photo || 'default.jpg'}" 
+                       alt="Photo de ${user.nom}" 
+                       style="width: 100px; height: 100px; border-radius: 50%; margin-right: 10px;">
+                  <div style="font-size: 14px;"> 
+                      <strong>Matricule:</strong> ${user.matricule}<br>
+                      <strong>Nom et Prénom: </strong> ${user.nom} ${user.prenom}<br>
+                      <strong>CIN: </strong> ${user.cin}<br>
+                      <strong>Wallet Privilège: </strong> ${user.balance} MAD <br>
+                      <strong>Type D'abonnement: </strong> ${user.pack_name} <br>
+                      <strong>Date Debut D'abonnement: </strong> ${user.date_debut} <br>
+                      <strong>Date Fin D'abonnement: </strong> ${user.date_fin}
+                  </div>
+              </div>
+          </a>`
+                        }, {
+                            // settings
+                            type: user.etat === 'actif' ? 'success' : 'danger', // Green for "actif", red otherwise
+                            placement: {
+                                from: "top",
+                                align: "right"
+                            },
+                            time: 10000, // Duration to show the notification
+                            z_index: 1051, // Adjust z-index if needed
+                            template: `<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0}" role="alert" style="min-height: 150px;">
+              <button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>
+              <span data-notify="icon"></span>
+              <span data-notify="title">{1}</span>
+              <span data-notify="message">{2}</span>
+              <div class="progress" data-notify="progressbar">
+                  <div class="progress-bar progress-bar-{0}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>
+              </div>
+              <a href="{3}" target="{4}" data-notify="url"></a>
+             </div>`
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Erreur lors de la requête:', error);
+                }
+            });
+        }
+
+        // Call the function every second to check card status
+        setInterval(checkCardStatus, 1000);
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Initialize the event listeners for checkboxes and dropdown
+        const activityCheckboxes = document.querySelectorAll('.activite-checkbox');
+        const periodSelect = document.getElementById('periode_activite');
+
+        // Attach the 'change' event listener for each activity checkbox
+        activityCheckboxes.forEach(function(checkbox) {
+            checkbox.addEventListener('change', calculateTotalPrice);
+        });
+
+        // Attach the 'change' event listener for the period dropdown
+        periodSelect.addEventListener('change', calculateTotalPrice);
+    });
+
+    function calculateTotalPrice() {
+        // Obtenir la période sélectionnée
+        const periode = parseFloat(document.getElementById('periode_activite').value) || 0;
+
+        // Obtenir les inputs pour afficher le total des activités
+        const totalInput = document.getElementById('total');
+        const totalActivitesInput = document.getElementById('total_activites');
+        const resteInput = document.getElementById('reste');
+        const resteActivitesInput = document.getElementById('reste_activites');
+
+        // Obtenir toutes les activités sélectionnées
+        const selectedActivites = document.querySelectorAll('.activite-checkbox:checked');
+
+        // Réinitialiser le totalPrice à 0
+        let totalPrice = 0;
+
+        // Boucler à travers les activités sélectionnées et additionner les prix
+        selectedActivites.forEach(function(activite) {
+            const activitePrice = parseFloat(activite.getAttribute('data-price')) || 0;
+            if (!isNaN(activitePrice)) {
+                totalPrice += activitePrice * periode; // Multiplier le prix de l'activité par la période
+            }
+        });
+
+        // Mettre à jour les inputs avec le nouveau total
+        totalActivitesInput.value = totalPrice.toFixed(2);
+        resteActivitesInput.value = totalPrice.toFixed(2);
+
+        // Debug logs (facultatif, pour vérifier la console)
+        console.log("Total price for activities:", totalPrice.toFixed(2));
+    }
+</script>
+
+<script>
     document.addEventListener('DOMContentLoaded', function() {
         const itemsPerPage = 6;
         let currentPage = 1;
         let usersData = [];
         let filteredUsers = [];
-
-        // Fetch user data from the server
-        fetch('users.php')
-            .then(response => response.json())
-            .then(users => {
-                usersData = users;
-                filteredUsers = usersData; // Initially no filter applied
-                displayUsers();
-                setupPagination();
-            })
-            .catch(error => console.error('Error fetching users:', error));
 
         // Search functionality
         document.getElementById('search').addEventListener('input', function() {
@@ -734,33 +1040,7 @@ $conn->close();
 
 
     // Function to calculate the total amount based on the selected abonnement type and package
-    function calculateTotal() {
-        var selectedPackage = document.getElementById('categorie_adherence').selectedOptions[0];
-        var selectedAbonnement = document.getElementById('type_abonnement').value;
 
-        // Get the selected package prices
-        var price;
-        if (selectedAbonnement === '0.03') {
-            price = selectedPackage.getAttribute('data-daily');
-        } else if (selectedAbonnement === '1') {
-            price = selectedPackage.getAttribute('data-monthly');
-        } else if (selectedAbonnement === '3') {
-            price = selectedPackage.getAttribute('data-trimestrial');
-        } else if (selectedAbonnement === '6') {
-            price = selectedPackage.getAttribute('data-semestrial');
-        } else if (selectedAbonnement === '12') {
-            price = selectedPackage.getAttribute('data-annual');
-        }
-
-        // If price is available, update the total and reste fields
-        if (price) {
-            document.getElementById('total').value = price;
-            document.getElementById('reste').value = price;
-        } else {
-            document.getElementById('total').value = '';
-            document.getElementById('reste').value = '';
-        }
-    }
 
     function toggleChequeSection(typePaiementSelect, sectionCheque, labelCheque) {
         if (!typePaiementSelect || !sectionCheque || !labelCheque) return;
@@ -799,7 +1079,7 @@ $conn->close();
         const matriculeHiddenInput = document.getElementById('matricule_input'); // Hidden input to store matricule
         const selectedPackage = document.getElementById('categorie_adherence').selectedOptions[0]; // Package selection
 
-        fetch('get_latest_id.php')
+        fetch('../Adherents/get_latest_id.php')
             .then(response => response.json())
             .then(data => {
                 const latestId = parseInt(data.latest_id, 10); // Ensure latestId is treated as an integer
@@ -1000,7 +1280,6 @@ if ($profil == 4) {; ?>
             paymentModesContainer.appendChild(newPaymentMode);
 
             paymentModeIndex++;
-
             calculateReste();
         }
 
