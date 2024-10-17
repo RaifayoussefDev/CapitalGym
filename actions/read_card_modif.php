@@ -1,6 +1,9 @@
 <?php
 require "../inc/conn_db.php";
 
+// Set the charset to UTF-8 to ensure proper encoding
+$conn->set_charset("utf8");
+
 // Récupérer la valeur de la carte ou vérifiez simplement si une entrée existe
 $sql = "SELECT ip, valeur FROM envoi_app LIMIT 1"; // Check for the latest card data
 $result = $conn->query($sql);
@@ -10,9 +13,10 @@ if ($result->num_rows > 0) {
     $card = $result->fetch_assoc();
 
     // Combined query to get user details and wallet balance
-    $user_sql = "select * from `envoi_app`";
-
+    $user_sql = "SELECT * FROM `envoi_app` WHERE valeur = ?";
     $user_stmt = $conn->prepare($user_sql);
+    
+    // Bind the card value to the query
     $user_stmt->bind_param("s", $card['valeur']);
     $user_stmt->execute();
     $user_result = $user_stmt->get_result();
@@ -39,3 +43,4 @@ if ($result->num_rows > 0) {
         'message' => "Aucune carte détectée"
     ]);
 }
+?>
