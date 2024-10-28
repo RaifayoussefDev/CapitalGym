@@ -15,7 +15,7 @@ if ($result->num_rows > 0) {
     // Combined query to get user details and wallet balance
     $user_sql = "SELECT * FROM `envoi_app` WHERE valeur = ?";
     $user_stmt = $conn->prepare($user_sql);
-    
+
     // Bind the card value to the query
     $user_stmt->bind_param("s", $card['valeur']);
     $user_stmt->execute();
@@ -43,4 +43,3 @@ if ($result->num_rows > 0) {
         'message' => "Aucune carte détectée"
     ]);
 }
-?>

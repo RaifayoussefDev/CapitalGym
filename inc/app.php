@@ -123,7 +123,7 @@ if (!isset($_SESSION['email'])) {
 
 <body>
   <!-- Loader -->
-  <div class="loader-wrapper" id="custom-loader">
+  <!-- <div class="loader-wrapper" id="custom-loader">
     <div class="loading">
       <div class="dot"></div>
       <div class="dot"></div>
@@ -131,7 +131,7 @@ if (!isset($_SESSION['email'])) {
       <div class="dot"></div>
       <div class="dot"></div>
     </div>
-  </div>
+  </div> -->
 
 
 

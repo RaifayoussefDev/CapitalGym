@@ -7,7 +7,7 @@ $profil = $_SESSION['profil'];
 $user_id = $_GET['id_user'];
 
 // Retrieve packages
-$package_sql = "SELECT * FROM `packages` ORDER BY packages.annual_price DESC";
+$package_sql = "SELECT * FROM `packages` where package_type_id not like 9 ORDER BY packages.annual_price DESC";
 $package_result = $conn->query($package_sql);
 $packages = [];
 if ($package_result->num_rows > 0) {

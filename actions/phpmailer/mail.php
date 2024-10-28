@@ -39,8 +39,8 @@ function sendEmail($to, $subject, $message)
         $mail->Subject = $subject;
 
         // Encode logo image in Base64
-        $logoPath = 'logo_light.png'; // Ensure this path is correct and accessible
-        $logo = base64_encode_image($logoPath);
+        // $logoPath = 'logo_light.png'; // Ensure this path is correct and accessibl:e
+        // $logo = base64_encode_image($logoPath);
 
         // HTML email content
         $mail->Body = '

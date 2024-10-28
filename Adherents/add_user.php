@@ -111,7 +111,6 @@ $requiredFields = [
     'cin' => 'CIN',
     'nom' => 'Nom',
     'prenom' => 'Prénom',
-    'email' => 'Email',
     'phone' => 'Téléphone',
     'genre' => 'Genre',
     'type_abonnement' => 'Type d\'abonnement',

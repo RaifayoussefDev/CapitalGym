@@ -98,7 +98,7 @@ if ($already_insert == 0) {
             'cin' => 'CIN',
             'nom' => 'Nom',
             'prenom' => 'Prénom',
-            'email' => 'Email',
+            
             'phone' => 'Téléphone'
         ];
 
@@ -118,6 +118,9 @@ if ($already_insert == 0) {
             throw new Exception("Commercial value is missing");
         }
 
+        $email = isset($_POST['email']) && !empty($_POST['email']) ? $_POST['email'] : '';
+
+
         // If there are missing required fields, handle the error
         if (empty($missingFields)) {
             // All required fields are present; Insert user details
@@ -135,7 +138,7 @@ if ($already_insert == 0) {
                 $_POST['cin'],
                 $_POST['nom'],
                 $_POST['prenom'],
-                $_POST['email'],
+                $email,
                 $_POST['phone'],
                 $date_naissance,
                 $genre,

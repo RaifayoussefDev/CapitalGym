@@ -5,7 +5,7 @@ $profil = $_SESSION['profil'];
 $_SESSION['current_page'] = 'adherent';
 $_SESSION['user_insert'] = 0;
 $id_user = $_GET['id_user'];
-$package_sql = "SELECT * FROM `packages` ORDER BY packages.annual_price DESC";
+$package_sql = "SELECT * FROM `packages` where package_type_id not like 9 ORDER BY packages.annual_price DESC";
 $package_result = $conn->query($package_sql);
 
 // Récupérer les types de paiement
@@ -31,8 +31,51 @@ if ($type_paiements_result->num_rows > 0) {
 
 // Récupérer les utilisateurs avec les détails de l'abonnement et les activités
 $sql = "
-SELECT u.id ,u.matricule ,u.id_card ,nom,prenom, Note,email,phone,adresse,num_urgence,photo,fonction,employeur,date_naissance,a.type_abonnement ,cin,genre,p.package_type_id ,a.offres_promotionnelles , a.description, a.id as id_abonnement , p.id as id_pack , py.id as payement_id , py.total ,p.pack_name , py.reste , a.date_debut, a.date_fin from users u, abonnements a , packages p , payments py WHERE u.id=a.user_id and p.id=a.type_abonnement and a.id=py.abonnement_id and role_id = 3 and u.id = $id_user;
+SELECT 
+    u.id, 
+    u.matricule, 
+    u.id_card, 
+    u.nom, 
+    u.prenom, 
+    u.Note, 
+    u.email, 
+    u.phone, 
+    u.adresse, 
+    u.num_urgence, 
+    u.photo, 
+    u.fonction, 
+    u.employeur, 
+    a.id AS id_abonnement, 
+    u.date_naissance, 
+    a.type_abonnement, 
+    u.cin, 
+    u.genre, 
+    p.package_type_id, 
+    a.offres_promotionnelles, 
+    a.description, 
+    a.id AS id_abonnement, 
+    p.id AS id_pack, 
+    MAX(py.id) AS payement_id, 
+    MAX(py.total) AS total, 
+    MAX(p.pack_name) AS pack_name, 
+    MAX(py.reste) AS reste, 
+    MAX(a.date_debut) AS date_debut, 
+    MAX(a.date_fin) AS date_fin 
+FROM 
+    users u 
+JOIN 
+    abonnements a ON u.id = a.user_id 
+JOIN 
+    packages p ON p.id = a.type_abonnement 
+JOIN 
+    payments py ON py.abonnement_id = a.id 
+WHERE 
+    u.role_id = 3 
+    AND u.id = '$id_user' 
+GROUP BY 
+    u.id, a.id, p.id;
 ";
+
 
 $result = $conn->query($sql);
 
@@ -42,6 +85,7 @@ if ($result->num_rows > 0) {
     }
 } else {
     $users = [];
+    echo $sql;
 }
 
 
@@ -237,15 +281,15 @@ $conn->close();
         <div class="col-sm-12 col-md-12">
             <div class="card card-stats card-round">
                 <div class="wizard-content" id="tab-wizard">
-                    <form id="example-form" action="add_user.php" method="post" class="tab-wizardProce wizard-circle wizard" enctype="multipart/form-data">
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <H1 class="text-secondary d-none" id="matricule" name="matricule"></H1>
-                                <input id="matricule_input" name="matricule_input" class="d-none" value="" />
+                    <?php foreach ($users as $user) {; ?>
+                        <form id="example-form" action="edit_adherent.php?id_user=<?php echo $user['id']; ?>" method="post" class="tab-wizardProce wizard-circle wizard" enctype="multipart/form-data">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <H1 class="text-secondary d-none" id="matricule" name="matricule"></H1>
+                                    <input id="matricule_input" name="matricule_input" class="d-none" value="" />
+                                </div>
                             </div>
-                        </div>
-                        <?php
-                        foreach ($users as $user) {; ?>
+                            <input type="text" name="id_abonnement" style="display: none;" value="<?php echo $user['id_abonnement'] ;?>">
                             <h5>Information Personnel</h5>
                             <section>
                                 <legend></legend>
@@ -253,7 +297,7 @@ $conn->close();
                                     <div class="col-md-12">
                                         <div class="row">
                                             <div class="col-md-4">
-                                                <img id="preview" src="<?php echo $user['photo'] ?? '#'; ?>" alt="Aperçu de la photo" style="display:none; max-width: 200px; height: auto" />
+                                                <img id="preview" src="../assets/img/capitalsoft/profils/<?php echo $user['photo'] ?? '#'; ?>" alt="Aperçu de la photo" style=" max-width: 200px; height: auto" />
                                                 <video id="camera" width="320" height="240" autoplay style="display:none;"></video>
                                                 <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
                                             </div>
@@ -320,7 +364,7 @@ $conn->close();
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Genre</label>
-                                            <select name="genre" class="form-select form-control-lg" id="genre">
+                                            <select name="genre" class="form-select form-control-lg" id="genre" disabled>
                                                 <option value="M" <?php echo ($user['genre'] == 'M') ? 'selected' : ''; ?>>Homme</option>
                                                 <option value="F" <?php echo ($user['genre'] == 'F') ? 'selected' : ''; ?>>Femme</option>
                                             </select>
@@ -449,37 +493,55 @@ $conn->close();
                                         </div>
                                     </div>
                                 </div>
+
                                 <div class="row">
-                                    <div class="col-md-6">
+                                    <div class="col-md-12">
                                         <div class="form-group">
                                             <label class="form-label">Activités</label>
-                                            <div class="selectgroup selectgroup-pills" id="activites-container">
-                                                <?php foreach ($activites as $activite) { ?>
-                                                    <label class="selectgroup-item">
-                                                        <input
-                                                            type="checkbox"
-                                                            name="value[]"
-                                                            value="<?php echo $activite['id']; ?>"
-                                                            data-price="<?php echo $activite['prix']; ?>"
-                                                            class="selectgroup-input activite-checkbox" />
-                                                        <span class="selectgroup-button"><?php echo $activite['nom']; ?></span>
-                                                    </label>
-                                                <?php } ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="form-label">Période d'activité</label>
-                                            <select name="periode_activite" class="form-select form-control-lg" id="periode_activite">
-                                                <option value="1">Mensuel</option>
-                                                <option value="3">Trimestriel</option>
-                                                <option value="6">Semestriel</option>
-                                                <option value="12">Annuel</option> <!-- Annuel avec la valeur correcte -->
-                                            </select>
+                                            <?php foreach ($activites as $activite) { ?>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for=""></label><br>
+                                                            <input
+                                                                class="form-check-input activite-checkbox"
+                                                                type="checkbox"
+                                                                name="value[]"
+                                                                value="<?php echo $activite['id']; ?>"
+                                                                data-price="<?php echo $activite['prix']; ?>"
+                                                                id="<?php echo $activite['nom']; ?>" />
+                                                            <label class="form-check-label" for="<?php echo $activite['nom']; ?>"><?php echo $activite['nom']; ?></label>
+                                                        </div>
+                                                    </div>
+                                                    <input type="text" name="type_activite[]" value="<?php echo $activite['type'];?>" style="display:none">
+
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label class="form-label">
+                                                                <?php echo ($activite['type'] == 'par mois') ? 'Période d\'activité' : 'Nombre des séances'; ?>
+                                                            </label>
+                                                            <select name="periode_activite[<?php echo $activite['id']; ?>]" class="form-select form-control-lg period-select" disabled>
+                                                                <?php if ($activite['type'] == 'par mois') { ?>
+                                                                    <option value="1">Mensuel</option>
+                                                                    <option value="3">Trimestriel</option>
+                                                                    <option value="6">Semestriel</option>
+                                                                    <option value="12">Annuel</option>
+                                                                <?php } else { ?>
+                                                                    <?php for ($i = 1; $i <= 10; $i++) { ?>
+                                                                        <option value="<?php echo $i; ?>">
+                                                                            <?php echo $i . ' séance' . ($i > 1 ? 's' : ''); ?>
+                                                                        </option>
+                                                                    <?php } ?>
+                                                                <?php } ?>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <?php } ?>
                                         </div>
                                     </div>
                                 </div>
+
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
@@ -571,39 +633,43 @@ $conn->close();
                                                             <?php echo $user['matricule']; ?>
                                                         </div>
                                                     </div>
-                                                    <?php
-                                                    if ($user['id_card'] != null or $user['id_card'] != '') { ?>
+                                                    <!-- <?php
+                                                   // if ($user['id_card'] != null or $user['id_card'] != '') { ?>
                                                         <div class="row">
-                                                            <div class="col-md-12 info">
-                                                                Badge: <?php echo $user['id_card']; ?>
+                                                            <div class="col-md-12 info bg-white" >
+                                                                Badge: <?php //echo $user['id_card']; ?>
                                                             </div>
                                                         </div>
                                                     <?php
-                                                    }
-                                                    ?>
+                                                    //}
+                                                    ?> -->
                                                 </div>
 
                                             </div>
                                         </div>
                                     </div>
+
+                                    <!-- Input field for the badge number and change button -->
                                     <div class="col-md-6">
                                         <div class="container">
                                             <!-- Input field for the badge number -->
-                                            <div class="row">
+                                            <div class="row d-none">
                                                 <div class="col-md-12">
                                                     <label for="badge-number">Badge Number:</label>
-                                                    <input type="text" id="badge-number" class="form-control" placeholder="Enter badge number" readonly>
+                                                    <input type="text" id="badge-number" name="badge_number" class="form-control" placeholder="Enter badge number" readonly>
                                                 </div>
                                             </div>
 
                                             <!-- Button to change the badge number -->
                                             <div class="row mt-3">
                                                 <div class="col-md-12">
-                                                    <button id="change-badge-btn" class="btn btn-primary">Change Badge</button>
+                                                    <button type="button" id="change-badge-btn" onclick="get_newbadge()" class="btn btn-primary">Change Badge</button>
                                                 </div>
                                             </div>
-                                        </div>
 
+                                            <!-- Area for displaying timer and messages -->
+                                            <div id="message" class="mt-3"></div>
+                                        </div>
                                     </div>
                                 </div>
                             </section>
@@ -684,62 +750,174 @@ $conn->close();
                                 </div>
                             </template>
 
-                        <?php }; ?>
-                    </form>
+                        </form>
+                    <?php }; ?>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Initialize the event listeners for checkboxes and dropdown
-        const activityCheckboxes = document.querySelectorAll('.activite-checkbox');
-        const periodSelect = document.getElementById('periode_activite');
+    function get_newbadge() {
+        const badgeInput = document.getElementById('badge-number');
 
-        // Attach the 'change' event listener for each activity checkbox
-        activityCheckboxes.forEach(function(checkbox) {
-            checkbox.addEventListener('change', calculateTotalPrice);
+        // Initial notification with countdown message
+        let secondsRemaining = 5;
+
+        // Create the notification and store the reference
+        let notifyElement = $.notify({
+            title: "<h3>Attention</h3>",
+            message: `Merci d'ajouter le nouveau badge au lecteur. Temps restant : ${secondsRemaining} secondes...`
+        }, {
+            type: 'info',
+            placement: {
+                from: "top",
+                align: "right"
+            },
+            delay: 6000, // Keep the notification visible for 6 seconds
+            z_index: 1051
         });
 
-        // Attach the 'change' event listener for the period dropdown
-        periodSelect.addEventListener('change', calculateTotalPrice);
-    });
+        // Set a timer to update the countdown every second
+        const countdownInterval = setInterval(() => {
+            secondsRemaining--;
 
-    function calculateTotalPrice() {
-        // Obtenir la période sélectionnée
-        const periode = parseFloat(document.getElementById('periode_activite').value) || 0;
+            // Update the existing notification's message
+            notifyElement.update('message', `Temps restant : ${secondsRemaining} secondes...`);
 
-        // Obtenir les inputs pour afficher le total des activités
-        const totalInput = document.getElementById('total');
-        const totalActivitesInput = document.getElementById('total_activites');
-        const resteInput = document.getElementById('reste');
-        const resteActivitesInput = document.getElementById('reste_activites');
-
-        // Obtenir toutes les activités sélectionnées
-        const selectedActivites = document.querySelectorAll('.activite-checkbox:checked');
-
-        // Réinitialiser le totalPrice à 0
-        let totalPrice = 0;
-
-        // Boucler à travers les activités sélectionnées et additionner les prix
-        selectedActivites.forEach(function(activite) {
-            const activitePrice = parseFloat(activite.getAttribute('data-price')) || 0;
-            if (!isNaN(activitePrice)) {
-                totalPrice += activitePrice * periode; // Multiplier le prix de l'activité par la période
+            if (secondsRemaining === 0) {
+                clearInterval(countdownInterval); // Stop the countdown when it reaches 0
             }
-        });
+        }, 1000); // Update every second
 
-        // Mettre à jour les inputs avec le nouveau total
-        totalActivitesInput.value = totalPrice.toFixed(2);
-        resteActivitesInput.value = totalPrice.toFixed(2);
+        // Set a timeout for 5 seconds to check the badge value
+        setTimeout(function() {
+            // Make an AJAX request to check if there's a value for the badge in the database
+            fetch('read_card_app.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data && data.data.valeur) {
+                        // If a badge value is found, display it in the input field
+                        badgeInput.value = data.data.valeur;
 
-        // Debug logs (facultatif, pour vérifier la console)
-        console.log("Total price for activities:", totalPrice.toFixed(2));
+                        // Update the existing notification with a success message
+                        notifyElement.update({
+                            'type': 'success',
+                            'title': "<h3>Badge trouvé</h3>",
+                            'message': `Le badge a été correctement détecté.`
+                        });
+
+                        // Call the clear_envoi_app.php to clear the table
+                        fetch('clear_envoi_app.php')
+                            .then(clearResponse => clearResponse.json())
+                            .then(clearData => {
+                                if (clearData.success) {
+                                    console.log("Table vidée avec succès.");
+                                } else {
+                                    console.error("Échec du vidage de la table.");
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Erreur lors du vidage de la table :", error);
+                            });
+
+                    } else {
+                        // Handle if the badge is already assigned or not detected
+                        if (data.message === "Le badge est déjà affecté à un utilisateur.") {
+                            // Badge is already assigned to a user
+                            notifyElement.update({
+                                'type': 'danger',
+                                'title': "<h3>Erreur</h3>",
+                                'message': "Le badge est déjà affecté à un utilisateur."
+                            });
+                        } else {
+                            // If no badge value is found, update the notification to prompt the user
+                            notifyElement.update({
+                                'type': 'danger',
+                                'title': "<h3>Aucun badge détecté</h3>",
+                                'message': "Veuillez réessayer."
+                            });
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur :', error);
+                    // Update the existing notification with an error message
+                    notifyElement.update({
+                        'type': 'danger',
+                        'title': "<h3>Erreur</h3>",
+                        'message': "Une erreur est survenue. Veuillez réessayer."
+                    });
+                });
+        }, 5000); // 5 seconds timer
     }
 </script>
 
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Initialize the event listeners for checkboxes and dropdowns
+        const activityCheckboxes = document.querySelectorAll('.activite-checkbox');
+        const periodSelects = document.querySelectorAll('.period-select');
+
+        // Attach the 'change' event listener for each activity checkbox
+        activityCheckboxes.forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                togglePeriodSelect(checkbox);
+                calculateTotalPrice(); // Recalculate the total price whenever checkbox state changes
+            });
+        });
+
+        // Attach the 'change' event listener for each period dropdown
+        periodSelects.forEach(function(select) {
+            select.addEventListener('change', calculateTotalPrice);
+        });
+    });
+
+    function togglePeriodSelect(checkbox) {
+        // Find the corresponding period select element
+        const periodSelect = checkbox.closest('.row').querySelector('.period-select');
+
+        // Disable or enable the select based on the checkbox state
+        if (checkbox.checked) {
+            periodSelect.disabled = false; // Enable the select if the checkbox is checked
+        } else {
+            periodSelect.disabled = true; // Disable the select if the checkbox is unchecked
+            periodSelect.selectedIndex = 0; // Optionally reset the select to the first option
+        }
+    }
+
+    function calculateTotalPrice() {
+        // Get the inputs for displaying the total price
+        const totalActivitesInput = document.getElementById('total_activites');
+        const resteActivitesInput = document.getElementById('reste_activites');
+
+        // Get all the activity checkboxes
+        const selectedActivites = document.querySelectorAll('.activite-checkbox:checked');
+
+        // Initialize totalPrice to 0
+        let totalPrice = 0;
+
+        // Loop through each selected activity
+        selectedActivites.forEach(function(activite) {
+            const activitePrice = parseFloat(activite.getAttribute('data-price')) || 0;
+
+            // Get the period select for the current activity
+            const periodSelect = activite.closest('.row').querySelector('.period-select');
+            const periode = parseFloat(periodSelect.value) || 0;
+
+            // Calculate the total price for this activity
+            if (!isNaN(activitePrice)) {
+                totalPrice += activitePrice * periode; // Multiply the activity price by the selected period
+            }
+        });
+
+        // Update the inputs with the new total
+        totalActivitesInput.value = totalPrice.toFixed(2);
+        resteActivitesInput.value = totalPrice.toFixed(2);
+
+    }
+</script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const itemsPerPage = 6;
@@ -974,7 +1152,7 @@ $conn->close();
     }
 
     function calculateReste() {
-        const totalInput = document.getElementById('total');
+        const totalInput = document.getElementById('reste_activites');
         const resteInput = document.getElementById('reste');
         const montantPayeInputs = document.querySelectorAll('.montant_paye');
 

@@ -206,6 +206,7 @@ $user_sql = "UPDATE `users` SET
     `fonction` = ?, 
     `num_urgence` = ?, 
     `employeur` = ?,
+    `password` = ?,
     `id_card`=? 
 WHERE `id` = ?;";
 
@@ -215,7 +216,7 @@ if ($stmt === false) {
 }
 
 // Remplacez les variables par les valeurs appropriées
-$stmt->bind_param("sssssssssi",$matricule, $photo_name, $date_naissance, $genre, $adresse, $fonction, $num_urgence, $employeur, $rmsvalue, $user_id);
+$stmt->bind_param("ssssssssssi",$matricule, $photo_name, $date_naissance, $genre, $adresse, $fonction, $num_urgence, $employeur,$hashed_password, $rmsvalue, $user_id);
 
 if (!$stmt->execute()) {
     throw new Exception("Failed to execute statement: " . $stmt->error);
@@ -322,7 +323,7 @@ $message = '<table role="presentation" border="0" cellpadding="0" cellspacing="0
                 <img src="http://51.77.194.236:434/privilage/assets/img/capitalsoft/logo_light.png" alt="Logo Privilège" style="width: 100px; margin-bottom: 20px;">
                 <p>Bonjour,</p>
                 <p>Nous sommes ravis de vous accueillir au Club Privilège !</p>
-                <p>Voici vos identifiants pour vous connecter à notre application mobile :</p>
+                <p><strong>Votre Matricule : '.$matricule.' </strong></p>
                 <p><strong>Votre mot de passe : '.$passwordGENERATED.' </strong></p>
                 <p>Vous pouvez le changer après votre première connexion.</p>
                 <p>Merci de faire partie de la communauté du Club Privilège. Restez à l`écoute pour plus de mises à jour.</p>

@@ -47,12 +47,12 @@ $(".tab-wizard").steps({
       }
 
       // Validate the Email field
-      if (!$("#email").val().trim()) {
-        $("#email").addClass("is-invalid");
-        valid = false;
-      } else {
-        $("#email").removeClass("is-invalid");
-      }
+      // if (!$("#email").val().trim()) {
+      //   $("#email").addClass("is-invalid");
+      //   valid = false;
+      // } else {
+      //   $("#email").removeClass("is-invalid");
+      // }
 
       // Validate the Phone field
       if (!$("#phone").val().trim()) {

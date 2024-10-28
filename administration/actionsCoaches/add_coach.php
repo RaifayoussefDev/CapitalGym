@@ -1,5 +1,5 @@
 <?php
-require "../inc/conn_db.php";
+require "../../inc/conn_db.php";
 
 // Function to generate a secure random password
 function generateRandomPassword($length = 8) {
