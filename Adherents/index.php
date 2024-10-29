@@ -465,13 +465,15 @@ $conn->close();
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label>Total :</label>
-                                                        <input type="text" name="total" id="total" class="form-control" readonly />
+                                                        <input type="text" name="total" id="total" class="form-control"
+                                                            <?php if ($profil != 1) echo 'readonly'; ?> />
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label>Reste :</label>
-                                                        <input type="text" name="reste" id="reste" class="form-control" readonly />
+                                                        <input type="text" name="reste" id="reste" class="form-control"
+                                                            <?php if ($profil != 1) echo 'readonly'; ?> />
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4 d-flex align-items-end">
@@ -562,6 +564,21 @@ $conn->close();
                                                                     <option value="CDG Capital">CDG Capital</option>
                                                                     <option value="Dar Assafaa">Dar Assafaa</option>
                                                                     <option value="Umnia Bank">Umnia Bank</option>
+                                                                    <option value="Banque Atlantique">Banque Atlantique</option>
+                                                                    <option value="Wafa Assurance">Wafa Assurance</option>
+                                                                    <option value="Société Marocaine de Crédit Bailleurs">Société Marocaine de Crédit Bailleurs</option>
+                                                                    <option value="Société Générale Maroc">Société Générale Maroc</option>
+                                                                    <option value="RMA Watanya">RMA Watanya</option>
+                                                                    <option value="Tanger Med Bank">Tanger Med Bank</option>
+                                                                    <option value="Banque de l'Habitat">Banque de l'Habitat</option>
+                                                                    <option value="Maghreb Arab Bank">Maghreb Arab Bank</option>
+                                                                    <option value="Banque Marocaine pour le Commerce et l'Industrie">Banque Marocaine pour le Commerce et l'Industrie</option>
+                                                                    <option value="Crédit du Maroc">Crédit du Maroc</option>
+                                                                    <option value="Banque de Développement du Maroc">Banque de Développement du Maroc</option>
+                                                                    <option value="MAMDA - MCMA">MAMDA - MCMA</option>
+                                                                    <option value="Société de Crédit à la Consommation">Société de Crédit à la Consommation</option>
+                                                                    <option value="Wafa Bank">Wafa Bank</option>
+                                                                    <option value="CFG Bank">CFG Bank</option>
                                                                 </select>
                                                             </div>
                                                         </div>
@@ -608,6 +625,21 @@ $conn->close();
                                                                     <option value="CDG Capital">CDG Capital</option>
                                                                     <option value="Dar Assafaa">Dar Assafaa</option>
                                                                     <option value="Umnia Bank">Umnia Bank</option>
+                                                                    <option value="Banque Atlantique">Banque Atlantique</option>
+                                                                    <option value="Wafa Assurance">Wafa Assurance</option>
+                                                                    <option value="Société Marocaine de Crédit Bailleurs">Société Marocaine de Crédit Bailleurs</option>
+                                                                    <option value="Société Générale Maroc">Société Générale Maroc</option>
+                                                                    <option value="RMA Watanya">RMA Watanya</option>
+                                                                    <option value="Tanger Med Bank">Tanger Med Bank</option>
+                                                                    <option value="Banque de l'Habitat">Banque de l'Habitat</option>
+                                                                    <option value="Maghreb Arab Bank">Maghreb Arab Bank</option>
+                                                                    <option value="Banque Marocaine pour le Commerce et l'Industrie">Banque Marocaine pour le Commerce et l'Industrie</option>
+                                                                    <option value="Crédit du Maroc">Crédit du Maroc</option>
+                                                                    <option value="Banque de Développement du Maroc">Banque de Développement du Maroc</option>
+                                                                    <option value="MAMDA - MCMA">MAMDA - MCMA</option>
+                                                                    <option value="Société de Crédit à la Consommation">Société de Crédit à la Consommation</option>
+                                                                    <option value="Wafa Bank">Wafa Bank</option>
+                                                                    <option value="CFG Bank">CFG Bank</option>
                                                                 </select>
                                                             </div>
                                                         </div>
@@ -683,8 +715,7 @@ $conn->close();
                                                     </div>
                                                     <div class="col-md-3">
                                                         <div class="form-group">
-                                                            <label>Email <span class="text-danger">*</span></label>
-                                                            <input type="email" class="form-control" id="email" name="email" placeholder="Email" required />
+                                                            <input type="email" class="form-control" id="email" name="email" placeholder="Email"/>
                                                             <small class="text-danger" id="email-error" style="display:none;">Ce champ est obligatoire</small>
                                                         </div>
                                                     </div>
@@ -871,19 +902,20 @@ $conn->close();
                                                 <a href="consultprocep.php?id_user=<?php echo htmlspecialchars($proceP['id']); ?>" class="btn btn-info btn-consult">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-
-                                                <!-- Edit Button (Conditional) -->
-                                                <?php if ($profil == 4): ?>
-                                                <?php elseif ($profil == 1 || $profil == 5): ?>
+                                                <!-- Edit and Delete Buttons (Conditional) -->
+                                                <?php if ($profil == 1 || $profil == 5): ?>
+                                                    <!-- Edit Button -->
                                                     <a href="modif_procp.php?id_user=<?php echo htmlspecialchars($proceP['id']); ?>" class="btn btn-warning btn-modify">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
+                                                    <?php if ($profil == 1): ?>
+                                                        <!-- Delete Button -->
+                                                        <a href="delete_procp.php?id_user=<?php echo htmlspecialchars($proceP['id']); ?>" class="btn btn-danger btn-delete" onclick="return confirm('Are you sure you want to delete this record?');">
+                                                            <i class="fas fa-trash"></i>
+                                                        </a>
+                                                    <?php endif; ?>
                                                 <?php endif; ?>
 
-                                                <!-- Delete Button -->
-                                                <a href="delete_procp.php?id_user=<?php echo htmlspecialchars($proceP['id']); ?>" class="btn btn-danger btn-delete" onclick="return confirm('Are you sure you want to delete this record?');">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>

@@ -569,15 +569,22 @@ $conn->close();
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Total :</label>
-                                            <input type="text" name="total" id="total" value="<?php echo $user['total']; ?>" class="form-control" readonly />
+                                            <input type="text" name="total" id="total"
+                                                value="<?php echo htmlspecialchars($user['total']); ?>"
+                                                class="form-control"
+                                                <?php if ($profil != 1) echo 'readonly'; ?> />
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Reste :</label>
-                                            <input type="text" name="reste" id="reste" value="<?php echo $user['reste']; ?>" class="form-control" readonly />
+                                            <input type="text" name="reste" id="reste"
+                                                value="<?php echo htmlspecialchars($user['reste']); ?>"
+                                                class="form-control"
+                                                <?php if ($profil != 1) echo 'readonly'; ?> />
                                         </div>
                                     </div>
+
                                     <div class="col-md-4 d-flex align-items-end">
                                         <div class="form-group">
                                             <button type="button" class="btn btn-secondary" id="add_mode_payement">Ajouter un mode de paiement</button>
@@ -701,8 +708,8 @@ $conn->close();
                                             </div>
                                         </div>
                                     </div>
-                                    <h2 class="label_cheque d-none">Chèque</h2>
                                     <div class="section_cheque d-none">
+                                        <h2 class="label_cheque d-none">Chèque</h2>
                                         <hr>
                                         <div class="row">
                                             <div class="col-md-6">
@@ -748,6 +755,82 @@ $conn->close();
                                                         <option value="CDG Capital">CDG Capital</option>
                                                         <option value="Dar Assafaa">Dar Assafaa</option>
                                                         <option value="Umnia Bank">Umnia Bank</option>
+                                                        <option value="Banque Atlantique">Banque Atlantique</option>
+                                                        <option value="Wafa Assurance">Wafa Assurance</option>
+                                                        <option value="Société Marocaine de Crédit Bailleurs">Société Marocaine de Crédit Bailleurs</option>
+                                                        <option value="Société Générale Maroc">Société Générale Maroc</option>
+                                                        <option value="RMA Watanya">RMA Watanya</option>
+                                                        <option value="Tanger Med Bank">Tanger Med Bank</option>
+                                                        <option value="Banque de l'Habitat">Banque de l'Habitat</option>
+                                                        <option value="Maghreb Arab Bank">Maghreb Arab Bank</option>
+                                                        <option value="Banque Marocaine pour le Commerce et l'Industrie">Banque Marocaine pour le Commerce et l'Industrie</option>
+                                                        <option value="Crédit du Maroc">Crédit du Maroc</option>
+                                                        <option value="Banque de Développement du Maroc">Banque de Développement du Maroc</option>
+                                                        <option value="MAMDA - MCMA">MAMDA - MCMA</option>
+                                                        <option value="Société de Crédit à la Consommation">Société de Crédit à la Consommation</option>
+                                                        <option value="Wafa Bank">Wafa Bank</option>
+                                                        <option value="CFG Bank">CFG Bank</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="section_virement d-none">
+                                        <h2 class="label_virement">Virement</h2>
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="nomEmetteur">Nom de l'émetteur :</label>
+                                                    <input type="text" name="nomEmetteur[]" class="form-control" placeholder="Entrez le nom de l'émetteur du virement" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="dateImitation">Date d'imitation :</label>
+                                                    <input type="date" name="dateImitation[]" class="form-control" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="reference">Référence :</label>
+                                                    <input type="text" name="reference[]" class="form-control" placeholder="Entrez la référence du virement" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="banqueEmettrice">Banque émettrice :</label>
+                                                    <select name="banqueEmettrice[]" class="form-control">
+                                                        <option value="" disabled selected>Choisissez une banque</option>
+                                                        <option value="Attijariwafa Bank">Attijariwafa Bank</option>
+                                                        <option value="Banque Populaire">Banque Populaire</option>
+                                                        <option value="BMCE Bank">BMCE Bank</option>
+                                                        <option value="Banque Centrale Populaire">Banque Centrale Populaire</option>
+                                                        <option value="Crédit Agricole du Maroc">Crédit Agricole du Maroc</option>
+                                                        <option value="Crédit du Maroc">Crédit du Maroc</option>
+                                                        <option value="CIH Bank">CIH Bank</option>
+                                                        <option value="Société Générale">Société Générale</option>
+                                                        <option value="Bank of Africa">Bank of Africa</option>
+                                                        <option value="BMCI">BMCI</option>
+                                                        <option value="Al Barid Bank">Al Barid Bank</option>
+                                                        <option value="CDG Capital">CDG Capital</option>
+                                                        <option value="Dar Assafaa">Dar Assafaa</option>
+                                                        <option value="Umnia Bank">Umnia Bank</option>
+                                                        <option value="Banque Atlantique">Banque Atlantique</option>
+                                                        <option value="Wafa Assurance">Wafa Assurance</option>
+                                                        <option value="Société Marocaine de Crédit Bailleurs">Société Marocaine de Crédit Bailleurs</option>
+                                                        <option value="Société Générale Maroc">Société Générale Maroc</option>
+                                                        <option value="RMA Watanya">RMA Watanya</option>
+                                                        <option value="Tanger Med Bank">Tanger Med Bank</option>
+                                                        <option value="Banque de l'Habitat">Banque de l'Habitat</option>
+                                                        <option value="Maghreb Arab Bank">Maghreb Arab Bank</option>
+                                                        <option value="Banque Marocaine pour le Commerce et l'Industrie">Banque Marocaine pour le Commerce et l'Industrie</option>
+                                                        <option value="Crédit du Maroc">Crédit du Maroc</option>
+                                                        <option value="Banque de Développement du Maroc">Banque de Développement du Maroc</option>
+                                                        <option value="MAMDA - MCMA">MAMDA - MCMA</option>
+                                                        <option value="Société de Crédit à la Consommation">Société de Crédit à la Consommation</option>
+                                                        <option value="Wafa Bank">Wafa Bank</option>
+                                                        <option value="CFG Bank">CFG Bank</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -1157,6 +1240,18 @@ $conn->close();
         }
     }
 
+    function toggleVirementSection(typePaiementSelect, sectionVirement, labelCheque) {
+        if (!typePaiementSelect || !sectionVirement || !labelCheque) return;
+
+        if (typePaiementSelect.value === "4") { // Assuming "3" is the value for cheque payment
+            sectionVirement.classList.remove("d-none");
+            labelCheque.classList.remove("d-none");
+        } else {
+            sectionCheque.classList.add("d-none");
+            sectionVirement.classList.add("d-none");
+        }
+    }
+
     function calculateReste() {
         const totalInput = document.getElementById('reste_activites');
         const resteInput = document.getElementById('reste');
@@ -1365,6 +1460,7 @@ if ($profil == 4) {; ?>
             const typePaiementSelect = newPaymentMode.querySelector('.type_paiement');
             const montantPayeInput = newPaymentMode.querySelector('.montant_paye');
             const sectionCheque = newPaymentMode.querySelector('.section_cheque');
+            const sectionVirement = newPaymentMode.querySelector('.section_virement');
             const labelCheque = newPaymentMode.querySelector('.label_cheque');
 
             montantPayeInput.addEventListener('input', function() {
@@ -1379,10 +1475,14 @@ if ($profil == 4) {; ?>
             typePaiementSelect.addEventListener('change', function() {
                 toggleChequeSection(typePaiementSelect, sectionCheque, labelCheque);
             });
+            typePaiementSelect.addEventListener('change', function() {
+                toggleVirementSection(typePaiementSelect, sectionVirement, labelCheque);
+            });
 
             paymentModesContainer.appendChild(newPaymentMode);
 
             paymentModeIndex++;
+
             calculateReste();
         }
 
@@ -1422,7 +1522,7 @@ if ($profil == 4) {; ?>
 <script>
     function displayPhoto(input) {
         const preview = document.getElementById('preview');
-        
+
         // Reset the src and hide it first to prevent double loading
         preview.src = '';
         preview.style.display = 'none';
@@ -1430,7 +1530,7 @@ if ($profil == 4) {; ?>
         // If a new file is selected, update the preview
         if (input.files && input.files[0]) {
             const reader = new FileReader();
-            reader.onload = function (e) {
+            reader.onload = function(e) {
                 preview.src = e.target.result;
                 preview.style.display = 'block';
             };
@@ -1439,7 +1539,7 @@ if ($profil == 4) {; ?>
     }
 
     // Hide the image preview if there's no photo initially
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         const preview = document.getElementById('preview');
         if (preview.src === '#') {
             preview.style.display = 'none';
