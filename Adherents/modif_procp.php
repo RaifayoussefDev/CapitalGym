@@ -488,8 +488,8 @@ $conn->close();
                                             </div>
                                         </div>
                                     </div>
-                                    <h2 class="label_cheque d-none">Chèque</h2>
                                     <div class="section_cheque d-none">
+                                        <h2 class="label_cheque d-none">Chèque</h2>
                                         <hr>
                                         <div class="row">
                                             <div class="col-md-6">
@@ -514,6 +514,52 @@ $conn->close();
                                                 <div class="form-group">
                                                     <label for="numeroCompte">Numéro de compte :</label>
                                                     <input type="text" name="numeroCompte[]" class="form-control" value="19 29 989898989898988998989898" placeholder="Entrez le numéro de compte" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="banqueEmettrice">Banque émettrice :</label>
+                                                    <select name="banqueEmettrice[]" class="form-control">
+                                                        <option value="" disabled selected>Choisissez une banque</option>
+                                                        <option value="Attijariwafa Bank">Attijariwafa Bank</option>
+                                                        <option value="Banque Populaire">Banque Populaire</option>
+                                                        <option value="BMCE Bank">BMCE Bank</option>
+                                                        <option value="Banque Centrale Populaire">Banque Centrale Populaire</option>
+                                                        <option value="Crédit Agricole du Maroc">Crédit Agricole du Maroc</option>
+                                                        <option value="Crédit du Maroc">Crédit du Maroc</option>
+                                                        <option value="CIH Bank">CIH Bank</option>
+                                                        <option value="Société Générale">Société Générale</option>
+                                                        <option value="Bank of Africa">Bank of Africa</option>
+                                                        <option value="BMCI">BMCI</option>
+                                                        <option value="Al Barid Bank">Al Barid Bank</option>
+                                                        <option value="CDG Capital">CDG Capital</option>
+                                                        <option value="Dar Assafaa">Dar Assafaa</option>
+                                                        <option value="Umnia Bank">Umnia Bank</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="section_virement d-none">
+                                        <h2 class="label_virement">Virement</h2>
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="nomEmetteur">Nom de l'émetteur :</label>
+                                                    <input type="text" name="nomEmetteur[]" class="form-control" placeholder="Entrez le nom de l'émetteur du virement" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="dateImitation">Date d'imitation :</label>
+                                                    <input type="date" name="dateImitation[]" class="form-control" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="reference">Référence :</label>
+                                                    <input type="text" name="reference[]" class="form-control" placeholder="Entrez la référence du virement" />
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
@@ -806,6 +852,18 @@ $conn->close();
         }
     }
 
+    function toggleVirementSection(typePaiementSelect, sectionVirement, labelCheque) {
+        if (!typePaiementSelect || !sectionVirement || !labelCheque) return;
+
+        if (typePaiementSelect.value === "4") { // Assuming "3" is the value for cheque payment
+            sectionVirement.classList.remove("d-none");
+            labelCheque.classList.remove("d-none");
+        } else {
+            sectionCheque.classList.add("d-none");
+            sectionVirement.classList.add("d-none");
+        }
+    }
+
     function calculateReste() {
         const totalInput = document.getElementById('total');
         const resteInput = document.getElementById('reste');
@@ -1014,6 +1072,7 @@ if ($profil == 4) {; ?>
             const typePaiementSelect = newPaymentMode.querySelector('.type_paiement');
             const montantPayeInput = newPaymentMode.querySelector('.montant_paye');
             const sectionCheque = newPaymentMode.querySelector('.section_cheque');
+            const sectionVirement = newPaymentMode.querySelector('.section_virement');
             const labelCheque = newPaymentMode.querySelector('.label_cheque');
 
             montantPayeInput.addEventListener('input', function() {
@@ -1027,6 +1086,9 @@ if ($profil == 4) {; ?>
 
             typePaiementSelect.addEventListener('change', function() {
                 toggleChequeSection(typePaiementSelect, sectionCheque, labelCheque);
+            });
+            typePaiementSelect.addEventListener('change', function() {
+                toggleVirementSection(typePaiementSelect, sectionVirement, labelCheque);
             });
 
             paymentModesContainer.appendChild(newPaymentMode);
