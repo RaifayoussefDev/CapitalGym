@@ -1,5 +1,5 @@
 <?php
-require "../inc/conn_db.php";
+require "../../inc/conn_db.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = $conn->real_escape_string($_POST['name']);

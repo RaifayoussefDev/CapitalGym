@@ -3,7 +3,7 @@ require "../inc/app.php";
 require "../inc/conn_db.php";
 
 // Fetch locations
-$locations_sql = "SELECT id, name, nomber_place FROM locations WHERE 1";
+$locations_sql = "SELECT id, name, nomber_place FROM locations ";
 $locations_result = $conn->query($locations_sql);
 
 $locations = [];

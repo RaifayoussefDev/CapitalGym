@@ -1,5 +1,5 @@
 <?php
-require "../inc/conn_db.php";
+require "../../inc/conn_db.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $id = (int)$_POST['id']; // Convert to integer
