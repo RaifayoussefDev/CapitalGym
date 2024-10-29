@@ -2,9 +2,9 @@
 require "../inc/conn_db.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $id = $conn->real_escape_string($_POST['id']);
+    $id = (int)$_POST['id']; // Convert to integer
 
-    $sql = "DELETE FROM locations WHERE id='$id'";
+    $sql = "DELETE FROM locations WHERE id = $id";
 
     if ($conn->query($sql) === TRUE) {
         header("Location: ../local.php?msg=success");

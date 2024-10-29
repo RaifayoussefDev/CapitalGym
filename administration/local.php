@@ -3,7 +3,7 @@ require "../inc/app.php";
 require "../inc/conn_db.php";
 
 // Fetch locations
-$locations_sql = "SELECT id, name FROM locations";
+$locations_sql = "SELECT id, name, nomber_place FROM locations WHERE 1";
 $locations_result = $conn->query($locations_sql);
 
 $locations = [];
@@ -101,6 +101,7 @@ $conn->close();
                             <thead>
                                 <tr>
                                     <th>Nom</th>
+                                    <th>Nombre de places</th> <!-- New column for number of places -->
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -108,9 +109,10 @@ $conn->close();
                                 <?php if (count($locations) > 0) : ?>
                                     <?php foreach ($locations as $location) : ?>
                                         <tr>
-                                            <td  style="width: 80%;"><?php echo htmlspecialchars($location['name']); ?></td>
+                                            <td style="width: 40%;"><?php echo htmlspecialchars($location['name']); ?></td>
+                                            <td style="width: 40%;"><?php echo htmlspecialchars($location['nomber_place']); ?></td> <!-- Display number of places -->
                                             <td>
-                                                <button class="btn btn-warning btn-edit" data-id="<?php echo $location['id']; ?>" data-name="<?php echo htmlspecialchars($location['name']); ?>" data-bs-toggle="modal" data-bs-target="#editLocationModal">
+                                                <button class="btn btn-warning btn-edit" data-id="<?php echo $location['id']; ?>" data-name="<?php echo htmlspecialchars($location['name']); ?>" data-nomber-place="<?php echo htmlspecialchars($location['nomber_place']); ?>" data-bs-toggle="modal" data-bs-target="#editLocationModal">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
                                                 <button class="btn btn-danger btn-delete" data-id="<?php echo $location['id']; ?>" data-bs-toggle="modal" data-bs-target="#deleteLocationModal">
@@ -121,7 +123,7 @@ $conn->close();
                                     <?php endforeach; ?>
                                 <?php else : ?>
                                     <tr>
-                                        <td colspan="2">Aucune location disponible</td>
+                                        <td colspan="3">Aucune location disponible</td> <!-- Updated colspan -->
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
@@ -145,6 +147,10 @@ $conn->close();
                         <div class="form-group">
                             <label for="locationName">Nom de la location</label>
                             <input type="text" class="form-control" id="locationName" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="numberPlaces">Nombre de places</label>
+                            <input type="number" class="form-control" id="numberPlaces" name="nomber_place" required> <!-- New field for number of places -->
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -170,6 +176,10 @@ $conn->close();
                         <div class="form-group">
                             <label for="editLocationName">Nom de la location</label>
                             <input type="text" class="form-control" id="editLocationName" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editNumberPlaces">Nombre de places</label>
+                            <input type="number" class="form-control" id="editNumberPlaces" name="nomber_place" required> <!-- New field for number of places -->
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -204,36 +214,20 @@ $conn->close();
     </div>
 </div>
 
-
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const editLocationModal = document.getElementById('editLocationModal');
-        const deleteLocationModal = document.getElementById('deleteLocationModal');
+    $(document).on('click', '.btn-edit', function() {
+        var id = $(this).data('id');
+        var name = $(this).data('name');
+        var nomberPlace = $(this).data('nomber-place');
 
-        editLocationModal.addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget;
-            const id = button.getAttribute('data-id');
-            const name = button.getAttribute('data-name');
+        $('#editLocationId').val(id);
+        $('#editLocationName').val(name);
+        $('#editNumberPlaces').val(nomberPlace);
+    });
 
-            const modalTitle = editLocationModal.querySelector('.modal-title');
-            const editLocationId = editLocationModal.querySelector('#editLocationId');
-            const editLocationName = editLocationModal.querySelector('#editLocationName');
-
-            modalTitle.textContent = `Modifier Location: ${name}`;
-            editLocationId.value = id;
-            editLocationName.value = name;
-        });
-
-        deleteLocationModal.addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget;
-            const id = button.getAttribute('data-id');
-
-            const deleteLocationId = deleteLocationModal.querySelector('#deleteLocationId');
-            deleteLocationId.value = id;
-        });
+    $(document).on('click', '.btn-delete', function() {
+        var id = $(this).data('id');
+        $('#deleteLocationId').val(id);
     });
 </script>
-
-<?php
-require "../inc/footer.php";
-?>
+<?php require("../inc/footer.php");?>
