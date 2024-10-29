@@ -101,7 +101,7 @@ if ($resultc->num_rows > 0) {
 }
 
 
-$sqla = "SELECT * FROM `activites`";
+$sqla = "SELECT * FROM `activites` where type not like ''";
 $resulta = $conn->query($sqla);
 if ($resulta->num_rows > 0) {
     while ($rowa = $resulta->fetch_assoc()) {

@@ -111,18 +111,18 @@ $(".tab-wizard").steps({
       // Get values of total and reste
       const total = parseFloat(document.getElementById("total").value) || 0;
       const reste = parseFloat(document.getElementById("reste").value) || 0;
+      valid = true;
+      // console.log(total);
+      // console.log(reste);
 
-      console.log(total);
-      console.log(reste);
-
-      // Check if reste is at least 25% of total
-      // Check if reste is at most 25% of total
-      if (reste == 0) {
-        valid = true; // Validation passes
-      } else {
-        valid = false; // Validation fails
-        alert("Le montant payé est incomplet ."); // Alert message for user
-      }
+      // // Check if reste is at least 25% of total
+      // // Check if reste is at most 25% of total
+      // if (reste == 0) {
+      //   valid = true; // Validation passes
+      // } else {
+      //   valid = false; // Validation fails
+      //   alert("Le montant payé est incomplet ."); // Alert message for user
+      // }
     }
 
     return valid;
@@ -273,18 +273,18 @@ $(".tab-wizardProce").steps({
       // Get values of total and reste
       const total = parseFloat(document.getElementById("total").value) || 0;
       const reste = parseFloat(document.getElementById("reste").value) || 0;
+      valid = true;
+      // console.log(total);
+      // console.log(reste);
 
-      console.log(total);
-      console.log(reste);
-
-      // Check if reste is at least 25% of total
-      // Check if reste is at most 25% of total
-      if (reste == 0) {
-        valid = true; // Validation passes
-      } else {
-        valid = false; // Validation fails
-        alert("Le montant payé est incomplet ."); // Alert message for user
-      }
+      // // Check if reste is at least 25% of total
+      // // Check if reste is at most 25% of total
+      // if (reste == 0) {
+      //   valid = true; // Validation passes
+      // } else {
+      //   valid = false; // Validation fails
+      //   alert("Le montant payé est incomplet ."); // Alert message for user
+      // }
     }
 
     return valid;

@@ -10,7 +10,10 @@
     </p>
   </div>
 </footer>
+<?php
+$profil=$_POST['profil'];
 
+;?>
 
 </div>
 
