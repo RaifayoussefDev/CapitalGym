@@ -515,8 +515,8 @@ $conn->close();
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <h2 class="label_cheque d-none">Chèque</h2>
                                                 <div class="section_cheque d-none">
+                                                    <h2 class="label_cheque d-none">Chèque</h2>
                                                     <hr>
                                                     <div class="row">
                                                         <div class="col-md-6">
@@ -567,6 +567,53 @@ $conn->close();
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <div class="section_virement d-none">
+                                                    <h2 class="label_virement">Virement</h2>
+                                                    <hr>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="nomEmetteur">Nom de l'émetteur :</label>
+                                                                <input type="text" name="nomEmetteur[]" class="form-control" placeholder="Entrez le nom de l'émetteur du virement" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="dateImitation">Date d'imitation :</label>
+                                                                <input type="date" name="dateImitation[]" class="form-control" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="reference">Référence :</label>
+                                                                <input type="text" name="reference[]" class="form-control" placeholder="Entrez la référence du virement" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="banqueEmettrice">Banque émettrice :</label>
+                                                                <select name="banqueEmettrice[]" class="form-control">
+                                                                    <option value="" disabled selected>Choisissez une banque</option>
+                                                                    <option value="Attijariwafa Bank">Attijariwafa Bank</option>
+                                                                    <option value="Banque Populaire">Banque Populaire</option>
+                                                                    <option value="BMCE Bank">BMCE Bank</option>
+                                                                    <option value="Banque Centrale Populaire">Banque Centrale Populaire</option>
+                                                                    <option value="Crédit Agricole du Maroc">Crédit Agricole du Maroc</option>
+                                                                    <option value="Crédit du Maroc">Crédit du Maroc</option>
+                                                                    <option value="CIH Bank">CIH Bank</option>
+                                                                    <option value="Société Générale">Société Générale</option>
+                                                                    <option value="Bank of Africa">Bank of Africa</option>
+                                                                    <option value="BMCI">BMCI</option>
+                                                                    <option value="Al Barid Bank">Al Barid Bank</option>
+                                                                    <option value="CDG Capital">CDG Capital</option>
+                                                                    <option value="Dar Assafaa">Dar Assafaa</option>
+                                                                    <option value="Umnia Bank">Umnia Bank</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
                                             </div>
                                         </template>
                                     </form>
@@ -755,7 +802,7 @@ $conn->close();
                                                 </a>
                                                 <?php if ($profil == 4): ?>
                                                 <?php elseif ($profil == 1 || $profil == 5): ?>
-                                                    <a href="modif.php?id_user=<?php echo htmlspecialchars($user['id']); ?>" class="btn btn-warning btn-modify">
+                                                    <a href="../services/renouvelement.php?id_user=<?php echo htmlspecialchars($user['id']); ?>" class="btn btn-warning btn-modify">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
                                                 <?php else: ?>
@@ -777,7 +824,7 @@ $conn->close();
 
             </div>
         </div>
-        <div class="col-sm-12 col-md-8">
+        <div class="col-sm-12 col-md-9">
             <div class="card card-stats card-round">
                 <div class="card-header">
                     <div class="d-flex align-items-center">
@@ -820,17 +867,23 @@ $conn->close();
                                                 <?php echo htmlspecialchars($proceP['saisie_par_nom']); ?> <?php echo htmlspecialchars($proceP['saisie_par_prenom']); ?> <!-- Affiche le nom et prénom de la personne qui a saisi -->
                                             </td>
                                             <td>
+                                                <!-- View Button -->
                                                 <a href="consultprocep.php?id_user=<?php echo htmlspecialchars($proceP['id']); ?>" class="btn btn-info btn-consult">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
+
+                                                <!-- Edit Button (Conditional) -->
                                                 <?php if ($profil == 4): ?>
                                                 <?php elseif ($profil == 1 || $profil == 5): ?>
                                                     <a href="modif_procp.php?id_user=<?php echo htmlspecialchars($proceP['id']); ?>" class="btn btn-warning btn-modify">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
-                                                <?php else: ?>
-
                                                 <?php endif; ?>
+
+                                                <!-- Delete Button -->
+                                                <a href="delete_procp.php?id_user=<?php echo htmlspecialchars($proceP['id']); ?>" class="btn btn-danger btn-delete" onclick="return confirm('Are you sure you want to delete this record?');">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -843,7 +896,7 @@ $conn->close();
 
             </div>
         </div>
-        <div class="col-sm-12 col-md-4">
+        <div class="col-sm-12 col-md-3">
             <div class="card card-round">
                 <div class="card-body">
                     <div class="card-head-row card-tools-still-right">
@@ -1192,6 +1245,18 @@ $conn->close();
         }
     }
 
+    function toggleVirementSection(typePaiementSelect, sectionVirement, labelCheque) {
+        if (!typePaiementSelect || !sectionVirement || !labelCheque) return;
+
+        if (typePaiementSelect.value === "4") { // Assuming "3" is the value for cheque payment
+            sectionVirement.classList.remove("d-none");
+            labelCheque.classList.remove("d-none");
+        } else {
+            sectionCheque.classList.add("d-none");
+            sectionVirement.classList.add("d-none");
+        }
+    }
+
     function calculateReste() {
         const totalInput = document.getElementById('total');
         const resteInput = document.getElementById('reste');
@@ -1400,6 +1465,7 @@ if ($profil == 4) {; ?>
             const typePaiementSelect = newPaymentMode.querySelector('.type_paiement');
             const montantPayeInput = newPaymentMode.querySelector('.montant_paye');
             const sectionCheque = newPaymentMode.querySelector('.section_cheque');
+            const sectionVirement = newPaymentMode.querySelector('.section_virement');
             const labelCheque = newPaymentMode.querySelector('.label_cheque');
 
             montantPayeInput.addEventListener('input', function() {
@@ -1413,6 +1479,9 @@ if ($profil == 4) {; ?>
 
             typePaiementSelect.addEventListener('change', function() {
                 toggleChequeSection(typePaiementSelect, sectionCheque, labelCheque);
+            });
+            typePaiementSelect.addEventListener('change', function() {
+                toggleVirementSection(typePaiementSelect, sectionVirement, labelCheque);
             });
 
             paymentModesContainer.appendChild(newPaymentMode);

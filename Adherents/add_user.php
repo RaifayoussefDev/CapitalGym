@@ -17,7 +17,7 @@ function generateRandomPassword($length = 8)
 }
 // Generate a random password
 $passwordGenerated = generateRandomPassword();
-$hashed_password = password_hash($passwordGenerated, PASSWORD_DEFAULT); 
+$hashed_password = password_hash($passwordGenerated, PASSWORD_DEFAULT);
 
 // Function to upload files
 function uploadFile($file, $target_dir, $allowed_types = [])
@@ -163,11 +163,11 @@ if ($result->num_rows > 0) {
     $premiere_lettre = strtoupper(substr($pack_name, 0, 1));
 
     // Calculer le matricule (première lettre + user_id + 1000)
-    
+
 
     $premiere_lettre = ($premiere_lettre == 'F' || $premiere_lettre == 'G') ? 'S' : $premiere_lettre;
     $matricule = $premiere_lettre . ($user_id + 1000);
-    
+
 
 
     // Afficher ou utiliser le matricule
@@ -224,7 +224,7 @@ if ($stmt === false) {
 }
 
 // Remplacez les variables par les valeurs appropriées
-$stmt->bind_param("ssssssssssi", $matricule, $photo_name, $date_naissance, $genre, $adresse, $fonction, $num_urgence, $employeur, $rmsvalue,$hashed_password, $user_id);
+$stmt->bind_param("ssssssssssi", $matricule, $photo_name, $date_naissance, $genre, $adresse, $fonction, $num_urgence, $employeur, $rmsvalue, $hashed_password, $user_id);
 
 if (!$stmt->execute()) {
     throw new Exception("Failed to execute statement: " . $stmt->error);
@@ -311,6 +311,29 @@ foreach ($_POST['type_paiement'] as $index => $type_paiement_id) {
         } else {
             // Handle missing cheque details (e.g., set an error message)
         }
+    } elseif ($type_paiement_id == 4) {
+        // Ensure virement details are set
+        $nomEmetteur = $_POST['nomEmetteur'][$index] ?? null; // Nom de l'émetteur
+        $dateImitation = $_POST['dateImitation'][$index] ?? null; // Date d'imitation
+        $reference = $_POST['reference'][$index] ?? null; // Référence
+        $banqueEmettrice = $_POST['banqueEmettrice'][$index] ?? null; // Banque émettrice
+
+        // Validate virement details
+        if (!empty($nomEmetteur) && !empty($dateImitation) && !empty($reference) && !empty($banqueEmettrice)) {
+            $virement_sql = "INSERT INTO virement (nomEmetteur, dateImitation, reference, banqueEmettrice, id_utilisateur, abonnement_id, payment_id)
+                             VALUES (?, ?, ?, ?, ?, ?, ?)";
+            $stmt = $conn->prepare($virement_sql);
+            if ($stmt) {
+                $stmt->bind_param("sssssii", $nomEmetteur, $dateImitation, $reference, $banqueEmettrice, $user_id, $abonnement_id, $payment_id);
+                $stmt->execute();
+                $stmt->close();
+            } else {
+                // Handle SQL prepare error
+                continue; // Skip this iteration if the statement preparation fails
+            }
+        } else {
+            // Handle missing virement details (e.g., set an error message)
+        }
     }
 }
 $clear_sql = "DELETE FROM envoi_app";
@@ -330,11 +353,11 @@ $message = '<table role="presentation" border="0" cellpadding="0" cellspacing="0
         <tr>
             <td class="wrapper">
                 <img src="http://51.77.194.236:434/privilage/assets/img/capitalsoft/logo_light.png" alt="Logo Privilège" style="width: 100px; margin-bottom: 20px;">
-                <p>Bonjour '.ucfirst($nom) .' '.ucfirst($prenom)  .',</p>
+                <p>Bonjour ' . ucfirst($nom) . ' ' . ucfirst($prenom)  . ',</p>
                 <p>Nous sommes ravis de vous accueillir au Club Privilège !</p>
                 <p>Voici vos identifiants pour vous connecter à notre application mobile :</p>
-                <p><strong>Votre Matricule : '.$matricule.' </strong></p>
-                <p><strong>Votre mot de passe : '.$passwordGenerated.' </strong></p>
+                <p><strong>Votre Matricule : ' . $matricule . ' </strong></p>
+                <p><strong>Votre mot de passe : ' . $passwordGenerated . ' </strong></p>
                 <p>Vous pouvez le changer après votre première connexion.</p>
                 <p>Merci de faire partie de la communauté du Club Privilège. Restez à l`écoute pour plus de mises à jour.</p>
             </td>

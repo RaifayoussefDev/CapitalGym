@@ -1,8 +1,8 @@
 <?php
 ob_start(); // Start output buffering
-
+session_start();
 require "../inc/conn_db.php";
-require "../inc/app.php";
+// require "../inc/app.php";
 
 // Function to upload files
 function uploadFile($file, $target_dir, $allowed_types = [])
@@ -76,9 +76,15 @@ $employeur = $_POST['employeur'];
 $changer_par = $_SESSION['id']; // Assuming user ID is stored in session
 $phone = $_POST['phone'];
 $email = $_POST['email'];
+$nom = $_POST['nom'];
+$prenom= $_POST['prenom'];
+$cin= $_POST['cin'];
 
 // SQL to update user details
 $user_sql = "UPDATE `users` SET 
+    `nom` = ?,
+    `prenom` = ?,
+    `cin` = ?,
     `phone` = ?, 
     `email` = ?, 
     `photo` = ?, 
@@ -101,7 +107,10 @@ $badge_number = $_POST['badge_number'];
 
 // Bind parameters and execute the statement
 $stmt->bind_param(
-    "sssssssisi",
+    "ssssssssssisi",
+    $nom,
+    $prenom,
+    $cin,
     $phone,
     $email,
     $photo_name,
@@ -171,89 +180,67 @@ if (isset($_POST['value']) && is_array($_POST['value'])) {
     }
 }
 
-foreach ($_POST['type_paiement'] as $index => $type_paiement_id) {
-    // Convert string amounts to float
-    $montant_paye = floatval($_POST['montant_paye'][$index]);
-    $reste = floatval($_POST['reste'][$index]);
-    $total = floatval($_POST['total_activites']);
-    $abonnement_id = $_POST['id_abonnement']; // Replace this with logic to dynamically fetch if necessary
+if (isset($_POST['type_paiement'], $_POST['montant_paye'], $_POST['reste'], $_POST['total_activites'], $_POST['id_abonnement'])) {
+    foreach ($_POST['type_paiement'] as $index => $type_paiement_id) {
+        // Convert string amounts to float
+        $montant_paye = isset($_POST['montant_paye'][$index]) ? floatval($_POST['montant_paye'][$index]) : 0;
+        $reste = isset($_POST['reste'][$index]) ? floatval($_POST['reste'][$index]) : 0;
+        $total = floatval($_POST['total_activites']);
+        $abonnement_id = $_POST['id_abonnement'];
+        $user_id = $_POST['user_id'] ?? null; // Ensure $user_id is set
 
+        // Validate inputs
+        if ($montant_paye < 0 || $reste < 0 || $total < 0 || !$user_id) {
+            continue; // Skip this iteration if validation fails
+        }
 
-    // Validate inputs
-    if ($montant_paye < 0 || $reste < 0 || $total < 0) {
-        // Handle the error (for example, set an error message)
-        continue; // Skip this iteration if validation fails
-    }
-
-    // Insert payment details
-    $payment_sql = "INSERT INTO payments (user_id, abonnement_id, montant_paye, type_paiement_id, reste, total)
-                    VALUES (?, ?, ?, ?, ?, ?)";
-    $stmt = $conn->prepare($payment_sql);
-    if ($stmt) {
-        $stmt->bind_param("iidddd", $user_id, $abonnement_id, $montant_paye, $type_paiement_id, $reste, $total);
-        $stmt->execute();
-        $payment_id = $stmt->insert_id; // Get the last inserted payment ID
-        $stmt->close();
-    } else {
-        // Handle SQL prepare error
-        continue; // Skip this iteration if the statement preparation fails
-    }
-
-    // If the payment type is cheque (id 3), insert cheque details
-    if ($type_paiement_id == 3) {
-        // Ensure cheque details are set
-        $nomTitulaire = $_POST['nomTitulaire'][$index] ?? null;
-        $numeroCheque = $_POST['numeroCheque'][$index] ?? null;
-        $dateEmission = $_POST['dateEmission'][$index] ?? null;
-        $banqueEmettrice = $_POST['banqueEmettrice'][$index] ?? null;
-        $numeroCompte = $_POST['numeroCompte'][$index] ?? null;
-
-        // Validate cheque details
-        if (!empty($nomTitulaire) && !empty($numeroCheque) && !empty($dateEmission) && !empty($banqueEmettrice)) {
-            $cheque_sql = "INSERT INTO cheque (nomTitulaire, numeroCheque, dateEmission, banqueEmettrice, numeroCompte, id_utilisateur, abonnement_id, payment_id)
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-            $stmt = $conn->prepare($cheque_sql);
-            if ($stmt) {
-                $stmt->bind_param("sssssiii", $nomTitulaire, $numeroCheque, $dateEmission, $banqueEmettrice, $numeroCompte, $user_id, $abonnement_id, $payment_id);
-                $stmt->execute();
-                $stmt->close();
-            } else {
-                // Handle SQL prepare error
-                continue; // Skip this iteration if the statement preparation fails
-            }
+        // Insert payment details
+        $payment_sql = "INSERT INTO payments (user_id, abonnement_id, montant_paye, type_paiement_id, reste, total)
+                        VALUES (?, ?, ?, ?, ?, ?)";
+        $stmt = $conn->prepare($payment_sql);
+        if ($stmt) {
+            $stmt->bind_param("iidddd", $user_id, $abonnement_id, $montant_paye, $type_paiement_id, $reste, $total);
+            $stmt->execute();
+            $payment_id = $stmt->insert_id; // Get the last inserted payment ID
+            $stmt->close();
         } else {
-            // Handle missing cheque details (e.g., set an error message)
+            continue; // Skip this iteration if the statement preparation fails
+        }
+
+        // If the payment type is cheque (id 3), insert cheque details
+        if ($type_paiement_id == 3) {
+            // Ensure cheque details are set
+            $nomTitulaire = $_POST['nomTitulaire'][$index] ?? null;
+            $numeroCheque = $_POST['numeroCheque'][$index] ?? null;
+            $dateEmission = $_POST['dateEmission'][$index] ?? null;
+            $banqueEmettrice = $_POST['banqueEmettrice'][$index] ?? null;
+            $numeroCompte = $_POST['numeroCompte'][$index] ?? null;
+
+            // Validate cheque details
+            if (!empty($nomTitulaire) && !empty($numeroCheque) && !empty($dateEmission) && !empty($banqueEmettrice)) {
+                $cheque_sql = "INSERT INTO cheque (nomTitulaire, numeroCheque, dateEmission, banqueEmettrice, numeroCompte, id_utilisateur, abonnement_id, payment_id)
+                               VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                $stmt = $conn->prepare($cheque_sql);
+                if ($stmt) {
+                    $stmt->bind_param("sssssiii", $nomTitulaire, $numeroCheque, $dateEmission, $banqueEmettrice, $numeroCompte, $user_id, $abonnement_id, $payment_id);
+                    $stmt->execute();
+                    $stmt->close();
+                } else {
+                    continue; // Skip this iteration if the statement preparation fails
+                }
+            } else {
+                // Handle missing cheque details (e.g., set an error message)
+            }
         }
     }
 }
 
 
+
 // Commit the transaction
 $conn->commit();
 
-// Send confirmation email
-require "../actions/phpmailer/mail.php";
-$to = "raifadev@gmail.com";
-$subject = "Test Email";
-$message = '
-    <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="main">
-        <tr>
-            <td class="wrapper">
-                <img src="http://51.77.194.236:434/privilage/assets/img/capitalsoft/logo_light.png" alt="Logo Privilège" style="width: 100px; margin-bottom: 20px;">
-                <p>Bonjour,</p>
-                <p>Nous sommes ravis de vous accueillir au Club Privilège !</p>
-                <p>Voici vos identifiants pour vous connecter à notre application mobile :</p>
-                <p><strong>Votre mot de passe :  </strong></p>
-                <p>Vous pouvez le changer après votre première connexion.</p>
-                <p>Merci de faire partie de la communauté du Club Privilège. Restez à l`écoute pour plus de mises à jour.</p>
-            </td>
-        </tr>
-    </table>';
-
-if (!sendEmail($to, $subject, $message)) {
-    $conn->rollback(); // Rollback transaction if email fails
-    throw new Exception("Failed to send email.");
-}
+header('location:../adherents/');
 
 // Close connection and end output buffering
 $conn->close();

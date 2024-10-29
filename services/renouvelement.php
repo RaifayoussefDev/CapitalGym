@@ -289,7 +289,7 @@ $conn->close();
                                     <input id="matricule_input" name="matricule_input" class="d-none" value="" />
                                 </div>
                             </div>
-                            <input type="text" name="id_abonnement" style="display: none;" value="<?php echo $user['id_abonnement'] ;?>">
+                            <input type="text" name="id_abonnement" style="display: none;" value="<?php echo $user['id_abonnement']; ?>">
                             <h5>Information Personnel</h5>
                             <section>
                                 <legend></legend>
@@ -297,7 +297,11 @@ $conn->close();
                                     <div class="col-md-12">
                                         <div class="row">
                                             <div class="col-md-4">
-                                                <img id="preview" src="../assets/img/capitalsoft/profils/<?php echo $user['photo'] ?? '#'; ?>" alt="Aperçu de la photo" style=" max-width: 200px; height: auto" />
+                                                <img
+                                                    id="preview"
+                                                    src="<?php echo isset($user['photo']) && !empty($user['photo']) ? '../assets/img/capitalsoft/profils/' . htmlspecialchars($user['photo']) : '#'; ?>"
+                                                    alt="<?php echo empty($user['photo']) ? 'Aucune photo disponible' : 'Aperçu de la photo'; ?>"
+                                                    style="max-width: 200px; height: auto; <?php echo empty($user['photo']) ? 'display:none;' : ''; ?>" />
                                                 <video id="camera" width="320" height="240" autoplay style="display:none;"></video>
                                                 <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
                                             </div>
@@ -317,7 +321,7 @@ $conn->close();
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label>CIN <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" id="cin" name="cin" value="<?php echo $user['cin']; ?>" required readonly />
+                                            <input type="text" class="form-control" id="cin" name="cin" value="<?php echo $user['cin']; ?>" required />
                                             <small class="text-danger" id="cin-error" style="display:none;">Ce champ est obligatoire</small>
                                         </div>
                                     </div>
@@ -325,7 +329,7 @@ $conn->close();
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Nom <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" id="nom" name="nom" value="<?php echo $user['nom']; ?>" required readonly />
+                                            <input type="text" class="form-control" id="nom" name="nom" value="<?php echo $user['nom']; ?>" required />
                                             <small class="text-danger" id="nom-error" style="display:none;">Ce champ est obligatoire</small>
                                         </div>
                                     </div>
@@ -333,7 +337,7 @@ $conn->close();
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Prénom <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" id="prenom" name="prenom" value="<?php echo $user['prenom']; ?>" required readonly />
+                                            <input type="text" class="form-control" id="prenom" name="prenom" value="<?php echo $user['prenom']; ?>" required />
                                             <small class="text-danger" id="prenom-error" style="display:none;">Ce champ est obligatoire</small>
                                         </div>
                                     </div>
@@ -357,14 +361,14 @@ $conn->close();
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Date de naissance</label>
-                                            <input type="date" class="form-control" id="date_n" name="date_naissance" value="<?php echo $user['date_naissance']; ?>" readonly />
+                                            <input type="date" class="form-control" id="date_n" name="date_naissance" value="<?php echo $user['date_naissance']; ?>" />
                                         </div>
                                     </div>
 
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Genre</label>
-                                            <select name="genre" class="form-select form-control-lg" id="genre" disabled>
+                                            <select name="genre" class="form-select form-control-lg" id="genre">
                                                 <option value="M" <?php echo ($user['genre'] == 'M') ? 'selected' : ''; ?>>Homme</option>
                                                 <option value="F" <?php echo ($user['genre'] == 'F') ? 'selected' : ''; ?>>Femme</option>
                                             </select>
@@ -513,7 +517,7 @@ $conn->close();
                                                             <label class="form-check-label" for="<?php echo $activite['nom']; ?>"><?php echo $activite['nom']; ?></label>
                                                         </div>
                                                     </div>
-                                                    <input type="text" name="type_activite[]" value="<?php echo $activite['type'];?>" style="display:none">
+                                                    <input type="text" name="type_activite[]" value="<?php echo $activite['type']; ?>" style="display:none">
 
                                                     <div class="col-md-6">
                                                         <div class="form-group">
@@ -634,10 +638,12 @@ $conn->close();
                                                         </div>
                                                     </div>
                                                     <!-- <?php
-                                                   // if ($user['id_card'] != null or $user['id_card'] != '') { ?>
+                                                            // if ($user['id_card'] != null or $user['id_card'] != '') { 
+                                                            ?>
                                                         <div class="row">
                                                             <div class="col-md-12 info bg-white" >
-                                                                Badge: <?php //echo $user['id_card']; ?>
+                                                                Badge: <?php //echo $user['id_card']; 
+                                                                        ?>
                                                             </div>
                                                         </div>
                                                     <?php
@@ -1411,6 +1417,33 @@ if ($profil == 4) {; ?>
         calculateTotal();
         calculateDateFin();
         calculateReste();
+    });
+</script>
+<script>
+    function displayPhoto(input) {
+        const preview = document.getElementById('preview');
+        
+        // Reset the src and hide it first to prevent double loading
+        preview.src = '';
+        preview.style.display = 'none';
+
+        // If a new file is selected, update the preview
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Hide the image preview if there's no photo initially
+    document.addEventListener('DOMContentLoaded', function () {
+        const preview = document.getElementById('preview');
+        if (preview.src === '#') {
+            preview.style.display = 'none';
+        }
     });
 </script>
 <script>

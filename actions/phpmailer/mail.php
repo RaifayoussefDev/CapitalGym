@@ -7,12 +7,12 @@ use PHPMailer\PHPMailer\Exception;
 require 'vendor/autoload.php'; // Ensure the path is correct
 
 // Function to encode image to Base64
-function base64_encode_image($file)
-{
-    $imageData = file_get_contents($file);
-    $base64 = base64_encode($imageData);
-    return 'data:image/png;base64,' . $base64;
-}
+// function base64_encode_image($file)
+// {
+//     $imageData = file_get_contents($file);
+//     $base64 = base64_encode($imageData);
+//     return 'data:image/png;base64,' . $base64;
+// }
 
 function sendEmail($to, $subject, $message)
 {
