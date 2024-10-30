@@ -13,7 +13,7 @@ if (isset($_GET['id_user'])) {
             JOIN payments py ON a.id = py.abonnement_id
             JOIN type_paiements tp ON py.type_paiement_id = tp.id
             WHERE u.id = ?";
-    
+
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('i', $user_id);
     $stmt->execute();
@@ -26,7 +26,7 @@ if (isset($_GET['id_user'])) {
     }
 
     // Requête pour récupérer les paiements associés à l'utilisateur
-    $sql_payments = "SELECT * FROM payments WHERE user_id = ?";
+    $sql_payments = "SELECT * FROM payments,type_paiements WHERE payments.type_paiement_id = type_paiements.id AND user_id = ?";
     $stmt_payments = $conn->prepare($sql_payments);
     $stmt_payments->bind_param('i', $user_id);
     $stmt_payments->execute();
@@ -41,6 +41,17 @@ if (isset($_GET['id_user'])) {
     $cheques_result = $stmt_cheques->get_result();
     $cheques = $cheques_result->fetch_all(MYSQLI_ASSOC);
 
+    // Requête pour récupérer les virements associés à l'utilisateur
+    $sql_virements = "SELECT * FROM virement WHERE id_utilisateur = ?";
+    $stmt_virements = $conn->prepare($sql_virements);
+    $stmt_virements->bind_param('i', $user_id);
+    $stmt_virements->execute();
+    $virements_result = $stmt_virements->get_result();
+    $virements = $virements_result->fetch_all(MYSQLI_ASSOC);
+
+
+
+
     // Requête pour récupérer les activités associées à l'utilisateur
     $sql_activites = "SELECT a.*, ua.date_inscription FROM activites a
                       JOIN user_activites ua ON a.id = ua.activite_id
@@ -50,7 +61,6 @@ if (isset($_GET['id_user'])) {
     $stmt_activites->execute();
     $activites_result = $stmt_activites->get_result();
     $activites = $activites_result->fetch_all(MYSQLI_ASSOC);
-    
 } else {
     echo "Aucun utilisateur sélectionné.";
     exit;
@@ -145,28 +155,22 @@ $conn->close();
                     <h5>Abonnement</h5>
                     <section>
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Type d'abonnement:</label>
                                     <span><?= htmlspecialchars($user['pack_name']) ?></span>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Date de Debut d’abonnement:</label>
+                                    <span><?= htmlspecialchars($user['date_debut']) ?></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Date de fin d’abonnement:</label>
                                     <span><?= htmlspecialchars($user['date_fin']) ?></span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Montant Payé:</label>
-                                    <span><?= htmlspecialchars($user['montant_paye']) ?></span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Type de Paiement:</label>
-                                    <span><?= htmlspecialchars($user['type']) ?></span>
                                 </div>
                             </div>
                         </div>
@@ -177,16 +181,23 @@ $conn->close();
                         <div class="row">
                             <?php if (count($payments) > 0) : ?>
                                 <?php foreach ($payments as $payment) : ?>
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Montant Payé:</label>
                                             <span><?= htmlspecialchars($payment['montant_paye']) ?></span>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Date de Paiement:</label>
                                             <span><?= htmlspecialchars($payment['date_paiement']) ?></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Type de Paiement:</label>
+                                            <span><?= htmlspecialchars($payment['type']) ?></span>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
@@ -201,22 +212,28 @@ $conn->close();
                         <div class="row">
                             <?php if (count($cheques) > 0) : ?>
                                 <?php foreach ($cheques as $cheque) : ?>
-                                    <div class="col-md-6">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Nom Titulaire:</label>
                                             <span><?= htmlspecialchars($cheque['nomTitulaire']) ?></span>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Numéro de Chèque:</label>
                                             <span><?= htmlspecialchars($cheque['numeroCheque']) ?></span>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Date d'Émission:</label>
                                             <span><?= htmlspecialchars($cheque['dateEmission']) ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Banque Emettrice:</label>
+                                            <span><?= htmlspecialchars($cheque['banqueEmettrice']) ?></span>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
@@ -225,6 +242,43 @@ $conn->close();
                             <?php endif; ?>
                         </div>
                     </section>
+
+                    <h5>Virements</h5>
+                    <section>
+                        <div class="row">
+                            <?php if (count($virements) > 0) : ?>
+                                <?php foreach ($virements as $virement) : ?>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Nom Émetteur:</label>
+                                            <span><?= htmlspecialchars($virement['nomEmetteur']) ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Référence:</label>
+                                            <span><?= htmlspecialchars($virement['reference']) ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Date d'Émission:</label>
+                                            <span><?= htmlspecialchars($virement['dateImitation']) ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Banque Émettrice:</label>
+                                            <span><?= htmlspecialchars($virement['banqueEmettrice']) ?></span>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else : ?>
+                                <span>Aucun virement trouvé.</span>
+                            <?php endif; ?>
+                        </div>
+                    </section>
+
 
                     <h5>Activités</h5>
                     <section>
@@ -258,112 +312,111 @@ $conn->close();
 
 <style>
     .page-inner {
-    padding: 20px;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-}
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
 
-.card {
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+    .card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 
-.card-header {
-    background-color: #977438;
-    color: white;
-    padding: 10px 15px;
-    border-bottom: 1px solid #e0e0e0;
-    border-radius: 8px 8px 0 0;
-}
+    .card-header {
+        background-color: #977438;
+        color: white;
+        padding: 10px 15px;
+        border-bottom: 1px solid #e0e0e0;
+        border-radius: 8px 8px 0 0;
+    }
 
-.card-title {
-    margin: 0;
-    font-size: 18px;
-    font-weight: bold;
-}
+    .card-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: bold;
+    }
 
-.card-body {
-    padding: 15px;
-    background-color: white;
-    border-radius: 0 0 8px 8px;
-}
+    .card-body {
+        padding: 15px;
+        background-color: white;
+        border-radius: 0 0 8px 8px;
+    }
 
-.card h5 {
-    margin-top: 20px;
-    font-size: 16px;
-    color: #977438;
-    font-weight: bold;
-    border-bottom: 1px solid #977438;
-    padding-bottom: 5px;
-}
+    .card h5 {
+        margin-top: 20px;
+        font-size: 16px;
+        color: #977438;
+        font-weight: bold;
+        border-bottom: 1px solid #977438;
+        padding-bottom: 5px;
+    }
 
-.section {
-    margin-bottom: 20px;
-}
+    .section {
+        margin-bottom: 20px;
+    }
 
-.section legend {
-    font-size: 18px;
-    font-weight: bold;
-    color: #977438;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    font-weight: bold;
-    color: #495057;
-}
-
-.form-group span {
-    display: block;
-    font-size: 14px;
-    color: #6c757d;
-}
-
-.selectgroup-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.selectgroup-item {
-    margin-bottom: 10px;
-}
-
-.selectgroup-button {
-    background-color: #e0e0e0;
-    border: 1px solid #977438;
-    color: #977438;
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 14px;
-    cursor: default;
-    display: inline-block;
-}
-
-.selectgroup-button:hover {
-    background-color: #977438;
-    color: white;
-}
-
-img {
-    border-radius: 8px;
-    margin-bottom: 10px;
-}
-
-@media (max-width: 768px) {
-    .row {
-        flex-direction: column;
+    .section legend {
+        font-size: 18px;
+        font-weight: bold;
+        color: #977438;
     }
 
     .form-group {
-        width: 100%;
+        margin-bottom: 15px;
     }
-}
 
+    .form-group label {
+        font-weight: bold;
+        color: #495057;
+    }
+
+    .form-group span {
+        display: block;
+        font-size: 14px;
+        color: #6c757d;
+    }
+
+    .selectgroup-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .selectgroup-item {
+        margin-bottom: 10px;
+    }
+
+    .selectgroup-button {
+        background-color: #e0e0e0;
+        border: 1px solid #977438;
+        color: #977438;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 14px;
+        cursor: default;
+        display: inline-block;
+    }
+
+    .selectgroup-button:hover {
+        background-color: #977438;
+        color: white;
+    }
+
+    img {
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+    @media (max-width: 768px) {
+        .row {
+            flex-direction: column;
+        }
+
+        .form-group {
+            width: 100%;
+        }
+    }
 </style>
 <?php
 require "../inc/footer.php";
