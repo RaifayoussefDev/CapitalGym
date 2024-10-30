@@ -151,10 +151,10 @@ $conn->close();
         });
 
         // Handle the delete button click event
-        $(document).on('click', '.btn-delete', function() {
-            const id = $(this).data('id');
-            $('#deleteActivityModal #deleteSessionId').val(id);
-        });
+        // $(document).on('click', '.btn-delete', function() {
+        //     const id = $(this).data('id');
+        //     $('#deleteActivityModal #deleteSessionId').val(id);
+        // });
     });
 </script>
 
@@ -258,7 +258,7 @@ $conn->close();
                                                 <a href="update_session.php?session_id=<?php echo htmlspecialchars($session['session_id']); ?>" class="btn btn-primary btn-edit" role="button">
                                                     <i class="fa fa-edit"></i>
                                                 </a>
-                                                <button class="btn btn-danger btn-delete" data-id="<?php echo htmlspecialchars($session['session_id']); ?>" data-bs-toggle="modal" data-bs-target="#deleteActivityModal">
+                                                <button class="btn btn-danger btn-delete" data-id="<?php echo htmlspecialchars($session['session_id']); ?>" data-bs-toggle="modal" data-bs-target="#deleteActivityModalM">
                                                     <i class="fa fa-trash"></i>
                                                 </button>
                                             </td>
@@ -275,6 +275,30 @@ $conn->close();
                 </div>
             </div>
         </div>
+        <!-- Delete Session Modal -->
+<div class="modal fade" id="deleteActivityModalM" tabindex="-1" role="dialog" aria-labelledby="deleteActivityModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteActivityModalLabel">Supprimer Séance</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="delete_session.php" method="POST">
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer cette séance ?</p>
+                    <!-- Hidden input to store session ID -->
+                    <input type="hidden" id="deleteSessionId" name="sessionId">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Non</button>
+                    <button type="submit" class="btn btn-danger">Oui</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
         <!-- Day's Schedule Table -->
         <div class="col-md-12">
@@ -506,96 +530,6 @@ $conn->close();
     </div>
 </div>
 
-<!-- JavaScript -->
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Days in French
-        const days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
-
-        // Function to generate time options
-        function generateTimeOptions() {
-            let options = '';
-            for (let hour = 8; hour < 22; hour++) {
-                const startTime = hour < 10 ? `0${hour}:00` : `${hour}:00`;
-                const endTime = hour + 1 < 10 ? `0${hour + 1}:00` : `${hour + 1}:00`;
-                options += `<option value="${startTime} - ${endTime}">${startTime} - ${endTime}</option>`;
-            }
-            return options;
-        }
-
-        // Apply time options to each day's select
-        days.forEach(day => {
-            const checkbox = document.getElementById(day);
-            const select = document.getElementById(day + 'Hours');
-
-            // Insert time options in the select element
-            select.innerHTML = generateTimeOptions();
-
-            // Enable/disable time select based on the checkbox state
-            checkbox.addEventListener('change', function() {
-                if (this.checked) {
-                    select.disabled = false;
-                    select.value = '08:00 - 09:00'; // Set default to the first option (08:00 - 09:00)
-                } else {
-                    select.disabled = true;
-                    select.value = ''; // Reset the selection when unchecked
-                }
-            });
-        });
-    });
-</script>
-
-
-<script>
-    // Update maxAttendees when location is selected
-    $('#location').on('change', function() {
-        var maxAttendees = $(this).find('option:selected').data('max-attendees');
-        $('#maxAttendees').val(maxAttendees); // Set the maxAttendees field
-    });
-
-    // Handle form submission via AJAX
-    $('#addSessionForm').on('submit', function(e) {
-        e.preventDefault(); // Prevent default form submission
-
-        var formData = new FormData(this); // Collect form data including file uploads
-
-        $.ajax({
-            url: 'add_session.php', // Replace with the URL to your PHP handler
-            type: 'POST',
-            data: formData,
-            contentType: false, // Important for file upload
-            processData: false, // Important for file upload
-            success: function(response) {
-                // Handle success (e.g., close the modal, display a success message)
-                $('#addActivityModal').modal('hide');
-                alert('Séance ajoutée avec succès!');
-            },
-            error: function() {
-                // Handle error
-                alert('Une erreur est survenue. Veuillez réessayer.');
-            }
-        });
-    });
-</script>
-
-
-<script>
-    document.getElementById('location').addEventListener('change', function() {
-        var selectedOption = this.options[this.selectedIndex];
-        var maxAttendees = selectedOption.getAttribute('data-max-attendees');
-        document.getElementById('maxAttendees').value = maxAttendees ? maxAttendees : '';
-    });
-</script>
-
-
-<script>
-    // Automatically set maxAttendees based on selected location
-    document.getElementById('location').addEventListener('change', function() {
-        var selectedOption = this.options[this.selectedIndex];
-        var maxAttendees = selectedOption.getAttribute('data-max-attendees');
-        document.getElementById('maxAttendees').value = maxAttendees || '';
-    });
-</script>
 
 
 <!-- Edit Session Modal -->
@@ -689,7 +623,7 @@ $conn->close();
     </div>
 </div>
 
-<script>
+<!-- <script>
     // Script to set the session ID in the delete modal
     $(document).ready(function() {
         $('.btn-delete').click(function() {
@@ -697,9 +631,99 @@ $conn->close();
             $('#deleteSessionId').val(sessionId); // Set session ID in the hidden input
         });
     });
+</script> -->
+
+
+<!-- JavaScript -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Days in French
+        const days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+
+        // Function to generate time options
+        function generateTimeOptions() {
+            let options = '';
+            for (let hour = 8; hour < 22; hour++) {
+                const startTime = hour < 10 ? `0${hour}:00` : `${hour}:00`;
+                const endTime = hour + 1 < 10 ? `0${hour + 1}:00` : `${hour + 1}:00`;
+                options += `<option value="${startTime} - ${endTime}">${startTime} - ${endTime}</option>`;
+            }
+            return options;
+        }
+
+        // Apply time options to each day's select
+        days.forEach(day => {
+            const checkbox = document.getElementById(day);
+            const select = document.getElementById(day + 'Hours');
+
+            // Insert time options in the select element
+            select.innerHTML = generateTimeOptions();
+
+            // Enable/disable time select based on the checkbox state
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    select.disabled = false;
+                    select.value = '08:00 - 09:00'; // Set default to the first option (08:00 - 09:00)
+                } else {
+                    select.disabled = true;
+                    select.value = ''; // Reset the selection when unchecked
+                }
+            });
+        });
+    });
 </script>
 
 
+<script>
+    // Update maxAttendees when location is selected
+    $('#location').on('change', function() {
+        var maxAttendees = $(this).find('option:selected').data('max-attendees');
+        $('#maxAttendees').val(maxAttendees); // Set the maxAttendees field
+    });
+
+    // Handle form submission via AJAX
+    $('#addSessionForm').on('submit', function(e) {
+        e.preventDefault(); // Prevent default form submission
+
+        var formData = new FormData(this); // Collect form data including file uploads
+
+        $.ajax({
+            url: 'add_session.php', // Replace with the URL to your PHP handler
+            type: 'POST',
+            data: formData,
+            contentType: false, // Important for file upload
+            processData: false, // Important for file upload
+            success: function(response) {
+                // Handle success (e.g., close the modal, display a success message)
+                $('#addActivityModal').modal('hide');
+                alert('Séance ajoutée avec succès!');
+            },
+            error: function() {
+                // Handle error
+                alert('Une erreur est survenue. Veuillez réessayer.');
+            }
+        });
+    });
+</script>
+
+
+<script>
+    document.getElementById('location').addEventListener('change', function() {
+        var selectedOption = this.options[this.selectedIndex];
+        var maxAttendees = selectedOption.getAttribute('data-max-attendees');
+        document.getElementById('maxAttendees').value = maxAttendees ? maxAttendees : '';
+    });
+</script>
+
+
+<script>
+    // Automatically set maxAttendees based on selected location
+    document.getElementById('location').addEventListener('change', function() {
+        var selectedOption = this.options[this.selectedIndex];
+        var maxAttendees = selectedOption.getAttribute('data-max-attendees');
+        document.getElementById('maxAttendees').value = maxAttendees || '';
+    });
+</script>
 
 
 <?php

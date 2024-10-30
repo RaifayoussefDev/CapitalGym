@@ -1,5 +1,8 @@
 <?php
-require "../inc/app.php";; ?>
+ob_start();
+require "../inc/app.php";
+header('location:../adherents/');
+ob_end_flush(); ?>
 <div class="page-inner">
     <?php
     $session_profil = $_SESSION['profil'];
