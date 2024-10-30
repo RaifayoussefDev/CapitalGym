@@ -19,7 +19,7 @@ if ($conn === false) {
 }
 
 // CardCode to check
-$cardCode = '9654291';
+$cardCode = '4468611';
 
 // Check if CardCode already exists in CardList
 $checkCardSql = "SELECT COUNT(*) AS count FROM [dbo].[CardList] WHERE [CardData] = ?";
@@ -118,14 +118,14 @@ if ($row['count'] > 0) {
             1                   // ICWriteCard
         ];
 
-        $cardListParams2 = [
-            $cardCode,          // CardCode (from CardData_Backup)
-            $cardCode,          // CardData_Backup
-            1,                  // CardStatus
-            $hstryTime,        // HstryTime
-            $personnelId,       // PersonnelID
-            1                   // ICWriteCard
-        ];
+        // $cardListParams2 = [
+        //     $cardCode,          // CardCode (from CardData_Backup)
+        //     $cardCode,          // CardData_Backup
+        //     1,                  // CardStatus
+        //     $hstryTime,        // HstryTime
+        //     $personnelId,       // PersonnelID
+        //     1                   // ICWriteCard
+        // ];
 
         // Insert CardData into CardList
         $stmtCardList1 = sqlsrv_query($conn, $insertCardListSql, $cardListParams1);
