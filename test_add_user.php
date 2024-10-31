@@ -46,7 +46,7 @@ if ($row['count'] > 0) {
 
     // Parameters for Personnel
     $params = [
-        'TEST APPLICATION', // PName
+        'Last Test', // PName
         '20000',            // PCode
         $cardCode,          // CardData
         $cardCode,          // CardCode
@@ -71,7 +71,7 @@ if ($row['count'] > 0) {
         '',                 // Addr
         '',                 // EMail
         '',                 // PDesc
-        1,                  // PImage
+        '',                  // PImage
         12345.6789012345,   // InputUser
         time(),             // InputSystemTime (use current timestamp)
         1,                  // BackupIsFingerprint
@@ -88,7 +88,7 @@ if ($row['count'] > 0) {
         echo "Personnel record inserted successfully!<br>";
 
         // Get the last inserted Personnel ID
-        $sql = "select MAX(Personnel.PersonnelID) As last_id  from Personnel";
+        $sql = "SELECT MAX(Personnel.PersonnelID) AS last_id FROM Personnel";
         $result = sqlsrv_query($conn, $sql);
 
         if ($result === false) {
@@ -99,7 +99,7 @@ if ($row['count'] > 0) {
         $personnelId = $lastIdRow['last_id'];
 
         if ($personnelId === null) {
-            die("Error: Personnel ID is null. Insert into CardList cannot proceed.");
+            die("Error: Personnel ID is null. Insert into CardList and EmplOfEqupt cannot proceed.");
         }
 
         // Prepare the INSERT statement for CardList
@@ -107,25 +107,16 @@ if ($row['count'] > 0) {
                    ([CardCode], [CardData], [CardStatus], [HstryTime], [PersonnelID], [ICWriteCard])
              VALUES (?, ?, ?, ?, ?, ?)";
 
-        $hstryTime = time(); // or use a more appropriate datetime format
+        $hstryTime = '45596.433645833335'; // or use a more appropriate datetime format
 
         $cardListParams1 = [
-            $cardCode,          // CardCode (from CardData)
+            '0049',          // CardCode (from CardData)
             $cardCode,          // CardData
             1,                  // CardStatus
-            $hstryTime,        // HstryTime
+            $hstryTime,         // HstryTime
             $personnelId,       // PersonnelID
-            1                   // ICWriteCard
+            0                  // ICWriteCard
         ];
-
-        // $cardListParams2 = [
-        //     $cardCode,          // CardCode (from CardData_Backup)
-        //     $cardCode,          // CardData_Backup
-        //     1,                  // CardStatus
-        //     $hstryTime,        // HstryTime
-        //     $personnelId,       // PersonnelID
-        //     1                   // ICWriteCard
-        // ];
 
         // Insert CardData into CardList
         $stmtCardList1 = sqlsrv_query($conn, $insertCardListSql, $cardListParams1);
@@ -135,16 +126,52 @@ if ($row['count'] > 0) {
             echo "CardList record for CardData inserted successfully!<br>";
         }
 
-        // Insert CardData_Backup into CardList
-        $stmtCardList2 = sqlsrv_query($conn, $insertCardListSql, $cardListParams2);
-        if ($stmtCardList2 === false) {
-            die("Error in CardList statement execution for CardData_Backup: " . print_r(sqlsrv_errors(), true));
+        // Requête modifiée pour insérer dans EmplOfEqupt
+        $insertEmplOfEquptSql = "INSERT INTO [dbo].[EmplOfEqupt]
+([PersonnelID], [EquptID], [PermitTime], [ReadCount], [CardMode], 
+[HldEnabled], [DownloadState], [InOutState_Port1], [InOutState_Date_Port1], 
+[InOutState_Port2], [InOutState_Date_Port2], [InOutState_Port3], 
+[InOutState_Date_Port3], [InOutState_Port4], [InOutState_Date_Port4], 
+[TimePieceIndex], [OpenLock], [HldPwr], [UserType])
+VALUES
+(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CONVERT(binary(4), ?), CONVERT(binary(4), ?), CONVERT(binary(4), ?), ?)";
+
+
+        // Parameters for EmplOfEqupt
+// Paramètres pour EmplOfEqupt
+$emplOfEquptParams = [
+    $personnelId,        // PersonnelID
+    1003,                // EquptID
+    68849.999305555553,  // PermitTime
+    65535,               // ReadCount
+    0,                   // CardMode
+    0,                   // HldEnabled
+    0,                   // DownloadState
+    0,                   // InOutState_Port1
+    0.0,                 // InOutState_Date_Port1
+    0,                   // InOutState_Port2
+    0.0,                 // InOutState_Date_Port2
+    0,                   // InOutState_Port3
+    0.0,                 // InOutState_Date_Port3
+    0,                   // InOutState_Port4
+    0.0,                 // InOutState_Date_Port4
+    hex2bin("00000000"), // TimePieceIndex (converted to binary)
+    hex2bin("00000000"), // OpenLock (converted to binary)
+    hex2bin("00000000"), // HldPwr (converted to binary)
+    0                    // UserType
+];
+
+
+        // Execute insertion for EmplOfEqupt
+        $stmtEmplOfEqupt = sqlsrv_query($conn, $insertEmplOfEquptSql, $emplOfEquptParams);
+
+        if ($stmtEmplOfEqupt === false) {
+            die("Error in EmplOfEqupt statement execution: " . print_r(sqlsrv_errors(), true));
         } else {
-            echo "CardList record for CardData_Backup inserted successfully!<br>";
+            echo "EmplOfEqupt record inserted successfully!<br>";
         }
     }
 }
 
 // Close the connection
 sqlsrv_close($conn);
-?>
