@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $sessionId = $stmt->insert_id; // Get the ID of the newly inserted session
 
             // Insert session planning data into session_planning table
-            $planningSql = "INSERT INTO session_planning (session_id, day, start_time, end_time, max_attendees, remaining_slots) VALUES (?, ?, ?, ?, ?, ?)";
+            $planningSql = "INSERT INTO session_planning (session_id, day, start_time, max_attendees, remaining_slots) VALUES (?, ?, ?, ?, ?)";
             $planningStmt = $conn->prepare($planningSql);
 
             // Handle repetitive planning (e.g., days of the week)
@@ -75,11 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 foreach ($_POST['days'] as $day) {
                     $startTime = $_POST[$day . 'Hours']; // Retrieve the selected time slot for the day
                     if (!empty($startTime)) {
-                        // Split the selected time slot into start and end times
-                        list($startTime, $endTime) = explode(' - ', $startTime);
-
-                        // Insert day and hours into session_planning table
-                        $planningStmt->bind_param("issssi", $sessionId, $day, $startTime, $endTime, $maxAttendees, $maxAttendees);
+                        // Use only start time (no end time)
+                        $planningStmt->bind_param("issii", $sessionId, $day, $startTime, $maxAttendees, $maxAttendees);
                         $planningStmt->execute();
                     }
                 }

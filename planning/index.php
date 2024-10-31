@@ -276,29 +276,29 @@ $conn->close();
             </div>
         </div>
         <!-- Delete Session Modal -->
-<div class="modal fade" id="deleteActivityModalM" tabindex="-1" role="dialog" aria-labelledby="deleteActivityModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteActivityModalLabel">Supprimer Séance</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+        <div class="modal fade" id="deleteActivityModalM" tabindex="-1" role="dialog" aria-labelledby="deleteActivityModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteActivityModalLabel">Supprimer Séance</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form action="delete_session.php" method="POST">
+                        <div class="modal-body">
+                            <p>Êtes-vous sûr de vouloir supprimer cette séance ?</p>
+                            <!-- Hidden input to store session ID -->
+                            <input type="hidden" id="deleteSessionId" name="sessionId">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Non</button>
+                            <button type="submit" class="btn btn-danger">Oui</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <form action="delete_session.php" method="POST">
-                <div class="modal-body">
-                    <p>Êtes-vous sûr de vouloir supprimer cette séance ?</p>
-                    <!-- Hidden input to store session ID -->
-                    <input type="hidden" id="deleteSessionId" name="sessionId">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Non</button>
-                    <button type="submit" class="btn btn-danger">Oui</button>
-                </div>
-            </form>
         </div>
-    </div>
-</div>
 
         <!-- Day's Schedule Table -->
         <div class="col-md-12">
@@ -361,7 +361,7 @@ $conn->close();
                                     }
 
                                     // Display the time slot and session information
-                                    echo 
+                                    echo
                                     "<tr>
                                         <td>$slot_start - $slot_end</td>
                                         <td>" . ($found ? $activity_name : '') . "</td>
@@ -414,7 +414,7 @@ $conn->close();
                                     <option value="">Sélectionner une activité</option>
                                     <?php foreach ($activites as $activite) : ?>
                                         <option value="<?php echo htmlspecialchars($activite['id']); ?>">
-                                            <?php echo htmlspecialchars($activite['nom']); ?> 
+                                            <?php echo htmlspecialchars($activite['nom']); ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
@@ -640,18 +640,19 @@ $conn->close();
         // Days in French
         const days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
 
-        // Function to generate time options
+        // Specific times for all days
+        const times = [
+            "07:00", "08:00", "09:00", "10:00", "11:00",
+            "12:30", "13:30", "16:30", "17:30", "18:30",
+            "19:30", "20:00", "20:30"
+        ];
+
+        // Function to generate time options for each select
         function generateTimeOptions() {
-            let options = '';
-            for (let hour = 8; hour < 22; hour++) {
-                const startTime = hour < 10 ? `0${hour}:00` : `${hour}:00`;
-                const endTime = hour + 1 < 10 ? `0${hour + 1}:00` : `${hour + 1}:00`;
-                options += `<option value="${startTime} - ${endTime}">${startTime} - ${endTime}</option>`;
-            }
-            return options;
+            return times.map(time => `<option value="${time}">${time}</option>`).join('');
         }
 
-        // Apply time options to each day's select
+        // Apply the time options to each day's select element
         days.forEach(day => {
             const checkbox = document.getElementById(day);
             const select = document.getElementById(day + 'Hours');
@@ -661,17 +662,17 @@ $conn->close();
 
             // Enable/disable time select based on the checkbox state
             checkbox.addEventListener('change', function() {
+                select.disabled = !this.checked;
                 if (this.checked) {
-                    select.disabled = false;
-                    select.value = '08:00 - 09:00'; // Set default to the first option (08:00 - 09:00)
+                    select.value = '07:00'; // Set default to the first option (07:00)
                 } else {
-                    select.disabled = true;
                     select.value = ''; // Reset the selection when unchecked
                 }
             });
         });
     });
 </script>
+
 
 
 <script>

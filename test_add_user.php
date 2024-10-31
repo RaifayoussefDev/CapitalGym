@@ -1,6 +1,6 @@
 <?php
 // SQL Server connection configuration
-$serverName = "51.77.194.236";
+$serverName = "DESKTOP-EE9DAKJ";
 $connectionOptions = [
     "Database" => "Card3500",
     "UID" => "sa",
@@ -10,7 +10,7 @@ $connectionOptions = [
 ];
 
 // Define the function to add a personnel entry
-function addPersonnel($qrcode, $id_card, $nom, $prenom, $email, $phone, $departement)
+function addPersonnel($qrcode, $id_card, $nom, $prenom, $email, $phone, $departement , $id)
 {
     global $serverName, $connectionOptions;
 
@@ -92,7 +92,7 @@ function addPersonnel($qrcode, $id_card, $nom, $prenom, $email, $phone, $departe
         $insertCardListSql = "INSERT INTO [dbo].[CardList] 
             ([CardCode], [CardData], [CardStatus], [HstryTime], [PersonnelID], [ICWriteCard]) 
             VALUES (?, ?, ?, ?, ?, ?)";
-        $cardListParams = ['0049', $qrcode, 1, 45596.433645833335, $personnelId, 0];
+        $cardListParams = [$id, $qrcode, 1, 45596.433645833335, $personnelId, 0];
         $stmtCardList = sqlsrv_query($connsrv, $insertCardListSql, $cardListParams);
 
         if ($stmtCardList === false) {
@@ -144,5 +144,4 @@ function addPersonnel($qrcode, $id_card, $nom, $prenom, $email, $phone, $departe
 }
 
 // Example usage of the function
-addPersonnel('96891', '20000', 'John', 'Doe', 'johndoe@example.com', '1234567890', 19);
 ?>
