@@ -41,7 +41,7 @@ if ($result) {
             // Add personnel if QR code exists
             addPersonnel($qrcode, $id_card, $nom, $prenom, $email, $phone, $departement, $id);
         }else{
-            $qrcode = $row['CodeQr'];
+            $qrcode = $id + 500000;
             addPersonnel($qrcode, $id_card, $nom, $prenom, $email, $phone, $departement, $id);
         }
     }
