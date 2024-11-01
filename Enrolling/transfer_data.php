@@ -1,5 +1,5 @@
 <?php 
-        require "./test_add_user.php";
+        require "../test_add_user.php";
 
 $servername = "51.77.194.236";
 $username = "admin";
@@ -15,7 +15,7 @@ if ($conn->connect_error) {
 }
 
 // Fetch users from MySQL
-$sql = "SELECT users.id ,nom, prenom, email, phone, id_card, CodeQr, abonnements.type_abonnement 
+$sql = "SELECT users.id ,nom, prenom, email,id_card ,  phone, CodeQr, abonnements.type_abonnement 
         FROM users 
         JOIN abonnements ON abonnements.user_id = users.id 
         WHERE role_id = 3 and users.id = 515";

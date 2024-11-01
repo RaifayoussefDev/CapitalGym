@@ -10,7 +10,7 @@ $connectionOptions = [
 ];
 
 // Define the function to add a personnel entry
-function addPersonnel($qrcode, $id_card, $nom, $prenom, $email, $phone, $departement , $id)
+function addPersonnel($qrcode, $id_card, $nom, $prenom, $email, $phone, $departement, $id)
 {
     global $serverName, $connectionOptions;
 
@@ -41,15 +41,15 @@ function addPersonnel($qrcode, $id_card, $nom, $prenom, $email, $phone, $departe
         [GraduateTime], [Technical], [MobilePhone], [Addr], [EMail], [PDesc], [PImage],
         [InputUser], [InputSystemTime], [BackupIsFingerprint], [FPUserID], [IsBlacklist])
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
+    $pcode = $id + 10000;
     // Parameters for Personnel
     $params = [
         "$nom $prenom",     // PName
-        $id_card,           // PCode
+        $pcode,           // PCode
         $qrcode,            // CardData
-        $qrcode,            // CardCode
-        $qrcode,            // CardData_Backup
-        $qrcode,            // CardCode_Backup
+        '000' . $id,            // CardCode
+        '',            // CardData_Backup
+        '',            // CardCode_Backup
         '',                 // PPassword
         1,                  // Sex
         $departement,       // DepartmentID
@@ -71,11 +71,13 @@ function addPersonnel($qrcode, $id_card, $nom, $prenom, $email, $phone, $departe
         '',                 // PDesc
         '',                 // PImage
         12345.6789,         // InputUser
-        time(),             // InputSystemTime (timestamp)
-        1,                  // BackupIsFingerprint
-        0,                  // FPUserID
+        1,             // InputSystemTime (timestamp)
+        0,                  // BackupIsFingerprint
+        $pcode,                  // FPUserID
         0                   // IsBlacklist
     ];
+
+
 
     $stmt = sqlsrv_query($connsrv, $insertPersonnelSql, $params);
     if ($stmt === false) {
@@ -89,16 +91,35 @@ function addPersonnel($qrcode, $id_card, $nom, $prenom, $email, $phone, $departe
         $personnelId = $lastIdRow['last_id'];
 
         // CardList insertion
+        // Define the QR code with leading zeros
+
+        $insertPersonnelExtendSql = "INSERT INTO [dbo].[PersonnelExtend2]
+           ([PersonnelID], [CarNumber], [KinsfolkName], [KinsfolkTel], [Kinsfolk], [DefineFields])
+     VALUES (?, ?, ?, ?, ?, ?)";
+
+        // Parameters array
+        $params = [$personnelId, '', '', '', '', NULL];
+
+        // Execute the query
+        $stmtPersonnelExtend = sqlsrv_query($connsrv, $insertPersonnelExtendSql, $params);
+
+        // Check if insertion was successful
+        if ($stmtPersonnelExtend === false) {
+            die("Error in PersonnelExtend2 insertion: " . print_r(sqlsrv_errors(), true));
+        } else {
+            echo "PersonnelExtend2 record inserted successfully!<br>";
+        }
+
         $insertCardListSql = "INSERT INTO [dbo].[CardList] 
             ([CardCode], [CardData], [CardStatus], [HstryTime], [PersonnelID], [ICWriteCard]) 
             VALUES (?, ?, ?, ?, ?, ?)";
-        $cardListParams = [$id, $qrcode, 1, 45596.433645833335, $personnelId, 0];
+        $cardListParams = ['000' . $id, $qrcode, 1, 45596.433645833335, $personnelId, 0];
         $stmtCardList = sqlsrv_query($connsrv, $insertCardListSql, $cardListParams);
 
         if ($stmtCardList === false) {
             die("Error in CardList insertion: " . print_r(sqlsrv_errors(), true));
         } else {
-            echo "CardList record inserted successfully!<br>";
+            echo "CardList record inserted successfully with QR code $qrcode!<br>";
         }
 
         // EmplOfEqupt insertion
@@ -110,7 +131,7 @@ function addPersonnel($qrcode, $id_card, $nom, $prenom, $email, $phone, $departe
             [TimePieceIndex], [OpenLock], [HldPwr], [UserType])
             VALUES
             (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CONVERT(binary(4), ?), CONVERT(binary(4), ?), CONVERT(binary(4), ?), ?)";
-        
+
         $emplOfEquptParams = [
             $personnelId,        // PersonnelID
             1007,                // EquptID
@@ -144,4 +165,3 @@ function addPersonnel($qrcode, $id_card, $nom, $prenom, $email, $phone, $departe
 }
 
 // Example usage of the function
-?>
