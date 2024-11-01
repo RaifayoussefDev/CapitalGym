@@ -30,7 +30,7 @@ if ($result) {
         $email = $row['email'];
         $phone = $row['phone'];
         $id_card = $row['id_card'];
-        $qrcode = $row['CodeQr'];
+        $qrcode = $row['id_card'];
         $type_abonnement = $row['type_abonnement'];
 
         // Determine department based on type_abonnement
