@@ -1,5 +1,5 @@
-<?php 
-        require "../test_add_user.php";
+<?php
+require "../test_add_user.php";
 
 $servername = "51.77.194.236";
 $username = "admin";
@@ -18,7 +18,7 @@ if ($conn->connect_error) {
 $sql = "SELECT users.id ,nom, prenom, email,id_card ,  phone, CodeQr, abonnements.type_abonnement 
         FROM users 
         JOIN abonnements ON abonnements.user_id = users.id 
-        WHERE role_id = 3 and users.id = 515";
+        WHERE role_id = 3";
 
 $result = mysqli_query($conn, $sql);
 
@@ -36,9 +36,14 @@ if ($result) {
         // Determine department based on type_abonnement
         $departement = ($type_abonnement == 2 || $type_abonnement == 3) ? 19 : 20;
 
-        // Insert personnel data into SQL Server
-        addPersonnel($qrcode, $id_card, $nom, $prenom, $email, $phone, $departement , $id);
-        
+        // Check if $qrcode is not empty
+        if (!empty($qrcode)) {
+            // Add personnel if QR code exists
+            addPersonnel($qrcode, $id_card, $nom, $prenom, $email, $phone, $departement, $id);
+        }else{
+            $qrcode = $row['CodeQr'];
+            addPersonnel($qrcode, $id_card, $nom, $prenom, $email, $phone, $departement, $id);
+        }
     }
 } else {
     die("Error fetching users from MySQL: " . mysqli_error($conn));
@@ -46,5 +51,3 @@ if ($result) {
 
 // Close the connections
 mysqli_close($conn);
-
-?>
