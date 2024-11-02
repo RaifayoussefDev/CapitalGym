@@ -122,19 +122,19 @@ function addPersonnel($qrcode, $id_card, $nom, $prenom, $email, $phone, $departe
             echo "CardList record inserted successfully with QR code $qrcode!<br>";
         }
 
-        // EmplOfEqupt insertion
+        // EmplOfEqupt insertion SQL statement
         $insertEmplOfEquptSql = "INSERT INTO [dbo].[EmplOfEqupt]
-            ([PersonnelID], [EquptID], [PermitTime], [ReadCount], [CardMode], 
-            [HldEnabled], [DownloadState], [InOutState_Port1], [InOutState_Date_Port1], 
-            [InOutState_Port2], [InOutState_Date_Port2], [InOutState_Port3], 
-            [InOutState_Date_Port3], [InOutState_Port4], [InOutState_Date_Port4], 
-            [TimePieceIndex], [OpenLock], [HldPwr], [UserType])
-            VALUES
-            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CONVERT(binary(4), ?), CONVERT(binary(4), ?), CONVERT(binary(4), ?), ?)";
+([PersonnelID], [EquptID], [PermitTime], [ReadCount], [CardMode], 
+[HldEnabled], [DownloadState], [InOutState_Port1], [InOutState_Date_Port1], 
+[InOutState_Port2], [InOutState_Date_Port2], [InOutState_Port3], 
+[InOutState_Date_Port3], [InOutState_Port4], [InOutState_Date_Port4], 
+[TimePieceIndex], [OpenLock], [HldPwr], [UserType])
+VALUES
+(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CONVERT(binary(4), ?), CONVERT(binary(4), ?), CONVERT(binary(4), ?), ?)";
 
-        $emplOfEquptParams = [
+        // Define base parameters for insertion
+        $emplOfEquptParamsBase = [
             $personnelId,        // PersonnelID
-            1007,                // EquptID
             68849.999305555553,  // PermitTime
             65535,               // ReadCount
             0,                   // CardMode
@@ -154,11 +154,27 @@ function addPersonnel($qrcode, $id_card, $nom, $prenom, $email, $phone, $departe
             0                    // UserType
         ];
 
-        $stmtEmplOfEqupt = sqlsrv_query($connsrv, $insertEmplOfEquptSql, $emplOfEquptParams);
-        if ($stmtEmplOfEqupt === false) {
-            die("Error in EmplOfEqupt statement execution: " . print_r(sqlsrv_errors(), true));
+        // Array to store multiple insert parameters
+        $inserts = [];
+
+        // Check if departement is 19 to determine how many rows to insert
+        if ($departement == 19) {
+            // Add two records with EquptID 1017 and 1021
+            $inserts[] = array_merge([$emplOfEquptParamsBase[0], 1017], array_slice($emplOfEquptParamsBase, 1));
+            $inserts[] = array_merge([$emplOfEquptParamsBase[0], 1021], array_slice($emplOfEquptParamsBase, 1));
         } else {
-            echo "EmplOfEqupt record inserted successfully!<br>";
+            // Add only one record with EquptID 1017
+            $inserts[] = array_merge([$emplOfEquptParamsBase[0], 1017], array_slice($emplOfEquptParamsBase, 1));
+        }
+
+        // Execute each insertion
+        foreach ($inserts as $params) {
+            $stmtEmplOfEqupt = sqlsrv_query($connsrv, $insertEmplOfEquptSql, $params);
+            if ($stmtEmplOfEqupt === false) {
+                die("Error in EmplOfEqupt statement execution: " . print_r(sqlsrv_errors(), true));
+            } else {
+                echo "EmplOfEqupt record with EquptID " . $params[1] . " inserted successfully!<br>";
+            }
         }
     }
     sqlsrv_close($connsrv);

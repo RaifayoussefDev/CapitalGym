@@ -1,10 +1,18 @@
 <?php
 require "../test_add_user.php";
 
-$servername = "51.77.194.236";
-$username = "admin";
-$password = "C@p1t@l$0ft2022"; // Replace with your password
+// $servername = "51.77.194.236";
+// $username = "admin";
+// $password = "C@p1t@l$0ft2022"; // Replace with your password
+// $dbname = "privilage";
+
+
+$servername = "localhost";
+$username = "root";
+$password = ""; // Replace with your password
 $dbname = "privilage";
+
+
 
 // Create a database connection
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -18,7 +26,7 @@ if ($conn->connect_error) {
 $sql = "SELECT users.id ,nom, prenom, email,id_card ,  phone, CodeQr, abonnements.type_abonnement 
         FROM users 
         JOIN abonnements ON abonnements.user_id = users.id 
-        WHERE role_id = 3";
+        WHERE role_id = 3 AND users.id = 328";
 
 $result = mysqli_query($conn, $sql);
 

@@ -68,7 +68,7 @@
                     {
                         "data": "id_card",
                         "render": function(data, type, row) {
-                            return `<input type="text" class="form-control id-card-input" data-id="${row.id}" placeholder="Enter ID Card" maxlength="7">`;
+                            return `<input type="text" class="form-control id-card-input" data-id="${row.id}" placeholder="Enter ID Card" maxlength="10">`;
                         }
                     }
 
@@ -146,7 +146,7 @@
                     });
                 }, 2000); // 2-second delay
             });
-            
+
             // Button click handler for transferring data
             $('#transferDataButton').on('click', function() {
                 $.ajax({
