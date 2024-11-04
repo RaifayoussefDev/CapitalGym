@@ -552,6 +552,7 @@ $conn->close();
                                                         <option value="Société de Crédit à la Consommation">Société de Crédit à la Consommation</option>
                                                         <option value="Wafa Bank">Wafa Bank</option>
                                                         <option value="CFG Bank">CFG Bank</option>
+                                                                    <option value="BANK ASSAFA">BANK ASSAFA</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -613,6 +614,7 @@ $conn->close();
                                                         <option value="Société de Crédit à la Consommation">Société de Crédit à la Consommation</option>
                                                         <option value="Wafa Bank">Wafa Bank</option>
                                                         <option value="CFG Bank">CFG Bank</option>
+                                                                    <option value="BANK ASSAFA">BANK ASSAFA</option>
                                                     </select>
                                                 </div>
                                             </div>
