@@ -311,6 +311,37 @@ if ($conn->query($clear_sql) === TRUE) {
     // echo "Table envoi_app has been cleared.";
 }
 
+$timestamp = date("Y-m-d H:i:s");
+$balance = 20.00;
+
+// Insert balance into the wallet table for each user
+$insert_wallet_sql = "INSERT INTO wallet (user_id, balance, created_at, updated_at) 
+                              VALUES ('$user_id', '$balance', '$timestamp', '$timestamp')";
+
+if (mysqli_query($conn, $insert_wallet_sql)) {
+    // Get the last inserted wallet ID
+    $wallet_id = mysqli_insert_id($conn);
+
+    // Prepare transaction details
+    $amount = $balance;
+    $transaction_type = "credit";
+    $description = "Cadeau de privilège";
+
+    // Insert a record in the transaction_wallet table
+    $insert_transaction_sql = "INSERT INTO transaction_wallet (wallet_id, amount, transaction_type, transaction_date, description) 
+                                       VALUES ('$wallet_id', '$amount', '$transaction_type', '$timestamp', '$description')";
+
+    if (mysqli_query($conn, $insert_transaction_sql)) {
+        echo "Transaction added for wallet ID: $wallet_id<br>";
+    } else {
+        echo "Error adding transaction for wallet ID: $wallet_id - " . mysqli_error($conn) . "<br>";
+    }
+
+    echo "Wallet entry added for user ID: $user_id<br>";
+} else {
+    echo "Error adding wallet entry for user ID: $user_id - " . mysqli_error($conn) . "<br>";
+}
+
 
 
 require "../actions/phpmailer/mail.php";

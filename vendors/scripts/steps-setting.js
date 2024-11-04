@@ -131,10 +131,14 @@ $(".tab-wizard").steps({
     // Always add the 'disabled' class to previous steps
     $(".steps .current").prevAll().addClass("disabled");
   },
-  onFinished: function (event, currentIndex) {
-    // Submit the form when finished
-    $("#example-form").submit(); // Submit the form with id 'example-form'
-  },
+onFinished: function (event, currentIndex) {
+  // Désactive le bouton "Valider" pour éviter la double soumission
+  const $finishButton = $(".actions a[href='#finish']"); // Sélection du bouton "Valider"
+  $finishButton.prop("disabled", true); // Désactiver le bouton
+  
+  // Soumettez le formulaire
+  $("#example-form").submit();
+},
 });
 
 function validateField(input) {
@@ -293,8 +297,12 @@ $(".tab-wizardProce").steps({
     // Always add the 'disabled' class to previous steps
     $(".steps .current").prevAll().addClass("disabled");
   },
-  onFinished: function (event, currentIndex) {
-    // Submit the form when finished
-    $("#example-form").submit(); // Submit the form with id 'example-form'
-  },
+onFinished: function (event, currentIndex) {
+  // Désactive le bouton "Valider" pour éviter la double soumission
+  const $finishButton = $(".actions a[href='#finish']"); // Sélection du bouton "Valider"
+  $finishButton.prop("disabled", true); // Désactiver le bouton
+  
+  // Soumettez le formulaire
+  $("#example-form").submit();
+},
 });
