@@ -26,7 +26,7 @@ if ($conn->connect_error) {
 $sql = "SELECT users.id ,nom, prenom, email,id_card ,  phone, CodeQr, abonnements.type_abonnement 
         FROM users 
         JOIN abonnements ON abonnements.user_id = users.id 
-        WHERE role_id = 3 AND users.id = 328";
+        WHERE role_id = 3 AND users.id = 327";
 
 $result = mysqli_query($conn, $sql);
 

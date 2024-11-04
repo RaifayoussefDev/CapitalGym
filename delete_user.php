@@ -62,6 +62,7 @@ if (isset($_POST['user_id']) && !empty($_POST['user_id'])) {
         // Commit the transaction
         $conn->commit();
         echo "L'utilisateur a été supprimé avec succès.";
+        header('location:supprimer.php');
     } catch (Exception $e) {
         // An error occurred; rollback the transaction
         $conn->rollback();
