@@ -1,6 +1,6 @@
 <?php
 // Database connection
-require "../inc/conn_db.php"
+require "../inc/conn_db.php";
 
 // Fetch all user IDs from the users table
 $sql = "SELECT id FROM users where role_id = 3";
