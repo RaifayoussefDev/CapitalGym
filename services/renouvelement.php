@@ -550,7 +550,7 @@ $conn->close();
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Date Début d'abonnement</label>
-                                            <input type="date" name="date_debut_paiement" class="form-control" value="<?php echo $user['date_debut']; ?>" required />
+                                            <input type="date" name="date_debut_paiement" readonly class="form-control" value="<?php echo $user['date_debut']; ?>" required />
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -1439,45 +1439,44 @@ $conn->close();
     // Global variable to keep track of the number of months added
     var monthsAdded = 0; // Track the number of months added
 
-function adjustEndDate(months) {
-    var dateFinAbn = document.getElementById('date_fin_abn');
-    
-    if (!dateFinAbn) {
-        console.error("Element with id 'date_fin_abn' not found.");
-        return; // Exit if element is not found
-    }
+    function adjustEndDate(months) {
+        var dateFinAbn = document.getElementById('date_fin_abn');
 
-    // Temporarily remove 'readonly' so we can modify the value
-    dateFinAbn.removeAttribute('readonly');
-
-    var endDate = new Date(dateFinAbn.value);
-    console.log("Initial end date:", endDate);
-
-    // Adding months
-    if (months > 0) {
-        if (monthsAdded < 12) {
-            endDate.setMonth(endDate.getMonth() + months); // Add months
-            monthsAdded++; // Increment months added count
-        } else {
-            alert("Vous ne pouvez pas ajouter plus de 12 mois.");
+        if (!dateFinAbn) {
+            console.error("Element with id 'date_fin_abn' not found.");
+            return; // Exit if element is not found
         }
-    }
-    // Subtracting months
-    else {
-        if (monthsAdded > 0) {
-            endDate.setMonth(endDate.getMonth() + months); // Subtract months
-            monthsAdded--; // Decrement months added count
-        } else {
-            alert("Aucun mois à diminuer.");
+
+        // Temporarily remove 'readonly' so we can modify the value
+        dateFinAbn.removeAttribute('readonly');
+
+        var endDate = new Date(dateFinAbn.value);
+
+        // Adding months
+        if (months > 0) {
+            if (monthsAdded < 12) {
+                endDate.setMonth(endDate.getMonth() + months); // Add months
+                monthsAdded++; // Increment months added count
+            } else {
+                alert("Vous ne pouvez pas ajouter plus de 12 mois.");
+            }
         }
+        // Subtracting months
+        else {
+            if (monthsAdded > 0) {
+                endDate.setMonth(endDate.getMonth() + months); // Subtract months
+                monthsAdded--; // Decrement months added count
+            } else {
+                alert("Aucun mois à diminuer.");
+            }
+        }
+
+        // Set the updated value back to the input
+        dateFinAbn.value = endDate.toISOString().split('T')[0];
+
+        // Optionally, you can add the readonly attribute back if needed
+        dateFinAbn.setAttribute('readonly', true);
     }
-
-    // Set the updated value back to the input
-    dateFinAbn.value = endDate.toISOString().split('T')[0];
-
-    // Optionally, you can add the readonly attribute back if needed
-    dateFinAbn.setAttribute('readonly', true);
-}
 
 
 
