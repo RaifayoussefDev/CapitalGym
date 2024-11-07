@@ -55,12 +55,13 @@ SELECT
     a.description, 
     a.id AS id_abonnement, 
     p.id AS id_pack, 
-    MAX(py.id) AS payement_id, 
-    MAX(py.total) AS total, 
-    MAX(p.pack_name) AS pack_name, 
-    MAX(py.reste) AS reste, 
-    MAX(a.date_debut) AS date_debut, 
-    MAX(a.date_fin) AS date_fin 
+    py.id AS payement_id, 
+    py.total AS total, 
+    p.pack_name AS pack_name, 
+    py.reste AS reste, 
+    a.date_debut AS date_debut, 
+    a.date_fin AS date_fin 
+    py.montant_paye as montant_paye
 FROM 
     users u 
 JOIN 
@@ -582,10 +583,13 @@ $conn->close();
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Reste :</label>
-                                            <input type="text" name="reste" id="reste"
-                                                value="<?php echo $user['reste'] - $user['montant_paye']; ?>"
+                                            <input
+                                                type="text"
+                                                name="reste"
+                                                id="reste"
+                                                value="<?php echo isset($user['total'], $user['montant_paye']) ? $user['total'] - $user['montant_paye'] : 0; ?>"
                                                 class="form-control"
-                                                <?php if ($profil != 1) echo 'readonly'; ?> />
+                                                <?php echo ($profil != 1) ? 'readonly' : ''; ?> />
                                         </div>
                                     </div>
 
