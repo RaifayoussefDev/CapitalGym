@@ -583,7 +583,7 @@ $conn->close();
                                         <div class="form-group">
                                             <label>Reste :</label>
                                             <input type="text" name="reste" id="reste"
-                                                value="<?php echo htmlspecialchars($user['reste']); ?>"
+                                                value="<?php echo $user['reste'] - $user['montant_paye']; ?>"
                                                 class="form-control"
                                                 <?php if ($profil != 1) echo 'readonly'; ?> />
                                         </div>
