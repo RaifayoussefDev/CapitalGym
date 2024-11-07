@@ -123,126 +123,54 @@ $table->addCell(5000)->addText('ET Mme/Mr           ', [ // Adjust cell width as
     'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT
 ]);
 // Add a new row for additional information
-$table->addRow();
-
-// Add the left cell with a bordered frame for the address
-$leftCell = $table->addCell(5000, [
-    'borderSize' => 1,
-    'borderColor' => '000000',
-    'valign' => 'top', // Align content to the top of the cell
-]);
-
-// Add the address text inside the left cell
-$leftCell->addText("PRIVILEGE LUXURY FITNESS CLUB\n111 BOULEVARD MODIBO KEITA\nCASABLANCA\nMAROC", [
+// Ajouter le texte pour le Club et l'adhérent dans le même bloc, sans table
+$section->addText("PRIVILEGE LUXURY FITNESS CLUB ayant son siège social à Casablanca, 111 boulevard MODIBO KEITA.\nD’une part ;", [
     'name' => 'Times New Roman',
-    'size' => 8,
-], [
-    'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT
-]);
-// Add the right cell with a nested mini table for user details
-$rightCell = $table->addCell(5000, [
-    'valign' => 'top', // Align content to the top of the cell
+    'size' => 10,
 ]);
 
-// Create a nested table within the right cell for the user information
-$miniTable = $rightCell->addTable(['borderSize' => 0, 'cellMargin' => 20, 'borderColor' => 'ffffff']);
-
-$miniTable->addRow();
-$miniTable->addCell(4000)->addText("Nom et Prénom", [
-    'name' => 'Arial',
-    'size' => 8,
+$section->addText("Ci-après dénommé « Club »", [
+    'name' => 'Times New Roman',
+    'size' => 10,
     'bold' => true,
 ]);
-$miniTable->addCell(4000)->addText("Raifa Youssef", [
-    'name' => 'Arial',
-    'size' => 8,
-]);
 
-$miniTable->addRow();
-$miniTable->addCell(4000)->addText("Né le", [
-    'name' => 'Arial',
-    'size' => 8,
+$section->addTextBreak(1); // Ajoute un saut de ligne
+
+$section->addText("ET :", [
+    'name' => 'Times New Roman',
+    'size' => 10,
     'bold' => true,
 ]);
-$miniTable->addCell(4000)->addText("10/07/1998 a: Casablanca", [
-    'name' => 'Arial',
-    'size' => 8,
+
+$section->addText("Mme / Mr : Nom / Prénom, né le ../../…., demeurant à ……(Adresse) … (ville), titulaire de la CIN n …………..", [
+    'name' => 'Times New Roman',
+    'size' => 10,
 ]);
 
-$miniTable->addRow();
-$miniTable->addCell(4000)->addText("Adresse, Ville", [
-    'name' => 'Arial',
-    'size' => 8,
+$section->addText("GSM : ………   Profession : ……………..   Employeur : ………………..", [
+    'name' => 'Times New Roman',
+    'size' => 10,
+]);
+
+$section->addText("E-mail : ……………………… Personne à contacter en cas d’urgence : ……………", [
+    'name' => 'Times New Roman',
+    'size' => 10,
+]);
+
+$section->addTextBreak(1); // Ajoute un saut de ligne
+
+$section->addText("Ci-après dénommé « Adhérent »", [
+    'name' => 'Times New Roman',
+    'size' => 10,
     'bold' => true,
 ]);
-$miniTable->addCell(4000)->addText("Mimouna 2 Rue 41 N° 39, Casablanca", [
-    'name' => 'Arial',
-    'size' => 8,
+
+$section->addText("D’autre part ;", [
+    'name' => 'Times New Roman',
+    'size' => 10,
 ]);
 
-$miniTable->addRow();
-$miniTable->addCell(4000)->addText("CIN", [
-    'name' => 'Arial',
-    'size' => 8,
-    'bold' => true,
-]);
-$miniTable->addCell(4000)->addText("BL151132", [
-    'name' => 'Arial',
-    'size' => 8,
-]);
-
-$miniTable->addRow();
-$miniTable->addCell(4000)->addText("Tél portable, Tél fixe", [
-    'name' => 'Arial',
-    'size' => 8,
-    'bold' => true,
-]);
-$miniTable->addCell(4000)->addText("+212688808238, +212522342244", [
-    'name' => 'Arial',
-    'size' => 8,
-]);
-
-$miniTable->addRow();
-$miniTable->addCell(4000)->addText("Profession, Société", [
-    'name' => 'Arial',
-    'size' => 8,
-    'bold' => true,
-]);
-$miniTable->addCell(4000)->addText("Développeur Web, CAPITALSOFT", [
-    'name' => 'Arial',
-    'size' => 8,
-]);
-
-$miniTable->addRow();
-$miniTable->addCell(4000)->addText("E-mail", [
-    'name' => 'Arial',
-    'size' => 8,
-    'bold' => true,
-]);
-$miniTable->addCell(4000)->addText("Yucefr@gmail.com", [
-    'name' => 'Arial',
-    'size' => 8,
-]);
-
-$miniTable->addRow();
-$miniTable->addCell(4000)->addText("Personne à contacter en cas d'urgence", [
-    'name' => 'Arial',
-    'size' => 8,
-    'bold' => true,
-]);
-$miniTable->addCell(4000)->addText("+212666835011", [
-    'name' => 'Arial',
-    'size' => 8,
-]);
-
-$section->addTextBreak(1);
-// Ajouter une ligne horizontale après le tableau
-$section->addLine([
-    'width' => \PhpOffice\PhpWord\Shared\Converter::cmToPoint(16), // Largeur de la ligne (ajustez selon vos besoins)
-    'height' => 1, // Épaisseur de la ligne
-    'color' => '000000', // Couleur de la ligne en hexadécimal (ici, noir)
-    'align' => 'center', // Alignement de la ligne (centre)
-]);
 
 // Ajouter le texte après la ligne
 $section->addText(
