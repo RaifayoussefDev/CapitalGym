@@ -117,72 +117,80 @@ $stmt->close();
 
 // Update payment details
 if (isset($_POST['type_paiement'], $_POST['montant_paye'], $_POST['reste'], $_POST['total_activites'])) {
-    foreach ($_POST['type_paiement'] as $index => $type_paiement_id) {
-        $montant_paye = floatval($_POST['montant_paye'][$index]);
-        $reste = floatval($_POST['reste'][$index]);
-        $total = floatval($_POST['total_activites']);
+    $conn->begin_transaction(); // Start a transaction
 
-        // Insert payment details
-        $payment_sql = "INSERT INTO `payments` (`montant_paye`, `reste`, `total`, `user_id`, `abonnement_id`, `type_paiement_id`) 
-                        VALUES (?, ?, ?, ?, ?, ?)";
-        $stmt = $conn->prepare($payment_sql);
-        if ($stmt) {
-            $stmt->bind_param("ddiiii", $montant_paye, $reste, $total, $user_id, $abonnement_id, $type_paiement_id);
-            $stmt->execute();
-            $payment_id = $conn->insert_id; // Get the last inserted payment ID
-            $stmt->close();
-        } else {
-            $conn->rollback();
-            throw new Exception("Failed to prepare payment insert: " . $conn->error);
-        }
+    try {
+        foreach ($_POST['type_paiement'] as $index => $type_paiement_id) {
+            $montant_paye = floatval($_POST['montant_paye'][$index]);
+            $reste = floatval($_POST['reste'][$index]);
+            $total = floatval($_POST['total_activites']);
 
-        // If payment type is cheque, insert cheque details
-        if ($type_paiement_id == 3) {
-            $nomTitulaire = $_POST['nomTitulaire'][$index] ?? null;
-            $numeroCheque = $_POST['numeroCheque'][$index] ?? null;
-            $dateEmission = $_POST['dateEmission'][$index] ?? null;
-            $banqueEmettrice = $_POST['banqueEmettrice'][$index] ?? null;
-            $numeroCompte = $_POST['numeroCompte'][$index] ?? null;
-
-            if ($nomTitulaire && $numeroCheque && $dateEmission && $banqueEmettrice) {
-                $cheque_sql = "INSERT INTO `cheque` (`nomTitulaire`, `numeroCheque`, `dateEmission`, `banqueEmettrice`, `numeroCompte`, `payment_id`)
-                               VALUES (?, ?, ?, ?, ?, ?)";
-                $stmt = $conn->prepare($cheque_sql);
-                if ($stmt) {
-                    $stmt->bind_param("sssssi", $nomTitulaire, $numeroCheque, $dateEmission, $banqueEmettrice, $numeroCompte, $payment_id);
-                    $stmt->execute();
-                    $stmt->close();
-                } else {
-                    // Handle SQL prepare error for cheque insertion
-                    continue; // Skip this iteration if the statement preparation fails
-                }
-            }
-        }
-        // If payment type is virement, insert virement details
-        elseif ($type_paiement_id == 4) {
-            // Ensure virement details are set
-            $nomEmetteur = $_POST['nomEmetteur'][$index] ?? null; // Nom de l'émetteur
-            $dateImitation = $_POST['dateImitation'][$index] ?? null; // Date d'imitation
-            $reference = $_POST['reference'][$index] ?? null; // Référence
-            $banqueEmettrice = $_POST['banqueEmettrice'][$index] ?? null; // Banque émettrice
-
-            // Validate virement details
-            if (!empty($nomEmetteur) && !empty($dateImitation) && !empty($reference) && !empty($banqueEmettrice)) {
-                $virement_sql = "INSERT INTO `virement` (nomEmetteur, dateImitation, reference, banqueEmettrice, id_utilisateur, abonnement_id, payment_id)
-                                 VALUES (?, ?, ?, ?, ?, ?, ?)";
-                $stmt = $conn->prepare($virement_sql);
-                if ($stmt) {
-                    $stmt->bind_param("sssssii", $nomEmetteur, $dateImitation, $reference, $banqueEmettrice, $user_id, $abonnement_id, $payment_id);
-                    $stmt->execute();
-                    $stmt->close();
-                } else {
-                    // Handle SQL prepare error for virement insertion
-                    continue; // Skip this iteration if the statement preparation fails
-                }
+            // Insert payment details
+            $payment_sql = "INSERT INTO `payments` (`montant_paye`, `reste`, `total`, `user_id`, `abonnement_id`, `type_paiement_id`) 
+                            VALUES (?, ?, ?, ?, ?, ?)";
+            $stmt = $conn->prepare($payment_sql);
+            if ($stmt) {
+                $stmt->bind_param("ddiiii", $montant_paye, $reste, $total, $user_id, $abonnement_id, $type_paiement_id);
+                $stmt->execute();
+                $payment_id = $conn->insert_id; // Get the last inserted payment ID
+                $stmt->close();
             } else {
-                // Handle missing virement details (e.g., set an error message)
+                throw new Exception("Failed to prepare payment insert: " . $conn->error);
+            }
+
+            // If payment type is cheque, insert cheque details
+            if ($type_paiement_id == 3) {
+                $nomTitulaire = $_POST['nomTitulaire'][$index] ?? null;
+                $numeroCheque = $_POST['numeroCheque'][$index] ?? null;
+                $dateEmission = $_POST['dateEmission'][$index] ?? null;
+                $banqueEmettrice = $_POST['banqueEmettrice'][$index] ?? null;
+                $numeroCompte = $_POST['numeroCompte'][$index] ?? null;
+
+                if ($nomTitulaire && $numeroCheque && $dateEmission && $banqueEmettrice) {
+                    $cheque_sql = "INSERT INTO `cheque` (`nomTitulaire`, `numeroCheque`, `dateEmission`, `banqueEmettrice`, `numeroCompte`, `payment_id`, `abonnement_id`, `id_utilisateur`)
+                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                    $stmt = $conn->prepare($cheque_sql);
+                    if ($stmt) {
+                        $stmt->bind_param("sssssiis", $nomTitulaire, $numeroCheque, $dateEmission, $banqueEmettrice, $numeroCompte, $payment_id, $abonnement_id, $user_id);
+                        $stmt->execute();
+                        $stmt->close();
+                    } else {
+                        throw new Exception("Failed to prepare cheque insert: " . $conn->error);
+                    }
+                }
+            }
+
+            // If payment type is virement, insert virement details
+            elseif ($type_paiement_id == 4) {
+                $nomEmetteur = $_POST['nomEmetteur'][$index] ?? null;
+                $dateImitation = $_POST['dateImitation'][$index] ?? null;
+                $reference = $_POST['reference'][$index] ?? null;
+                $banqueEmettrice = $_POST['banqueEmettrice'][$index] ?? null;
+
+                // Validate virement details
+                if (!empty($nomEmetteur) && !empty($dateImitation) && !empty($reference) && !empty($banqueEmettrice)) {
+                    $virement_sql = "INSERT INTO `virement` (nomEmetteur, dateImitation, reference, banqueEmettrice, id_utilisateur, abonnement_id, payment_id)
+                                     VALUES (?, ?, ?, ?, ?, ?, ?)";
+                    $stmt = $conn->prepare($virement_sql);
+                    if ($stmt) {
+                        $stmt->bind_param("sssssii", $nomEmetteur, $dateImitation, $reference, $banqueEmettrice, $user_id, $abonnement_id, $payment_id);
+                        $stmt->execute();
+                        $stmt->close();
+                    } else {
+                        throw new Exception("Failed to prepare virement insert: " . $conn->error);
+                    }
+                } else {
+                    throw new Exception("Missing virement details for payment type ID: $type_paiement_id");
+                }
             }
         }
+
+        // Commit the transaction if all queries succeed
+        $conn->commit();
+    } catch (Exception $e) {
+        // Rollback the transaction in case of error
+        $conn->rollback();
+        echo "Error: " . $e->getMessage();
     }
 }
 
