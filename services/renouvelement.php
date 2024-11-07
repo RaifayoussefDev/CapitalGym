@@ -53,14 +53,14 @@ SELECT
     p.package_type_id, 
     a.offres_promotionnelles, 
     a.description, 
-    a.id AS id_abonnement, 
     p.id AS id_pack, 
-    MAX(py.id) AS payement_id, 
-    MAX(py.total) AS total, 
-    MAX(p.pack_name) AS pack_name, 
-    MAX(py.reste) AS reste, 
-    MAX(a.date_debut) AS date_debut, 
-    MAX(a.date_fin) AS date_fin 
+    SUM(py.montant_paye) AS montant_paye_total, -- Total montant_paye for the user
+    py.id AS payement_id, 
+    py.total AS total, 
+    p.pack_name AS pack_name, 
+    py.reste AS reste, 
+    a.date_debut AS date_debut, 
+    a.date_fin AS date_fin
 FROM 
     users u 
 JOIN 
@@ -71,7 +71,7 @@ JOIN
     payments py ON py.abonnement_id = a.id 
 WHERE 
     u.role_id = 3 
-    AND u.id = '$id_user' 
+    AND u.id = '$id_user'
 GROUP BY 
     u.id, a.id, p.id;
 ";
@@ -419,7 +419,7 @@ $conn->close();
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Conventions d'adhésion</label>
-                                            <select disabled name="convention" id="convention" class="form-select form-control-lg" onchange="filterCategories()">
+                                            <select name="convention" id="convention" class="form-select form-control-lg" onchange="filterCategories()">
                                                 <option value="YES" <?= $user['package_type_id'] == 8 ? 'selected' : '' ?>>Oui</option>
                                                 <option value="NO" <?= $user['package_type_id'] != 8 ? 'selected' : '' ?>>Non</option>
                                             </select>
@@ -429,7 +429,7 @@ $conn->close();
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Catégorie d'adhésion</label>
-                                            <select disabled name="categorie_adherence" id="categorie_adherence" class="form-select form-control-lg" onchange="updateAbonnementOptions()">
+                                            <select name="categorie_adherence" id="categorie_adherence" class="form-select form-control-lg" onchange="updateAbonnementOptions()">
                                                 <?php
                                                 // Séparer l'option sélectionnée des autres
                                                 $selectedOption = null;
@@ -476,7 +476,7 @@ $conn->close();
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Type d'abonnement</label>
-                                            <select name="type_abonnement" id="type_abonnement" disabled class="form-select form-control-lg">
+                                            <select name="type_abonnement" id="type_abonnement" class="form-select form-control-lg">
                                                 <!-- Options dynamically added by JavaScript -->
                                             </select>
                                         </div>
@@ -485,7 +485,7 @@ $conn->close();
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Offres promotionnelles</label>
-                                            <input type="text" class="form-control" id="offre_promo" name="offre_promo" placeholder="Offre promotionnelle" readonly value="<?php echo $user['offres_promotionnelles']; ?>" />
+                                            <input type="text" class="form-control" id="offre_promo" name="offre_promo" placeholder="Offre promotionnelle" value="<?php echo $user['offres_promotionnelles']; ?>" />
                                         </div>
                                     </div>
                                 </div>
@@ -493,7 +493,7 @@ $conn->close();
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label>Description</label>
-                                            <textarea name="description" id="description" class="form-control" placeholder="Ajouter une description" readonly><?php echo $user['description']; ?></textarea>
+                                            <textarea name="description" id="description" class="form-control" placeholder="Ajouter une description"><?php echo $user['description']; ?></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -550,7 +550,7 @@ $conn->close();
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Date Début d'abonnement</label>
-                                            <input type="date" name="date_debut_paiement" class="form-control" value="<?php echo $user['date_debut']; ?>" required readonly />
+                                            <input type="date" name="date_debut_paiement" class="form-control" value="<?php echo $user['date_debut']; ?>" required />
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -558,6 +558,10 @@ $conn->close();
                                             <label>Date de fin d’abonnement</label>
                                             <div class="input-group">
                                                 <input type="date" name="date_fin_abn" class="form-control" value="<?php echo $user['date_fin']; ?>" readonly />
+                                                <div id="adjustButtons">
+                                                    <button type="button" class="btn btn-dark" onclick="adjustEndDate(1)">+</button>
+                                                    <button type="button" class="btn btn-dark" onclick="adjustEndDate(-1)">-</button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -566,26 +570,41 @@ $conn->close();
                             <h5>Paiement</h5>
                             <section>
                                 <div class="row">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Total :</label>
-                                            <input type="text" name="total" id="total"
+                                            <input type="text" name="total99" id="total"
                                                 value="<?php echo htmlspecialchars($user['total']); ?>"
                                                 class="form-control"
                                                 <?php if ($profil != 1) echo 'readonly'; ?> />
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Reste :</label>
-                                            <input type="text" name="reste" id="reste"
-                                                value="<?php echo htmlspecialchars($user['reste']); ?>"
+                                            <input
+                                                type="text"
+                                                name="reste"
+                                                id="reste"
+                                                value="<?php echo isset($user['total'], $user['montant_paye_total']) ? $user['total'] - $user['montant_paye_total'] : 0; ?>"
                                                 class="form-control"
-                                                <?php if ($profil != 1) echo 'readonly'; ?> />
+                                                readonly />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Montant Payé :</label>
+                                            <input
+                                                type="text"
+                                                name="montant_paye_input"
+                                                id="montant_paye_input"
+                                                value="<?php echo $user['montant_paye_total']; ?>"
+                                                class="form-control"
+                                                <?php echo ($profil != 1) ? 'readonly' : ''; ?> />
                                         </div>
                                     </div>
 
-                                    <div class="col-md-4 d-flex align-items-end">
+                                    <div class="col-md-3 d-flex align-items-end">
                                         <div class="form-group">
                                             <button type="button" class="btn btn-secondary" id="add_mode_payement">Ajouter un mode de paiement</button>
                                         </div>
@@ -704,7 +723,7 @@ $conn->close();
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Montant Payé</label>
-                                                <input type="text" name="montant_paye[]" class="form-control montant_paye" />
+                                                <input type="text" name="montant_paye[]" class="form-control montant_paye" onchange="calculateReste()" />
                                             </div>
                                         </div>
                                     </div>
@@ -770,7 +789,7 @@ $conn->close();
                                                         <option value="Société de Crédit à la Consommation">Société de Crédit à la Consommation</option>
                                                         <option value="Wafa Bank">Wafa Bank</option>
                                                         <option value="CFG Bank">CFG Bank</option>
-                                                                    <option value="BANK ASSAFA">BANK ASSAFA</option>
+                                                        <option value="BANK ASSAFA">BANK ASSAFA</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -832,7 +851,7 @@ $conn->close();
                                                         <option value="Société de Crédit à la Consommation">Société de Crédit à la Consommation</option>
                                                         <option value="Wafa Bank">Wafa Bank</option>
                                                         <option value="CFG Bank">CFG Bank</option>
-                                                                    <option value="BANK ASSAFA">BANK ASSAFA</option>
+                                                        <option value="BANK ASSAFA">BANK ASSAFA</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -1176,6 +1195,41 @@ $conn->close();
         calculateDateFin();
     }
 
+    function calculateTotal() {
+        var selectedPackage = document.getElementById('categorie_adherence').selectedOptions[0];
+        var selectedAbonnement = document.getElementById('type_abonnement').value;
+
+        var price;
+        if (selectedAbonnement === '0.03') {
+            price = selectedPackage.getAttribute('data-daily');
+        } else if (selectedAbonnement === '1') {
+            price = selectedPackage.getAttribute('data-monthly');
+        } else if (selectedAbonnement === '3') {
+            price = selectedPackage.getAttribute('data-trimestrial');
+        } else if (selectedAbonnement === '6') {
+            price = selectedPackage.getAttribute('data-semestrial');
+        } else if (selectedAbonnement === '12') {
+            price = selectedPackage.getAttribute('data-annual');
+        }
+
+        if (price) {
+            document.getElementById('total').value = price;
+            updateReste();
+        } else {
+            document.getElementById('total').value = '';
+            document.getElementById('reste').value = '';
+        }
+    }
+
+    function updateReste() {
+        var total = parseFloat(document.getElementById('total').value) || 0;
+        var montantPaye = parseFloat(document.getElementById('montant_paye_input').value) || 0;
+        document.getElementById('reste').value = total - montantPaye;
+    }
+
+    // Attach event listeners
+    document.getElementById('total').addEventListener('input', updateReste);
+    document.getElementById('montant_paye_input').addEventListener('input', updateReste);
 
     function filterCategories() {
         var conventionSelect = document.getElementById('convention');
@@ -1254,14 +1308,70 @@ $conn->close();
         }
     }
 
+    let paymentModeIndex = 0; // Initialize the payment mode index
+
+    function addPaymentMode() {
+        if (!resteInput || !paymentModesContainer) return;
+
+        const remainingAmount = parseFloat(resteInput.value.replace(' MAD', '')) || 0;
+
+        if (remainingAmount <= 0) {
+            alert("Le montant total a été atteint. Vous ne pouvez pas ajouter un autre mode de paiement.");
+            return;
+        }
+
+        const newPaymentMode = document.importNode(paymentModeTemplate, true);
+
+        newPaymentMode.querySelector('.type_paiement').name = `type_paiement[${paymentModeIndex}]`;
+        newPaymentMode.querySelector('.montant_paye').name = `montant_paye[${paymentModeIndex}]`;
+        newPaymentMode.querySelector('input[name="nomTitulaire[]"]').name = `nomTitulaire[${paymentModeIndex}]`;
+        newPaymentMode.querySelector('input[name="numeroCheque[]"]').name = `numeroCheque[${paymentModeIndex}]`;
+        newPaymentMode.querySelector('input[name="dateEmission[]"]').name = `dateEmission[${paymentModeIndex}]`;
+        newPaymentMode.querySelector('input[name="numeroCompte[]"]').name = `numeroCompte[${paymentModeIndex}]`;
+        newPaymentMode.querySelector('select[name="banqueEmettrice[]"]').name = `banqueEmettrice[${paymentModeIndex}]`;
+
+        const typePaiementSelect = newPaymentMode.querySelector('.type_paiement');
+        const montantPayeInput = newPaymentMode.querySelector('.montant_paye');
+        const sectionCheque = newPaymentMode.querySelector('.section_cheque');
+        const sectionVirement = newPaymentMode.querySelector('.section_virement');
+        const labelCheque = newPaymentMode.querySelector('.label_cheque');
+
+        // Event listener for montant_paye input change
+        montantPayeInput.addEventListener('input', function() {
+            const enteredAmount = parseFloat(montantPayeInput.value) || 0;
+            if (enteredAmount > remainingAmount) {
+                montantPayeInput.value = remainingAmount.toFixed(2);
+                alert("Le montant saisi dépasse le reste à payer.");
+            }
+            calculateReste(); // Call calculateReste whenever the amount changes
+        });
+
+        // Event listener for type_paiement select change
+        typePaiementSelect.addEventListener('change', function() {
+            toggleChequeSection(typePaiementSelect, sectionCheque, labelCheque);
+            toggleVirementSection(typePaiementSelect, sectionVirement, labelCheque);
+        });
+
+        // Append the new payment mode to the container
+        paymentModesContainer.appendChild(newPaymentMode);
+
+        // Increment the payment mode index
+        paymentModeIndex++;
+
+        // Recalculate the remaining amount
+        calculateReste();
+    }
+
+
     function calculateReste() {
-        const totalInput = document.getElementById('reste_activites');
+        const totalInput = document.getElementById('total');
         const resteInput = document.getElementById('reste');
         const montantPayeInputs = document.querySelectorAll('.montant_paye');
+        const montantPayeInput_2 = document.getElementById('montant_paye_input'); // Fixed selector here
 
-        if (!totalInput || !resteInput) return;
+        if (!totalInput || !resteInput || !montantPayeInput_2) return; // Added check for montantPayeInput_2
 
-        const totalText = totalInput.value.replace(' MAD', '');
+        const totalText = totalInput.value.replace(' MAD', '').trim(); // Remove extra spaces
         const total = parseFloat(totalText) || 0;
 
         let totalPaid = 0;
@@ -1270,9 +1380,13 @@ $conn->close();
             totalPaid += value;
         });
 
-        const remaining = total - totalPaid;
+        const additionalPaid = parseFloat(montantPayeInput_2.value) || 0; // Ensure montantPayeInput_2 is parsed as a number
+
+        const remaining = total - totalPaid - additionalPaid;
         resteInput.value = remaining.toFixed(2) + ' MAD';
     }
+
+
 
     function generateMatricule() {
         const matriculeInput = document.getElementById('matricule'); // Matricule display (for visual purposes)
@@ -1321,6 +1435,7 @@ $conn->close();
     }
 
     // Function to adjust the end date by a number of months
+    // Global variable to keep track of the number of months added
     // Global variable to keep track of the number of months added
     let monthsAdded = 0;
 
@@ -1471,7 +1586,7 @@ if ($profil == 4) {; ?>
                     montantPayeInput.value = remainingAmount.toFixed(2);
                     alert("Le montant saisi dépasse le reste à payer.");
                 }
-                calculateReste();
+                // calculateReste();
             });
 
             typePaiementSelect.addEventListener('change', function() {

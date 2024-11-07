@@ -717,7 +717,7 @@ $conn->close();
                                                     </div>
                                                     <div class="col-md-3">
                                                         <div class="form-group">
-                                                            <input type="email" class="form-control" id="email" name="email" placeholder="Email"/>
+                                                            <input type="email" class="form-control" id="email" name="email" placeholder="Email" />
                                                             <small class="text-danger" id="email-error" style="display:none;">Ce champ est obligatoire</small>
                                                         </div>
                                                     </div>
@@ -910,12 +910,14 @@ $conn->close();
                                                     <a href="modif_procp.php?id_user=<?php echo htmlspecialchars($proceP['id']); ?>" class="btn btn-warning btn-modify">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
-                                                    <?php //if ($profil == 1): ?>
-                                                        <!-- Delete Button -->
-                                                        <a href="delete_procp.php?id_user=<?php echo htmlspecialchars($proceP['id']); ?>" class="btn btn-danger btn-delete" onclick="return confirm('Are you sure you want to delete this record?');">
-                                                            <i class="fas fa-trash"></i>
-                                                        </a>
-                                                    <!-- <?php //endif; ?> -->
+                                                    <?php //if ($profil == 1): 
+                                                    ?>
+                                                    <!-- Delete Button -->
+                                                    <a href="delete_procp.php?id_user=<?php echo htmlspecialchars($proceP['id']); ?>" class="btn btn-danger btn-delete" onclick="return confirm('Are you sure you want to delete this record?');">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                    <!-- <?php //endif; 
+                                                            ?> -->
                                                 <?php endif; ?>
 
                                             </td>
