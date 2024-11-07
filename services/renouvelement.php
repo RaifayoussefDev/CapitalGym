@@ -60,7 +60,7 @@ SELECT
     p.pack_name AS pack_name, 
     py.reste AS reste, 
     a.date_debut AS date_debut, 
-    a.date_fin AS date_fin 
+    a.date_fin AS date_fin ,
     py.montant_paye as montant_paye
 FROM 
     users u 
