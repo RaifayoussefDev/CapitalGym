@@ -88,87 +88,51 @@ $frame->addText('CONTRAT N° :        2401', [
     'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER
 ]);
 
-
-
-// Create a table that spans the full width with invisible borders
-$table = $section->addTable([
-    'borderColor' => 'ffffff', // Invisible borders
-    'borderSize' => 0,
-    'cellMargin' => 150, // Margin between cells
-]);
-
-// Set the width of the table to 100% (relative to page width)
-$table->setWidth(100 * 50); // Percentage width (100%) for full width on the page
-
-// Add a row for the titles
-$table->addRow();
-
 // Add the title "ENTREE" to the left cell, setting a wider width to span half the table width
-$table->addCell(5000)->addText('ENTREE              ', [ // Adjust cell width as needed
+$section->addText('Entree', [ // Adjust cell width as needed
     'name' => 'Arial',
-    'size' => 12,
+    'size' => 8,
     'bold' => true,
     'underline' => 'single' // Underline the text
 ], [
     'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT
 ]);
 
-// Add the title "ET Mme/Mr" to the right cell, setting a wider width to span half the table width
-$table->addCell(5000)->addText('ET Mme/Mr           ', [ // Adjust cell width as needed
-    'name' => 'Arial',
-    'size' => 12,
-    'bold' => true,
-    'underline' => 'single' // Underline the text
-], [
-    'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT
-]);
 // Add a new row for additional information
 // Ajouter le texte pour le Club et l'adhérent dans le même bloc, sans table
 $section->addText("PRIVILEGE LUXURY FITNESS CLUB ayant son siège social à Casablanca, 111 boulevard MODIBO KEITA.\nD’une part ;", [
     'name' => 'Times New Roman',
-    'size' => 10,
+    'size' => 8,
 ]);
 
 $section->addText("Ci-après dénommé « Club »", [
     'name' => 'Times New Roman',
-    'size' => 10,
+    'size' => 8,
     'bold' => true,
 ]);
-
-$section->addTextBreak(1); // Ajoute un saut de ligne
 
 $section->addText("ET :", [
     'name' => 'Times New Roman',
-    'size' => 10,
+    'size' => 8,
     'bold' => true,
 ]);
 
-$section->addText("Mme / Mr : Nom / Prénom, né le ../../…., demeurant à ……(Adresse) … (ville), titulaire de la CIN n …………..", [
+$section->addText("Mme / Mr : Nom / Prénom, né le ../../…., demeurant à ……(Adresse) … (ville), titulaire de la CIN n ………….. GSM : ………   Profession : ……………..   Employeur : ……………….. E-mail : ……………………… Personne à contacter en cas d’urgence : ……………", [
     'name' => 'Times New Roman',
-    'size' => 10,
+    'size' => 8,
 ]);
 
-$section->addText("GSM : ………   Profession : ……………..   Employeur : ………………..", [
-    'name' => 'Times New Roman',
-    'size' => 10,
-]);
 
-$section->addText("E-mail : ……………………… Personne à contacter en cas d’urgence : ……………", [
-    'name' => 'Times New Roman',
-    'size' => 10,
-]);
-
-$section->addTextBreak(1); // Ajoute un saut de ligne
 
 $section->addText("Ci-après dénommé « Adhérent »", [
     'name' => 'Times New Roman',
-    'size' => 10,
+    'size' => 8,
     'bold' => true,
 ]);
 
 $section->addText("D’autre part ;", [
     'name' => 'Times New Roman',
-    'size' => 10,
+    'size' => 8,
 ]);
 
 
@@ -300,8 +264,6 @@ $table->addCell(2000)->addText(' Groupe', ['name' => 'Arial', 'size' => 8]); // 
 $table->addCell(500)->addText('O', ['name' => 'Arial', 'size' => 8]); // Simule le bouton radio
 $table->addCell(2000)->addText(' Convention', ['name' => 'Arial', 'size' => 8]); // Texte
 
-// Ajouter une ligne pour les boutons radio
-$table->addRow();
 
 // Ajouter une nouvelle table pour les informations de l'abonnement
 $table = $section->addTable([
@@ -350,7 +312,7 @@ $section->addText(
 $table = $section->addTable([
     'borderColor' => 'ffffff',
     'borderSize' => 0, // Bordures invisibles
-    'cellMargin' => 150, // Espacement interne des cellules
+    'cellMargin' => 10, // Espacement interne des cellules
 ]);
 
 // Ajouter une ligne pour "SOIT UN MONTANT TOTAL..."
@@ -379,15 +341,10 @@ $table->addCell(4000)->addText("TOTAL A REGLER : .........DH TTC", [
     'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::RIGHT, // Aligné à droite
 ]);
 
-// Ajouter un espace après la table si nécessaire
-$section->addTextBreak(1);
-
-
 // Créer la table principale avec deux colonnes
 $mainTable = $section->addTable([
     'borderColor' => 'ffffff',
     'borderSize' => 0,
-    'cellMargin' => 150,
 ]);
 
 // Colonne de gauche : Texte, boutons radio, et tableau pour les modes de paiement
@@ -409,7 +366,6 @@ $leftCell->addText("         ⃝ Chèque       ⃝ Espèce       ⃝ Carte      
 $paymentTable = $leftCell->addTable([
     'borderColor' => '000000',
     'borderSize' => 1,
-    'cellMargin' => 100,
 ]);
 
 // Ajouter l'entête des colonnes
@@ -418,16 +374,21 @@ $paymentTable->addCell(3000)->addText("Mode", [
     'name' => 'Arial',
     'size' => 8,
     'bold' => true,
+    'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER
+
 ]);
 $paymentTable->addCell(1500)->addText("Montant", [
     'name' => 'Arial',
     'size' => 8,
     'bold' => true,
+    'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER
+
 ]);
 $paymentTable->addCell(3000)->addText("N° Pièce", [
     'name' => 'Arial',
     'size' => 8,
     'bold' => true,
+    'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER
 ]);
 
 // Ligne pour le paiement en espèces
@@ -447,7 +408,11 @@ $paymentTable->addRow();
 $paymentTable->addCell(3000)->addText("Carte", ['name' => 'Arial', 'size' => 8]);
 $paymentTable->addCell(1500)->addText("…………DH", ['name' => 'Arial', 'size' => 8]);
 $paymentTable->addCell(3000)->addText("………………………", ['name' => 'Arial', 'size' => 8]);
-
+// Ligne pour le paiement par virement
+$paymentTable->addRow();
+$paymentTable->addCell(3000)->addText("Virement", ['name' => 'Arial', 'size' => 8]);
+$paymentTable->addCell(1500)->addText("…………DH", ['name' => 'Arial', 'size' => 8]);
+$paymentTable->addCell(3000)->addText("………………………", ['name' => 'Arial', 'size' => 8 ,'borderBottomSize' => 6,]);
 
 // Colonne de droite : Observations avec un cadre de texte simple
 $rightCell = $mainTable->addCell(5000);
@@ -457,17 +422,6 @@ $rightCell->addText("Pour tout règlement, prière d'exiger un reçu. Ce dernier
     'name' => 'Arial',
     'size' => 8,
 ]);
-
-// Ajouter le cadre pour les observations
-$rightCell->addTextBreak(1);
-$rightCell->addTextBox([
-    'borderColor' => '000000',
-    'borderSize' => 1,
-    'width' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(3), // Ajuster la largeur pour un cadre plus petit
-    'height' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1), // Ajuster la hauteur pour un cadre plus petit
-])->addText("Observations :", ['name' => 'Arial', 'size' => 8]);
-
-
 
 
 

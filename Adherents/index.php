@@ -910,12 +910,12 @@ $conn->close();
                                                     <a href="modif_procp.php?id_user=<?php echo htmlspecialchars($proceP['id']); ?>" class="btn btn-warning btn-modify">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
-                                                    <?php if ($profil == 1): ?>
+                                                    <?php //if ($profil == 1): ?>
                                                         <!-- Delete Button -->
                                                         <a href="delete_procp.php?id_user=<?php echo htmlspecialchars($proceP['id']); ?>" class="btn btn-danger btn-delete" onclick="return confirm('Are you sure you want to delete this record?');">
                                                             <i class="fas fa-trash"></i>
                                                         </a>
-                                                    <?php endif; ?>
+                                                    <!-- <?php //endif; ?> -->
                                                 <?php endif; ?>
 
                                             </td>
