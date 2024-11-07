@@ -15,10 +15,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "SELECT users.id, nom, prenom, email, phone, id_card, type_abonnement 
-        FROM users 
-        JOIN abonnements ON abonnements.user_id = users.id 
-        WHERE role_id = 3";
+$sql = "SELECT users.id, users.nom, users.prenom, users.email, users.phone, users.id_card, abonnements.type_abonnement, COALESCE(GROUP_CONCAT(activites.nom SEPARATOR ', '), '') AS activites FROM users JOIN abonnements ON abonnements.user_id = users.id LEFT JOIN user_activites ON user_activites.user_id = users.id LEFT JOIN activites ON activites.id = user_activites.activite_id WHERE users.role_id = 3 GROUP BY users.id, users.nom, users.prenom, users.email, users.phone, users.id_card, abonnements.type_abonnement;";
 $result = $conn->query($sql);
 
 $data = [];

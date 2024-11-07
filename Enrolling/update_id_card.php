@@ -19,16 +19,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'];
     $id_card = $_POST['id_card'];
 
-    $stmt = $conn->prepare("UPDATE users SET id_card = ? WHERE id = ?");
-    $stmt->bind_param("si", $id_card, $id);
+    // Check if the id_card already exists for another user
+    $checkStmt = $conn->prepare("SELECT id FROM users WHERE id_card = ? AND id != ?");
+    $checkStmt->bind_param("si", $id_card, $id);
+    $checkStmt->execute();
+    $checkStmt->store_result();
 
-    if ($stmt->execute()) {
-        echo "ID Card updated successfully";
+    if ($checkStmt->num_rows > 0) {
+        echo "ID Card is already in use by another user.";
     } else {
-        echo "Error updating ID Card: " . $conn->error;
+        // Update id_card if it is unique
+        $stmt = $conn->prepare("UPDATE users SET id_card = ? WHERE id = ?");
+        $stmt->bind_param("si", $id_card, $id);
+
+        if ($stmt->execute()) {
+            echo "ID Card updated successfully";
+        } else {
+            echo "Error updating ID Card: " . $conn->error;
+        }
+
+        $stmt->close();
     }
 
-    $stmt->close();
+    $checkStmt->close();
 }
 $conn->close();
+
 ?>

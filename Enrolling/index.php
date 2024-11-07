@@ -8,6 +8,17 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+
+    <style>
+        .is-invalid {
+            border-color: #dc3545;
+        }
+
+        .error-message {
+            font-size: 0.8em;
+            color: #dc3545;
+        }
+    </style>
 </head>
 
 <body>
@@ -28,7 +39,9 @@
                     <th>Email</th>
                     <th>Phone</th>
                     <th>Type d'Abonnement</th>
+                    <th>Activites</th>
                     <th>ID Card</th>
+                    <th>New ID Card</th>
                 </tr>
             </thead>
             <tbody>
@@ -63,7 +76,16 @@
                         "data": "phone"
                     },
                     {
-                        "data": "type_abonnement"
+                        "data": "type_abonnement",
+                        "render": function(data) {
+                            return data == 2 ? "Gold" : data == 3 ? "Platinum" : "Silver";
+                        }
+                    },
+                    {
+                        "data": "activites"
+                    },
+                    {
+                        "data": "id_card"
                     },
                     {
                         "data": "id_card",
@@ -71,7 +93,6 @@
                             return `<input type="text" class="form-control id-card-input" data-id="${row.id}" placeholder="Enter ID Card" maxlength="10">`;
                         }
                     }
-
                 ]
             });
 
@@ -104,31 +125,27 @@
                         </button>
                     </div>`;
                 $('#notification-area').html(alertHtml);
-
-                // Auto-dismiss alert after 3 seconds
                 setTimeout(() => {
                     $('.alert').alert('close');
                 }, 3000);
             }
 
-            // Timer variable for delayed update
             let timer;
 
             // Input field change handler
             $('#userTable tbody').on('input', '.id-card-input', function() {
-                const userId = $(this).data('id');
-                let idCardValue = $(this).val();
+                const $input = $(this); // Cache the input element
+                const userId = $input.data('id');
+                let idCardValue = $input.val();
 
                 // Replace special characters in the input field in real-time
                 idCardValue = replaceChars(idCardValue);
-                $(this).val(idCardValue);
+                $input.val(idCardValue);
 
-                // Clear the previous timer
                 clearTimeout(timer);
 
                 // Set a new timer for 2 seconds
                 timer = setTimeout(() => {
-                    // AJAX request to update id_card in the database
                     $.ajax({
                         url: 'update_id_card.php',
                         method: 'POST',
@@ -137,20 +154,29 @@
                             id_card: idCardValue
                         },
                         success: function(response) {
-                            showAlert("ID Card updated successfully.", "success");
-                            table.ajax.reload(); // Reload DataTable
+                            if (response === "ID Card updated successfully") {
+                                showAlert("ID Card updated successfully.", "success");
+                                $input.prop('readonly', true).removeClass('is-invalid'); // Mark as readonly and remove error styling
+                                $input.next('.error-message').remove();
+                                table.ajax.reload();
+                            } else {
+                                $input.addClass('is-invalid'); // Show error style
+                                $input.next('.error-message').remove();
+                                $input.after(`<small class="error-message text-danger">${response}</small>`);
+                            }
                         },
                         error: function() {
-                            showAlert("Error updating ID Card.", "danger");
+                            $input.addClass('is-invalid');
+                            $input.next('.error-message').remove();
+                            $input.after('<small class="error-message text-danger">Error updating ID Card.</small>');
                         }
                     });
-                }, 2000); // 2-second delay
+                }, 2000);
             });
 
-            // Button click handler for transferring data
             $('#transferDataButton').on('click', function() {
                 $.ajax({
-                    url: 'transfer_data.php', // Your PHP script to handle the data transfer
+                    url: 'transfer_data.php',
                     method: 'POST',
                     success: function(response) {
                         showAlert("Data transferred successfully.", "success");
