@@ -55,13 +55,12 @@ SELECT
     a.description, 
     a.id AS id_abonnement, 
     p.id AS id_pack, 
-    py.id AS payement_id, 
-    py.total AS total, 
-    p.pack_name AS pack_name, 
-    py.reste AS reste, 
-    a.date_debut AS date_debut, 
-    a.date_fin AS date_fin ,
-    py.montant_paye as montant_paye
+    MAX(py.id) AS payement_id, 
+    MAX(py.total) AS total, 
+    MAX(p.pack_name) AS pack_name, 
+    MAX(py.reste) AS reste, 
+    MAX(a.date_debut) AS date_debut, 
+    MAX(a.date_fin) AS date_fin 
 FROM 
     users u 
 JOIN 
@@ -420,7 +419,7 @@ $conn->close();
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Conventions d'adhésion</label>
-                                            <select name="convention" id="convention" class="form-select form-control-lg" onchange="filterCategories()">
+                                            <select disabled name="convention" id="convention" class="form-select form-control-lg" onchange="filterCategories()">
                                                 <option value="YES" <?= $user['package_type_id'] == 8 ? 'selected' : '' ?>>Oui</option>
                                                 <option value="NO" <?= $user['package_type_id'] != 8 ? 'selected' : '' ?>>Non</option>
                                             </select>
@@ -430,7 +429,7 @@ $conn->close();
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Catégorie d'adhésion</label>
-                                            <select name="categorie_adherence" id="categorie_adherence" class="form-select form-control-lg" onchange="updateAbonnementOptions()">
+                                            <select disabled name="categorie_adherence" id="categorie_adherence" class="form-select form-control-lg" onchange="updateAbonnementOptions()">
                                                 <?php
                                                 // Séparer l'option sélectionnée des autres
                                                 $selectedOption = null;
@@ -477,7 +476,7 @@ $conn->close();
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Type d'abonnement</label>
-                                            <select name="type_abonnement" id="type_abonnement" class="form-select form-control-lg">
+                                            <select name="type_abonnement" id="type_abonnement" disabled class="form-select form-control-lg">
                                                 <!-- Options dynamically added by JavaScript -->
                                             </select>
                                         </div>
@@ -486,7 +485,7 @@ $conn->close();
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Offres promotionnelles</label>
-                                            <input type="text" class="form-control" id="offre_promo" name="offre_promo" placeholder="Offre promotionnelle" value="<?php echo $user['offres_promotionnelles']; ?>" />
+                                            <input type="text" class="form-control" id="offre_promo" name="offre_promo" placeholder="Offre promotionnelle" readonly value="<?php echo $user['offres_promotionnelles']; ?>" />
                                         </div>
                                     </div>
                                 </div>
@@ -494,7 +493,7 @@ $conn->close();
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label>Description</label>
-                                            <textarea name="description" id="description" class="form-control" placeholder="Ajouter une description"><?php echo $user['description']; ?></textarea>
+                                            <textarea name="description" id="description" class="form-control" placeholder="Ajouter une description" readonly><?php echo $user['description']; ?></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -551,7 +550,7 @@ $conn->close();
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Date Début d'abonnement</label>
-                                            <input type="date" name="date_debut_paiement" class="form-control" value="<?php echo $user['date_debut']; ?>" required />
+                                            <input type="date" name="date_debut_paiement" class="form-control" value="<?php echo $user['date_debut']; ?>" required readonly />
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -559,10 +558,6 @@ $conn->close();
                                             <label>Date de fin d’abonnement</label>
                                             <div class="input-group">
                                                 <input type="date" name="date_fin_abn" class="form-control" value="<?php echo $user['date_fin']; ?>" readonly />
-                                                <div id="adjustButtons">
-                                                    <button type="button" class="btn btn-dark" onclick="adjustEndDate(1)">+</button>
-                                                    <button type="button" class="btn btn-dark" onclick="adjustEndDate(-1)">-</button>
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -574,7 +569,7 @@ $conn->close();
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Total :</label>
-                                            <input type="text" name="total99" id="total"
+                                            <input type="text" name="total" id="total"
                                                 value="<?php echo htmlspecialchars($user['total']); ?>"
                                                 class="form-control"
                                                 <?php if ($profil != 1) echo 'readonly'; ?> />
@@ -583,13 +578,10 @@ $conn->close();
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Reste :</label>
-                                            <input
-                                                type="text"
-                                                name="reste"
-                                                id="reste"
-                                                value="<?php echo isset($user['total'], $user['montant_paye']) ? $user['total'] - $user['montant_paye'] : 0; ?>"
+                                            <input type="text" name="reste" id="reste"
+                                                value="<?php echo htmlspecialchars($user['reste']); ?>"
                                                 class="form-control"
-                                                <?php echo ($profil != 1) ? 'readonly' : ''; ?> />
+                                                <?php if ($profil != 1) echo 'readonly'; ?> />
                                         </div>
                                     </div>
 
@@ -778,7 +770,7 @@ $conn->close();
                                                         <option value="Société de Crédit à la Consommation">Société de Crédit à la Consommation</option>
                                                         <option value="Wafa Bank">Wafa Bank</option>
                                                         <option value="CFG Bank">CFG Bank</option>
-                                                        <option value="BANK ASSAFA">BANK ASSAFA</option>
+                                                                    <option value="BANK ASSAFA">BANK ASSAFA</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -840,7 +832,7 @@ $conn->close();
                                                         <option value="Société de Crédit à la Consommation">Société de Crédit à la Consommation</option>
                                                         <option value="Wafa Bank">Wafa Bank</option>
                                                         <option value="CFG Bank">CFG Bank</option>
-                                                        <option value="BANK ASSAFA">BANK ASSAFA</option>
+                                                                    <option value="BANK ASSAFA">BANK ASSAFA</option>
                                                     </select>
                                                 </div>
                                             </div>
