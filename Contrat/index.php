@@ -409,10 +409,12 @@ $paymentTable->addCell(3000)->addText("Carte", ['name' => 'Arial', 'size' => 8])
 $paymentTable->addCell(1500)->addText("…………DH", ['name' => 'Arial', 'size' => 8]);
 $paymentTable->addCell(3000)->addText("………………………", ['name' => 'Arial', 'size' => 8]);
 // Ligne pour le paiement par virement
+// Ligne pour le paiement par virement avec une bordure en bas
 $paymentTable->addRow();
-$paymentTable->addCell(3000)->addText("Virement", ['name' => 'Arial', 'size' => 8]);
-$paymentTable->addCell(1500)->addText("…………DH", ['name' => 'Arial', 'size' => 8]);
-$paymentTable->addCell(3000)->addText("………………………", ['name' => 'Arial', 'size' => 8 ,'borderBottomSize' => 6,]);
+$paymentTable->addCell(3000, ['borderBottomSize' => 6, 'borderBottomColor' => '000000'])->addText("Virement", ['name' => 'Arial', 'size' => 8]);
+$paymentTable->addCell(1500, ['borderBottomSize' => 6, 'borderBottomColor' => '000000'])->addText("…………DH", ['name' => 'Arial', 'size' => 8]);
+$paymentTable->addCell(3000, ['borderBottomSize' => 6, 'borderBottomColor' => '000000'])->addText("………………………", ['name' => 'Arial', 'size' => 8]);
+
 
 // Colonne de droite : Observations avec un cadre de texte simple
 $rightCell = $mainTable->addCell(5000);
@@ -423,6 +425,23 @@ $rightCell->addText("Pour tout règlement, prière d'exiger un reçu. Ce dernier
     'size' => 8,
 ]);
 
+// Créer une cellule avec un cadre pour "Observation"
+$observationTable = $rightCell->addTable([
+    'borderColor' => '000000',
+    'borderSize' => 6, // Taille de la bordure pour simuler le cadre
+    'cellMargin' => 300, // Marges internes pour le contenu du cadre
+]);
+
+// Ajouter le titre "Observation" en haut à gauche du cadre
+$observationTable->addRow();
+$observationTable->addCell(5000)->addText("Observation", [
+    'name' => 'Arial',
+    'size' => 10,
+    'bold' => true,
+]);
+
+$section->addText("Fait en double exemplaire à Casablanca le ");
+$section->addText("L'adhérent reconnait avoir pris connaissance et accepte les conditions générales au verso sans réserve. ");
 
 
 // Save the document

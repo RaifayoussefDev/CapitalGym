@@ -3,7 +3,7 @@ require "../inc/app.php";
 require "../inc/conn_db.php";
 
 // Fetch activities
-$activites_sql = "SELECT id, nom, prix,sex FROM activites";
+$activites_sql = "SELECT id, nom, prix, sex, description FROM activites";
 $activites_result = $conn->query($activites_sql);
 
 $activites = [];
@@ -19,7 +19,6 @@ $conn->close();
 
 <script>
     $(document).ready(function() {
-        // Function to handle the fade-in and fade-out animations
         function animateAlert(alertId) {
             var alert = $('#' + alertId);
             alert.addClass('fade-in-right');
@@ -27,11 +26,10 @@ $conn->close();
                 alert.addClass('fade-out-left');
                 setTimeout(function() {
                     alert.alert('close');
-                }, 1000); // Time for fade-out animation
-            }, 5000); // Display time before starting fade-out
+                }, 1000);
+            }, 5000);
         }
 
-        // Apply the animations to the alerts
         if ($('#alert-success').length) {
             animateAlert('alert-success');
         } else if ($('#alert-error').length) {
@@ -67,12 +65,13 @@ $conn->close();
             <div class="card card-stats card-round">
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table id="multi-filter-select" class=" table table-striped">
+                        <table id="multi-filter-select" class="table table-striped">
                             <thead>
                                 <tr>
                                     <th>Nom</th>
                                     <th>Prix</th>
                                     <th>Genre</th>
+                                    <th>Description</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -91,12 +90,13 @@ $conn->close();
                                                 } elseif ($activite['sex'] === 'MF') {
                                                     echo 'Mix';
                                                 } else {
-                                                    echo 'N/A'; // Handle any unexpected values
+                                                    echo 'N/A';
                                                 }
                                                 ?>
                                             </td>
+                                            <td><?php echo htmlspecialchars($activite['description']); ?></td>
                                             <td style="width: 13%;">
-                                                <button class="btn btn-warning btn-edit" data-id="<?php echo $activite['id']; ?>" data-nom="<?php echo htmlspecialchars($activite['nom']); ?>" data-prix="<?php echo htmlspecialchars($activite['prix']); ?>" data-sex="<?php echo htmlspecialchars($activite['sex']); ?>" data-bs-toggle="modal" data-bs-target="#editActivityModal">
+                                                <button class="btn btn-warning btn-edit" data-id="<?php echo $activite['id']; ?>" data-nom="<?php echo htmlspecialchars($activite['nom']); ?>" data-prix="<?php echo htmlspecialchars($activite['prix']); ?>" data-sex="<?php echo htmlspecialchars($activite['sex']); ?>" data-description="<?php echo htmlspecialchars($activite['description']); ?>" data-bs-toggle="modal" data-bs-target="#editActivityModal">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
                                                 <button class="btn btn-danger btn-delete" data-id="<?php echo $activite['id']; ?>" data-bs-toggle="modal" data-bs-target="#deleteActivityModal">
@@ -107,11 +107,10 @@ $conn->close();
                                     <?php endforeach; ?>
                                 <?php else : ?>
                                     <tr>
-                                        <td colspan="4">No activities available</td>
+                                        <td colspan="5">No activities available</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
-
                         </table>
                     </div>
                 </div>
@@ -145,6 +144,10 @@ $conn->close();
                                 <option value="MF" selected>Mix</option>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label for="activityDescription">Description</label>
+                            <textarea class="form-control" id="activityDescription" name="description" rows="3"></textarea>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
@@ -175,46 +178,45 @@ $conn->close();
                             <input type="number" class="form-control" id="editActivityPrice" name="prix" step="0.01" required>
                         </div>
                         <div class="form-group">
-                            <label for="editActivitySex">Sexe</label>
+                            <label for="editActivitySex">Genre</label>
                             <select class="form-control" id="editActivitySex" name="sex" required>
                                 <option value="M">Hommes</option>
                                 <option value="F">Femmes</option>
-                                <option value="MF">Mixte</option>
+                                <option value="MF">Mix</option>
                             </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editActivityDescription">Description</label>
+                            <textarea class="form-control" id="editActivityDescription" name="description" rows="3"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                        <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- Delete Activity Modal -->
-    <div class="modal fade" id="deleteActivityModal" tabindex="-1" aria-labelledby="deleteActivityModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteActivityModalLabel">Supprimer Activité</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="actions/delete_activity.php" method="post">
-                    <div class="modal-body">
-                        <input type="hidden" id="deleteActivityId" name="id">
-                        <p>Êtes-vous sûr de vouloir supprimer cette activité ?</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                        <button type="submit" class="btn btn-primary">Sauvegarder</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    $(document).ready(function() {
+        $('.btn-edit').click(function() {
+            var id = $(this).data('id');
+            var nom = $(this).data('nom');
+            var prix = $(this).data('prix');
+            var sex = $(this).data('sex');
+            var description = $(this).data('description');
+
+            $('#editActivityId').val(id);
+            $('#editActivityName').val(nom);
+            $('#editActivityPrice').val(prix);
+            $('#editActivitySex').val(sex);
+            $('#editActivityDescription').val(description);
+        });
+    });
+</script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
