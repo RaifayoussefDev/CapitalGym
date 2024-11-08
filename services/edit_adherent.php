@@ -114,7 +114,54 @@ $stmt->bind_result($abonnement_id);
 $stmt->fetch();
 $stmt->close();
 
+// Insert user activities
+if (isset($_POST['value']) && is_array($_POST['value'])) {
+    foreach ($_POST['value'] as $activite_id) {
+        // Assuming you have a logic to retrieve the correct abonnement_id for the user
+        $abonnement_id = $_POST['id_abonnement']; // Replace this with logic to dynamically fetch if necessary
+        $periode_activite = $_POST['periode_activite'][$activite_id];
+        $type_activite = $_POST['type_activite'][array_search($activite_id, $_POST['value'])]; // Get the type for the current activity
 
+        // Determine type of purchase based on the activity type
+        $type_achat = ($type_activite == 'par mois') ? 'achat_par_periode' : 'achat_par_science';
+
+        // Set date_fin based on the type
+        if ($type_achat === 'achat_par_science') {
+            $date_fin = NULL; // No date_fin for 'achat_par_science'
+        } else {
+            // Here we assume the period is defined in months, modify as needed
+            $date_fin = date('Y-m-d', strtotime("+$periode_activite month")); // Example: add the period to the current date
+        }
+
+        // SQL to insert into user_activites
+        $insert_activite_sql = "INSERT INTO `user_activites` (`user_id`, `activite_id`, `abonnement_id`, `date_inscription`, `periode_activites`, `date_fin`, `type_activite`)
+            VALUES (?, ?, ?, NOW(), ?, ?, ?)
+            ";
+
+        $stmt = $conn->prepare($insert_activite_sql);
+        if ($stmt === false) {
+            $conn->rollback(); // Rollback if prepare fails
+            throw new Exception("Failed to prepare insert statement: " . $conn->error);
+        }
+
+        // Bind parameters
+        $stmt->bind_param(
+            "iiisss",
+            $user_id,
+            $activite_id,
+            $abonnement_id,
+            $periode_activite,
+            $date_fin,
+            $type_achat
+        );
+
+        if (!$stmt->execute()) {
+            $conn->rollback(); // Rollback if execution fails
+            throw new Exception("Failed to execute insert statement: " . $stmt->error);
+        }
+        $stmt->close();
+    }
+}
 // Update payment details
 if (isset($_POST['type_paiement'], $_POST['montant_paye'], $_POST['reste'], $_POST['total_activites'])) {
     $conn->begin_transaction(); // Start a transaction

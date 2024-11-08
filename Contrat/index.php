@@ -6,6 +6,8 @@ use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\Style\Image;
 use PhpOffice\PhpWord\Style\Paragraph;
 use PhpOffice\PhpWord\TemplateProcessor;
+use PhpOffice\PhpWord\Shared\Converter;
+
 
 
 // Create a new PHPWord object
@@ -466,11 +468,18 @@ $signatureTable->addCell(6000, ['align' => 'right'])->addText(
     ['name' => 'Arial', 'size' => 8, 'bold' => true],
     ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::RIGHT] // Aligné à droite
 );
+// Ajouter une nouvelle section pour la deuxième page
+$section2 = $phpWord->addSection([
+    'marginTop' => Converter::cmToTwip(0.5),
+    'marginBottom' => Converter::cmToTwip(0.5),
+    'marginLeft' => Converter::cmToTwip(0.5),
+    'marginRight' => Converter::cmToTwip(0.5),
+]);
 
 
-
-// Save the document
+// Enregistrez le fichier final
 $outputPath = './contrat_adhesion.docx';
 $phpWord->save($outputPath, 'Word2007');
 
+// Afficher un message de succès
 echo "Le contrat a été créé avec succès à l'emplacement : $outputPath";

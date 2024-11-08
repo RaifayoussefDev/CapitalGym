@@ -481,6 +481,8 @@ $conn->close();
                                             </select>
                                         </div>
                                     </div>
+                                    <input type="date" id="date_debut" style="display: none;" value="<?php echo $user['date_debut']; ?>">
+                                    <input type="date" id="date_fin" style="display: none;" value="<?php echo $user['date_fin']; ?>">
 
                                     <div class="col-md-6">
                                         <div class="form-group">
@@ -1142,7 +1144,7 @@ $conn->close();
     function updateAbonnementOptions() {
         var selectedPackage = document.getElementById('categorie_adherence').selectedOptions[0];
         var typeAbonnementSelect = document.getElementById('type_abonnement');
-        var adjustButtons = document.getElementById('adjustButtons'); // Get the button container
+        var adjustButtons = document.getElementById('adjustButtons');
 
         typeAbonnementSelect.innerHTML = ''; // Clear previous options
 
@@ -1175,25 +1177,42 @@ $conn->close();
             typeAbonnementSelect.add(option);
         }
 
-        // Add event listener to handle abonnement selection and adjust button visibility
-        typeAbonnementSelect.addEventListener('change', function() {
-            if (typeAbonnementSelect.value === '12') { // 12 represents 'Annuel'
-                adjustButtons.style.display = 'inline'; // Hide buttons
-            } else {
-                adjustButtons.style.display = 'none'; // Show buttons
-            }
-        });
-
-        // Initialize the button visibility when loading the page
-        if (typeAbonnementSelect.value === '12') {
-            adjustButtons.style.display = 'inline'; // Hide buttons if 'Annuel' is selected by default
-        } else {
-            adjustButtons.style.display = 'none'; // Show buttons otherwise
-        }
+        // Automatically select "Annuel" if the duration is exactly one year
+        calculateDurationAndSelectAbonnement();
 
         calculateTotal();
         generateMatricule();
         calculateDateFin();
+    }
+
+    function calculateDurationAndSelectAbonnement() {
+        var dateDebut = document.getElementById('date_debut').value;
+        var dateFin = document.getElementById('date_fin').value;
+        var typeAbonnementSelect = document.getElementById('type_abonnement');
+        var adjustButtons = document.getElementById('adjustButtons');
+
+        if (dateDebut && dateFin) {
+            var startDate = new Date(dateDebut);
+            var endDate = new Date(dateFin);
+
+            // Calculate the duration in months
+            var durationInMonths = (endDate.getFullYear() - startDate.getFullYear()) * 12 + (endDate.getMonth() - startDate.getMonth());
+
+            // Select "Annuel" if the duration is exactly 12 months
+            if (durationInMonths === 12) {
+                for (var i = 0; i < typeAbonnementSelect.options.length; i++) {
+                    if (typeAbonnementSelect.options[i].value === '12') { // "12" represents "Annuel"
+                        typeAbonnementSelect.selectedIndex = i;
+                        adjustButtons.style.display = 'inline'; // Show buttons if "Annuel" is selected
+                        break;
+                    }
+                }
+            } else {
+                adjustButtons.style.display = 'none';
+            }
+        } else {
+            adjustButtons.style.display = 'none';
+        }
     }
 
     function calculateTotal() {
