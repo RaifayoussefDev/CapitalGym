@@ -5,6 +5,8 @@ use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\Style\Image;
 use PhpOffice\PhpWord\Style\Paragraph;
+use PhpOffice\PhpWord\TemplateProcessor;
+
 
 // Create a new PHPWord object
 $phpWord = new PhpWord();
@@ -442,6 +444,29 @@ $observationTable->addCell(5000)->addText("Observation", [
 
 $section->addText("Fait en double exemplaire à Casablanca le ");
 $section->addText("L'adhérent reconnait avoir pris connaissance et accepte les conditions générales au verso sans réserve. ");
+
+// Ajouter une table pour les signatures
+$signatureTable = $section->addTable([
+    'borderColor' => 'FFFFFF',
+    'borderSize' => 1,
+]);
+
+// Ajouter la première ligne avec deux cellules (signature de l'adhérent à gauche, signature du club à droite)
+$signatureTable->addRow();
+
+// Ajouter la cellule gauche pour la signature de l'adhérent avec texte aligné à gauche
+$signatureTable->addCell(6000, ['align' => 'left'])->addText(
+    "Signature de l’adhérent précédée de la mention « lu et approuvé »",
+    ['name' => 'Arial', 'size' => 8]
+);
+
+// Ajouter la cellule droite pour la signature du club avec texte aligné à droite
+$signatureTable->addCell(6000, ['align' => 'right'])->addText(
+    "PRIVILEGE LUXURY FITNESS CLUB",
+    ['name' => 'Arial', 'size' => 8, 'bold' => true],
+    ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::RIGHT] // Aligné à droite
+);
+
 
 
 // Save the document
