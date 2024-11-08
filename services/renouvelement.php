@@ -521,7 +521,7 @@ $conn->close();
                                                     </div>
                                                     <input type="text" name="type_activite[]" value="<?php echo $activite['type']; ?>" style="display:none">
 
-                                                    <div class="col-md-6">
+                                                    <div class="col-md-6 d-none">
                                                         <div class="form-group">
                                                             <label class="form-label">
                                                                 <?php echo ($activite['type'] == 'par mois') ? 'Période d\'activité' : 'Nombre des séances'; ?>
@@ -531,14 +531,15 @@ $conn->close();
                                                                     <option value="1">Mensuel</option>
                                                                     <option value="3">Trimestriel</option>
                                                                     <option value="6">Semestriel</option>
-                                                                    <option value="12">Annuel</option>
+                                                                    <option value="12" selected>Annuel</option>
                                                                 <?php } else { ?>
                                                                     <?php for ($i = 1; $i <= 10; $i++) { ?>
-                                                                        <option value="<?php echo $i; ?>">
+                                                                        <option value="<?php echo $i; ?>" <?php echo ($i === 10) ? 'selected' : ''; ?>>
                                                                             <?php echo $i . ' séance' . ($i > 1 ? 's' : ''); ?>
                                                                         </option>
                                                                     <?php } ?>
                                                                 <?php } ?>
+
                                                             </select>
                                                         </div>
                                                     </div>
