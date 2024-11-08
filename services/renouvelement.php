@@ -1177,7 +1177,7 @@ $conn->close();
             typeAbonnementSelect.add(option);
         }
 
-        // Automatically select "Annuel" if the duration is exactly one year
+        // Automatically select "Annuel" if the duration is greater than or equal to one year
         calculateDurationAndSelectAbonnement();
 
         calculateTotal();
@@ -1198,8 +1198,8 @@ $conn->close();
             // Calculate the duration in months
             var durationInMonths = (endDate.getFullYear() - startDate.getFullYear()) * 12 + (endDate.getMonth() - startDate.getMonth());
 
-            // Select "Annuel" if the duration is exactly 12 months
-            if (durationInMonths === 12) {
+            // Select "Annuel" if the duration is 12 months or more
+            if (durationInMonths >= 12) {
                 for (var i = 0; i < typeAbonnementSelect.options.length; i++) {
                     if (typeAbonnementSelect.options[i].value === '12') { // "12" represents "Annuel"
                         typeAbonnementSelect.selectedIndex = i;
@@ -1214,6 +1214,7 @@ $conn->close();
             adjustButtons.style.display = 'none';
         }
     }
+
 
     function calculateTotal() {
         var selectedPackage = document.getElementById('categorie_adherence').selectedOptions[0];
