@@ -838,11 +838,16 @@ $conn->close();
                                                     <a href="../services/renouvelement.php?id_user=<?php echo htmlspecialchars($user['id']); ?>" class="btn btn-warning btn-modify">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
-                                                <?php else: ?>
-
                                                 <?php endif; ?>
 
+                                                <?php if ($profil == 1): ?>
+                                                    <!-- Button to delete the user (only visible for profil 1) -->
+                                                    <a href="delete_user.php?id_user=<?php echo htmlspecialchars($user['id']); ?>" class="btn btn-danger btn-delete" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </a>
+                                                <?php endif; ?>
                                             </td>
+
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php else : ?>
