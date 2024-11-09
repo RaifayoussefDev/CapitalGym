@@ -842,11 +842,12 @@ $conn->close();
 
                                                 <?php if ($profil == 1): ?>
                                                     <!-- Button to delete the user (only visible for profil 1) -->
-                                                    <a href="delete_user.php?id_user=<?php echo htmlspecialchars($user['id']); ?>" class="btn btn-danger btn-delete" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
+                                                    <button class="btn btn-danger btn-delete" data-bs-toggle="modal" data-bs-target="#confirmationModal" data-user-id="<?php echo htmlspecialchars($user['id']); ?>">
                                                         <i class="fas fa-trash-alt"></i>
-                                                    </a>
+                                                    </button>
                                                 <?php endif; ?>
                                             </td>
+
 
                                         </tr>
                                     <?php endforeach; ?>
@@ -860,6 +861,25 @@ $conn->close();
                     </div>
                 </div>
 
+
+            </div>
+        </div>
+        <!-- Confirmation Modal -->
+        <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmationModalLabel">Confirmation de suppression</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <a href="#" id="deleteConfirmBtn" class="btn btn-danger">Supprimer</a>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="col-sm-12 col-md-9">
@@ -1016,6 +1036,19 @@ $conn->close();
     </div>
 
 </div>
+<script>
+    // When the modal is shown, set the delete button URL to the appropriate delete user URL
+    const confirmationModal = document.getElementById('confirmationModal');
+    confirmationModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget; // Button that triggered the modal
+        const userId = button.getAttribute('data-user-id'); // Extract the user ID from the button data attribute
+
+        // Set the confirmation link to the correct delete URL
+        const deleteConfirmBtn = document.getElementById('deleteConfirmBtn');
+        deleteConfirmBtn.setAttribute('href', 'delete_user.php?id_user=' + userId);
+    });
+</script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const itemsPerPage = 6;
