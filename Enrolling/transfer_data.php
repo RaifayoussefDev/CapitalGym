@@ -59,9 +59,11 @@ if ($result) {
         $activite_nom = $row['activite_nom']; // Assume this column is fetched in your query
 
         // Determine department based on type_abonnement and CrossFit activity
-        if (($type_abonnement == 2 || $type_abonnement == 3) && $activite_nom == 'CrossFit') {
+        if ($type_abonnement == 2 || $type_abonnement == 3) {
             $departement = 19;
-        } else {
+        } elseif(($type_abonnement != 2 || $type_abonnement != 3) && $activite_nom == 'Crossfit') {
+            $departement = 19;
+        }else{
             $departement = 20;
         }
 
