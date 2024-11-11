@@ -42,7 +42,7 @@ LEFT JOIN
 LEFT JOIN 
     activites ON activites.id = user_activites.activite_id
 WHERE 
-    users.role_id = 3 AND users.id=383";
+    users.role_id = 3 AND id_card not LIKE ''";
 
 $result = mysqli_query($conn, $sql);
 
@@ -50,8 +50,16 @@ if ($result) {
     while ($row = mysqli_fetch_assoc($result)) {
         $id = $row["id"];
         $nom = $row['nom'];
+        $nom = str_replace("'", "\'", $nom);
+
         $prenom = $row['prenom'];
+        $prenom = str_replace("'", "\'", $prenom); // Escape any single quotes
+        $prenom = explode(" ", $prenom)[0]; // Take only the first word
+
+
         $email = $row['email'];
+        $email = str_replace("'", "\'", $email);
+
         $phone = $row['phone'];
         $id_card = $row['id_card'];
         $qrcode = $row['id_card'];
@@ -61,11 +69,13 @@ if ($result) {
         // Determine department based on type_abonnement and CrossFit activity
         if ($type_abonnement == 2 || $type_abonnement == 3) {
             $departement = 19;
-        } elseif(($type_abonnement != 2 || $type_abonnement != 3) && $activite_nom == 'Crossfit') {
+        } elseif ($type_abonnement != 2 && $type_abonnement != 3 && $activite_nom == 'CROSSFIT') {
             $departement = 19;
-        }else{
+        } elseif($activite_nom != 'CROSSFIT') {
             $departement = 20;
         }
+        echo $departement;
+
 
         // Check if $qrcode is not empty
         if (!empty($qrcode)) {
