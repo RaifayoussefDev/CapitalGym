@@ -42,7 +42,7 @@ LEFT JOIN
 LEFT JOIN 
     activites ON activites.id = user_activites.activite_id
 WHERE 
-    users.role_id = 3;";
+    users.role_id = 3 AND users.id=383";
 
 $result = mysqli_query($conn, $sql);
 

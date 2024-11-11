@@ -124,50 +124,81 @@ function addPersonnel($qrcode, $id_card, $nom, $prenom, $email, $phone, $departe
 
         // EmplOfEqupt insertion SQL statement
         $insertEmplOfEquptSql = "INSERT INTO [dbo].[EmplOfEqupt]
-([PersonnelID], [EquptID], [PermitTime], [ReadCount], [CardMode], 
-[HldEnabled], [DownloadState], [InOutState_Port1], [InOutState_Date_Port1], 
-[InOutState_Port2], [InOutState_Date_Port2], [InOutState_Port3], 
-[InOutState_Date_Port3], [InOutState_Port4], [InOutState_Date_Port4], 
-[TimePieceIndex], [OpenLock], [HldPwr], [UserType])
-VALUES
-(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CONVERT(binary(4), ?), CONVERT(binary(4), ?), CONVERT(binary(4), ?), ?)";
+        ([PersonnelID], [EquptID], [PermitTime], [ReadCount], [CardMode], 
+        [HldEnabled], [DownloadState], [InOutState_Port1], [InOutState_Date_Port1], 
+        [InOutState_Port2], [InOutState_Date_Port2], [InOutState_Port3], 
+        [InOutState_Date_Port3], [InOutState_Port4], [InOutState_Date_Port4], 
+        [TimePieceIndex], [OpenLock], [HldPwr], [UserType])
+        VALUES
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CONVERT(binary(4), ?), CONVERT(binary(4), ?), CONVERT(binary(4), ?), ?)";
+
+        // Convert hex values to binary for SQL Server compatibility
+        $timePieceIndexBinary = hex2bin("01010101"); // Equivalent to 0x01010101
+        $openLockBinary = hex2bin("01010101");       // Equivalent to 0x01010101
+        $hldPwrBinary = hex2bin("FFFFFFFF");         // Equivalent to 0xFFFFFFFF
 
         // Define base parameters for insertion
         $emplOfEquptParamsBase = [
-            $personnelId,        // PersonnelID
-            68849.999305555553,  // PermitTime
-            65535,               // ReadCount
-            0,                   // CardMode
-            0,                   // HldEnabled
-            0,                   // DownloadState
-            0,                   // InOutState_Port1
-            0.0,                 // InOutState_Date_Port1
-            0,                   // InOutState_Port2
-            0.0,                 // InOutState_Date_Port2
-            0,                   // InOutState_Port3
-            0.0,                 // InOutState_Date_Port3
-            0,                   // InOutState_Port4
-            0.0,                 // InOutState_Date_Port4
-            "0x01010000", // TimePieceIndex (converted to binary)
-            "0x01010000", // OpenLock (converted to binary)
-            "0x00000000", // HldPwr (converted to binary)
-            // pack('A*', 'U'),
-            // pack('A*', 'P'),
-            // pack('A*', ''),
-            0                    // UserType
+            $personnelId,           // PersonnelID
+            null,                   // Placeholder for EquptID (assigned later)
+            68849.999305555553,     // PermitTime
+            65535,                  // ReadCount
+            0,                      // CardMode
+            0,                      // HldEnabled
+            0,                      // DownloadState
+            0,                      // InOutState_Port1
+            0.0,                    // InOutState_Date_Port1
+            0,                      // InOutState_Port2
+            0.0,                    // InOutState_Date_Port2
+            0,                      // InOutState_Port3
+            0.0,                    // InOutState_Date_Port3
+            0,                      // InOutState_Port4
+            0.0,                    // InOutState_Date_Port4
+            $timePieceIndexBinary,  // TimePieceIndex in binary format
+            $openLockBinary,        // OpenLock in binary format
+            $hldPwrBinary,          // HldPwr in binary format
+            0                       // UserType
         ];
 
-        // Array to store multiple insert parameters
+        // Convert hex values to binary for SQL Server compatibility
+        $timePieceIndexBinary1021 = hex2bin("01010000"); // Equivalent to 0x01010101
+        $openLockBinary1021 = hex2bin("01010000");       // Equivalent to 0x01010101
+        $hldPwrBinary = hex2bin("FFFFFFFF");         // Equivalent to 0xFFFFFFFF
+
+        // Define base parameters for insertion
+        $emplOfEquptParamsBase1021 = [
+            $personnelId,           // PersonnelID
+            null,                   // Placeholder for EquptID (assigned later)
+            68849.999305555553,     // PermitTime
+            65535,                  // ReadCount
+            0,                      // CardMode
+            0,                      // HldEnabled
+            0,                      // DownloadState
+            0,                      // InOutState_Port1
+            0.0,                    // InOutState_Date_Port1
+            0,                      // InOutState_Port2
+            0.0,                    // InOutState_Date_Port2
+            0,                      // InOutState_Port3
+            0.0,                    // InOutState_Date_Port3
+            0,                      // InOutState_Port4
+            0.0,                    // InOutState_Date_Port4
+            $timePieceIndexBinary1021,  // TimePieceIndex in binary format
+            $openLockBinary1021,        // OpenLock in binary format
+            $hldPwrBinary,          // HldPwr in binary format
+            0                       // UserType
+        ];
+
+        // Prepare an array to store multiple insert parameters
         $inserts = [];
 
-        // Check if departement is 19 to determine how many rows to insert
+        // Check if department is 19 to determine how many rows to insert
         if ($departement == 19) {
             // Add two records with EquptID 1017 and 1021
-            $inserts[] = array_merge([$emplOfEquptParamsBase[0], 1017], array_slice($emplOfEquptParamsBase, 1));
-            $inserts[] = array_merge([$emplOfEquptParamsBase[0], 1021], array_slice($emplOfEquptParamsBase, 1));
+            $inserts[] = array_merge([$emplOfEquptParamsBase[0], 1017], array_slice($emplOfEquptParamsBase, 2));
+            $inserts[] = array_merge([$emplOfEquptParamsBase[0], 1021], array_slice($emplOfEquptParamsBase1021, 2));
         } else {
             // Add only one record with EquptID 1017
-            $inserts[] = array_merge([$emplOfEquptParamsBase[0], 1017], array_slice($emplOfEquptParamsBase, 1));
+            $inserts[] = array_merge([$emplOfEquptParamsBase[0], 1017], array_slice($emplOfEquptParamsBase, 2));
         }
 
         // Execute each insertion

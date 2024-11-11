@@ -194,10 +194,15 @@ $adresse = $_POST['adresse']; // adresse
 $fonction = $_POST['fonction']; // fonction
 $num_urgence = $_POST['num_urgence']; // numéro d'urgence
 $employeur = $_POST['employeur']; // employeur
+$nom = $_POST['nom']; // nom
+$prenom = $_POST['prenom']; // prenom
+
 
 // Update user details in the database
 $user_sql = "UPDATE `users` SET 
     `matricule` = ? ,
+    `nom` = ?,
+    `prenom` = ?,
     `etat` = 'actif', 
     `photo` = ?, 
     `date_naissance` = ?, 
@@ -216,7 +221,7 @@ if ($stmt === false) {
 }
 
 // Remplacez les variables par les valeurs appropriées
-$stmt->bind_param("ssssssssssi",$matricule, $photo_name, $date_naissance, $genre, $adresse, $fonction, $num_urgence, $employeur,$hashed_password, $rmsvalue, $user_id);
+$stmt->bind_param("ssssssssssssi",$matricule,$nom,$prenom, $photo_name, $date_naissance, $genre, $adresse, $fonction, $num_urgence, $employeur,$hashed_password, $rmsvalue, $user_id);
 
 if (!$stmt->execute()) {
     throw new Exception("Failed to execute statement: " . $stmt->error);
