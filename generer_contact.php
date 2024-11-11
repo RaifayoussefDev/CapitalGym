@@ -6,7 +6,7 @@ include './inc/conn_db.php';
 $vcfContent = "";
 
 // Requête pour récupérer les utilisateurs avec leur numéro de téléphone
-$query = $conn->query("SELECT nom, prenom, phone FROM users");
+$query = $conn->query("SELECT nom, prenom, phone FROM users WHERE role_id = 3 and etat='actif'");
 
 foreach ($query as $user) {
     $nomComplet = $user['prenom'] . ' ' . $user['nom'];
