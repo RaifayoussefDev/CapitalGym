@@ -148,12 +148,12 @@ VALUES
             0.0,                 // InOutState_Date_Port3
             0,                   // InOutState_Port4
             0.0,                 // InOutState_Date_Port4
-            // "0x01010000", // TimePieceIndex (converted to binary)
-            // "0x01010000", // OpenLock (converted to binary)
-            // "0x00000000", // HldPwr (converted to binary)
-            pack('A*', 'U'),
-            pack('A*', 'P'),
-            pack('A*', ''),
+            "0x01010000", // TimePieceIndex (converted to binary)
+            "0x01010000", // OpenLock (converted to binary)
+            "0x00000000", // HldPwr (converted to binary)
+            // pack('A*', 'U'),
+            // pack('A*', 'P'),
+            // pack('A*', ''),
             0                    // UserType
         ];
 
