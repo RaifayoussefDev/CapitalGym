@@ -414,4 +414,4 @@ exit();
 
 // Close the connection
 $conn->close();
-ob_end_flush();;
+ob_end_flush();

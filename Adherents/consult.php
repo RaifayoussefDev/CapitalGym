@@ -319,6 +319,9 @@ $conn->close();
                             <button id="downloadContractBtn" class="btn btn-secondary mt-3" onclick="downloadContract('<?php echo $contract_name; ?>')">
                                 Télécharger le Contrat
                             </button>
+                            <button id="prepareContractBtn" class="btn btn-success" onclick="prepareContract(<?php echo $user_id; ?>)">
+                                Préparer Un Autre Contrat
+                            </button>
                         <?php else: ?>
                             <!-- Si aucun contrat n'existe, afficher le bouton pour préparer le contrat -->
                             <button id="prepareContractBtn" class="btn btn-success" onclick="prepareContract(<?php echo $user_id; ?>)">
