@@ -1227,9 +1227,10 @@ function GenerateContrat($id_user)
             ['spaceAfter' => 0] // Réduire l'espace après chaque ligne
         );
 
-        // Sanitize 'nom' and 'prenom' to remove slashes or any unwanted characters
-        $nom = preg_replace('/[\/\\\\]/', '', $user['nom']);  // Remove both forward and backslashes
-        $prenom = preg_replace('/[\/\\\\]/', '', $user['prenom']);
+        // Sanitize 'nom' and 'prenom' to remove unwanted characters (' / \)
+        $nom = preg_replace("/[\/\\\\']/", '', $user['nom']);
+        $prenom = preg_replace("/[\/\\\\']/", '', $user['prenom']);
+
 
         // Définir le chemin de sortie dans le dossier "adhérents"
         $outputDir = './adherents/';
