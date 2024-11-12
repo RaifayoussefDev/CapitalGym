@@ -12,7 +12,8 @@ use PhpOffice\PhpWord\Style\Table;
 
 
 
-$id_user = $_GET['id_user'];
+// $id_user = $_GET['id_user'];
+$id_user = 314;
 // Récupérer les utilisateurs avec les détails de l'abonnement et les activités
 $sql = "
 SELECT 
@@ -81,19 +82,22 @@ if ($result->num_rows > 0) {
 // Create a new PHPWord object
 $phpWord = new PhpWord();
 // Définir les marges en cm (0,5 cm) pour la section
+// Define A4 paper size (in twips: 595x842)
 $section = $phpWord->addSection([
-    'marginTop' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.5), // Haut
-    'marginBottom' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.5), // Bas
-    'marginLeft' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.5), // Gauche
-    'marginRight' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.5), // Droite
+    'pageSizeW' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(21),  // A4 width (21 cm)
+    'pageSizeH' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(29.7), // A4 height (29.7 cm)
+    'marginTop' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.5),  // Top margin
+    'marginBottom' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.5), // Bottom margin
+    'marginLeft' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.5),  // Left margin
+    'marginRight' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.5), // Right margin
 ]);
 
 
 // Add the logo at the top, centered with smaller dimensions
 $logoPath = '../assets/img/capitalsoft/logo_light.png'; // Path to your logo
 $section->addImage($logoPath, [
-    'width' => 60,  // Adjusted width to reduce size
-    'height' => 40, // Adjusted height to reduce size
+    'width' => 120,  // Adjusted width to reduce size
+    'height' => 80, // Adjusted height to reduce size
     'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER,
     'wrappingStyle' => 'inline'
 ]);
@@ -194,7 +198,7 @@ foreach ($users as $user) {
         "Mme / Mr : " . safeField($user['nom']) . " " . safeField($user['prenom']) .
             ", né le " . safeField($user['date_naissance']) .
             ", demeurant à " . safeField($user['adresse']) .
-            " , titulaire de la CIN :" . safeField($user['cin']) .
+            " , titulaire de la CIN :............." .
             ", GSM : " . safeField($user['phone']) .
             ", Profession : " . safeField($user['fonction']) .
             ", Employeur : " . safeField($user['employeur']) .
@@ -277,7 +281,7 @@ foreach ($users as $user) {
     );
 
     $section->addText(
-        "A la signature du présent contrat, l'adhérent s'acquitte par chèque / espèce/ carte/ des sommes ci-après définies.",
+        "A la signature du présent contrat, l'adhérent s'acquitte par chèque / espèce/ carte/ virement des sommes ci-après définies.",
         [
             'name' => 'Arial',
             'size' => 8

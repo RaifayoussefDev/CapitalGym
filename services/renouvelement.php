@@ -692,7 +692,7 @@ $conn->close();
                                             <div class="row d-none">
                                                 <div class="col-md-12">
                                                     <label for="badge-number">Badge Number:</label>
-                                                    <input type="text" id="badge-number" name="badge_number" class="form-control" placeholder="Enter badge number" readonly>
+                                                    <input type="text" id="badge-number" name="badge_number" class="form-control" placeholder="Enter badge number" value="<?php echo $user['id_card'];?>" readonly>
                                                 </div>
                                             </div>
 
