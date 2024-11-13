@@ -99,8 +99,8 @@ function GenerateContrat($id_user)
     // Add the logo at the top, centered with smaller dimensions
     $logoPath = '../assets/img/capitalsoft/logo_light.png'; // Path to your logo
     $section->addImage($logoPath, [
-        'width' => 120,  // Smaller width
-        'height' => 60, // Smaller height
+        'width' => 200,  // Smaller width
+        'height' => 100, // Smaller height
         'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER,
         'wrappingStyle' => 'inline'
     ]);
@@ -111,7 +111,7 @@ function GenerateContrat($id_user)
         // Add centered club name text at the bottom
         $section->addText('PRIVILEGE LUXURY FITNESS CLUB', [
             'name' => 'Arial',
-            'size' =>10,
+            'size' =>12,
             'bold' => true
         ], [
             'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER
@@ -134,7 +134,7 @@ function GenerateContrat($id_user)
         // Set text in the frame with centered alignment
         $frame->addText('CONTRAT D’ADHESION', [
             'name' => 'Arial',
-            'size' => 10,
+            'size' => 12,
             'bold' => true
         ], [
             'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER
@@ -249,6 +249,7 @@ function GenerateContrat($id_user)
             ]
         );
 
+        $section->addTextBreak(); // Adds a single line break (empty line)
 
         // Ajouter le titre avec un style en gras, en majuscules et souligné
         $section->addText(
@@ -277,6 +278,8 @@ function GenerateContrat($id_user)
                 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::BOTH // Justifié pour un aspect plus formel
             ]
         );
+        $section->addTextBreak(); // Adds a single line break (empty line)
+
 
         // Ajouter le titre avec un style en gras, en majuscules et souligné
         $section->addText(
@@ -323,6 +326,7 @@ function GenerateContrat($id_user)
                 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::BOTH // Justifié pour un aspect plus formel
             ]
         );
+        $section->addTextBreak(); // Adds a single line break (empty line)
 
         // Ajouter le titre avec un style en gras, en majuscules et souligné
         $section->addText(
@@ -476,6 +480,7 @@ function GenerateContrat($id_user)
         ], [
             'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::RIGHT, // Aligné à droite
         ]);
+        $section->addTextBreak(); // Adds a single line break (empty line)
 
         // Créer la table principale avec deux colonnes
         $mainTable = $section->addTable([
@@ -627,6 +632,8 @@ function GenerateContrat($id_user)
             'name' => 'Arial',
             'size' => 7,
         ]);
+        $section->addTextBreak(); // Adds a single line break (empty line)
+
 
         $date_inscription = $user['date_abonnement'];
         $section->addText("Fait en double exemplaire à Casablanca le " . $date_inscription . "");
