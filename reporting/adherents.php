@@ -3,7 +3,29 @@ require "../inc/app.php";
 require "../inc/conn_db.php";
 
 // Fetch users using your SQL query
-$users_sql = "SELECT u.id, nom , prenom , phone ,cin , email , u.genre, p.pack_name , etat , matricule FROM `users` u , abonnements a , packages p WHERE u.id=a.user_id and a.type_abonnement=p.id;";
+$users_sql = "SELECT 
+    u.id, 
+    u.nom, 
+    u.prenom, 
+    u.phone, 
+    u.cin, 
+    u.email, 
+    u.genre, 
+    p.pack_name, 
+    u.etat, 
+    u.matricule, 
+    GROUP_CONCAT(ua.activite_id ORDER BY ua.activite_id ASC) AS activites_list,
+GROUP_CONCAT(ua.periode_activites ORDER BY ua.activite_id ASC) AS activites_periode
+FROM 
+    users u
+JOIN 
+    abonnements a ON u.id = a.user_id
+JOIN 
+    packages p ON a.type_abonnement = p.id
+LEFT JOIN 
+    user_activites ua ON ua.user_id = u.id
+GROUP BY 
+    u.id;";
 $users_result = $conn->query($users_sql);
 
 $users = [];
@@ -79,31 +101,28 @@ $conn->close();
                                             <td class="text-capitalize">
                                                 <?php
                                                 if ($user['pack_name'] === 'Familial') {
-                                                    // Extraire les valeurs des activités et des périodes sous forme de tableaux
-                                                    $activites_list = !empty($user['activites_list']) ? explode(',', $user['activites_list']) : [];
-                                                    $activites_periode = !empty($user['activites_periode']) ? explode(',', $user['activites_periode']) : [];
+                                                    // Convert `activites_list` and `activites_periode` to arrays
+                                                    $activites_list = $user['activites_list'];
+                                                    $activites_periode = $user['activites_periode'];
 
-                                                    // Vérifier les conditions spécifiques
+                                                    // Check specific conditions for Familial Gold and Familial Platinum
                                                     if (empty($activites_list)) {
                                                         echo "Familial Silver";
-                                                    } elseif (count($activites_list) === 1 && $activites_list[0] == 53 && $activites_periode[0] == 12) {
+                                                    } elseif ($activites_list === '53' && $activites_periode = '12'){
                                                         echo "Familial Gold";
-                                                    } elseif (
-                                                        count($activites_list) === 4 &&
-                                                        $activites_list === ['53', '54', '55', '56'] &&
-                                                        $activites_periode === ['12', '10', '10', '10']
-                                                    ) {
+                                                    } elseif ($activites_list === '53,54,55,56' && $activites_periode = '12,10,10,10') {
                                                         echo "Familial Platinum";
                                                     } else {
-                                                        // Si aucune condition spécifique n'est remplie, afficher le nom du pack tel quel
+                                                        // Default display for other cases with "Familial" pack name
                                                         echo "Familial";
                                                     }
                                                 } else {
-                                                    // Si le pack n'est pas "familial", afficher simplement le nom du pack
+                                                    // For non-familial packs, simply display the pack name
                                                     echo htmlspecialchars(ucfirst($user['pack_name']));
                                                 }
                                                 ?>
                                             </td>
+
 
                                             <td class="text-capitalize"><?php echo htmlspecialchars($user['etat']); ?></td>
                                         </tr>
