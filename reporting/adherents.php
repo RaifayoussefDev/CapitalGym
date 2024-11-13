@@ -10,7 +10,7 @@ $users_sql = "SELECT
     u.phone, 
     u.cin, 
     u.email,
-    u.date_naissance,
+    DATE_FORMAT(u.date_naissance, '%d/%m/%Y') AS date_naissance,
     u.genre, 
     p.pack_name, 
     u.etat, 
