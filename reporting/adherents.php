@@ -78,7 +78,7 @@ $conn->close();
                                             <td class="text-capitalize"><?php echo htmlspecialchars($user['email']); ?></td>
                                             <td class="text-capitalize">
                                                 <?php
-                                                if ($user['pack_name'] === 'familial') {
+                                                if ($user['pack_name'] === 'Familial') {
                                                     // Extraire les valeurs des activités et des périodes sous forme de tableaux
                                                     $activites_list = !empty($user['activites_list']) ? explode(',', $user['activites_list']) : [];
                                                     $activites_periode = !empty($user['activites_periode']) ? explode(',', $user['activites_periode']) : [];
