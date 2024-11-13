@@ -20,54 +20,56 @@ function GenerateContrat($id_user)
     // $id_user = $_GET['id_user'];
     $sql = "
     SELECT 
-        u.id, 
-        u.matricule, 
-        u.id_card, 
-        u.nom, 
-        u.prenom, 
-        u.Note, 
-        u.email, 
-        u.phone, 
-        u.adresse, 
-        u.num_urgence, 
-        u.photo, 
-        u.fonction, 
-        u.employeur, 
-        a.id AS id_abonnement, 
-        DATE_FORMAT(u.date_naissance, '%d/%m/%Y') AS date_naissance, 
-        a.type_abonnement, 
-        u.cin, 
-        u.genre, 
-        p.package_type_id, 
-        a.offres_promotionnelles, 
-        a.description, 
-        p.id AS id_pack, 
-        SUM(py.montant_paye) AS montant_paye_total,
-        py.id AS payement_id, 
-        py.total AS total, 
-        p.pack_name AS pack_name, 
-        py.reste AS reste, 
-        DATE_FORMAT(a.date_debut, '%d/%m/%Y') AS date_debut, 
-        DATE_FORMAT(a.date_fin, '%d/%m/%Y') AS date_fin ,
-        DATE_FORMAT(a.date_abonnement, '%d/%m/%Y') AS date_abonnement ,
-        GROUP_CONCAT(ua.activite_id ORDER BY ua.activite_id ASC) AS activites_list,
-        GROUP_CONCAT(ua.periode_activites ORDER BY ua.activite_id ASC) AS activites_periode
-    FROM 
-        users u 
-    JOIN 
-        abonnements a ON u.id = a.user_id 
-    JOIN 
-        packages p ON p.id = a.type_abonnement 
-    JOIN 
-        payments py ON py.abonnement_id = a.id
-    LEFT JOIN 
-        user_activites ua ON ua.user_id = u.id 
-    WHERE 
-        u.role_id = 3 
-        AND u.id = '$id_user'
-    GROUP BY 
-        u.id, a.id, p.id;
-    ;
+    u.id, 
+    u.matricule, 
+    u.id_card, 
+    u.nom, 
+    u.prenom, 
+    u.Note, 
+    u.email, 
+    u.phone, 
+    u.adresse, 
+    u.num_urgence, 
+    u.photo, 
+    u.fonction, 
+    u.employeur, 
+    a.id AS id_abonnement, 
+    DATE_FORMAT(u.date_naissance, '%d/%m/%Y') AS date_naissance, 
+    a.type_abonnement, 
+    u.cin, 
+    u.genre, 
+    p.package_type_id, 
+    a.offres_promotionnelles, 
+    a.description, 
+    p.id AS id_pack, 
+    SUM(py.montant_paye) AS montant_paye_total,
+    py.id AS payement_id, 
+    py.total AS total, 
+    p.pack_name AS pack_name, 
+    py.reste AS reste, 
+    DATE_FORMAT(a.date_debut, '%d/%m/%Y') AS date_debut, 
+    DATE_FORMAT(a.date_fin, '%d/%m/%Y') AS date_fin,
+    DATE_FORMAT(a.date_abonnement, '%d/%m/%Y') AS date_abonnement,
+
+    -- Use DISTINCT to remove duplicates in activites_list and activites_periode
+    GROUP_CONCAT(DISTINCT ua.activite_id ORDER BY ua.activite_id ASC) AS activites_list,
+    GROUP_CONCAT(DISTINCT ua.periode_activites ORDER BY ua.activite_id ASC) AS activites_periode
+
+FROM 
+    users u 
+JOIN 
+    abonnements a ON u.id = a.user_id 
+JOIN 
+    packages p ON p.id = a.type_abonnement 
+JOIN 
+    payments py ON py.abonnement_id = a.id
+LEFT JOIN 
+    user_activites ua ON ua.user_id = u.id 
+WHERE 
+    u.role_id = 3 
+    AND u.id = '$id_user'
+GROUP BY 
+    u.id, a.id, p.id;
     ";
 
 
@@ -179,7 +181,7 @@ function GenerateContrat($id_user)
         if ($pack_name == 'Familial') {
             if ($activites_list == '53' && $activites_periode == '12') {
                 $code_pack = 'FG';
-            } elseif ($activites_list == '53,54,55,56' && $activites_periode == '12,10,10,10') {
+            } elseif ($activites_list == '53,54,55,56' && $activites_periode == '12,10') {
                 $code_pack = 'FP';
             } else {
                 $code_pack = 'FS';
@@ -197,7 +199,7 @@ function GenerateContrat($id_user)
 
 
         // Ajouter le texte au cadre
-        $frame->addText('CONTRAT N° :        ' .$code_pack. $numeroContrat, [
+        $frame->addText('CONTRAT N° :        ' . $code_pack . $numeroContrat, [
             'name' => 'Arial',
             'size' => 10,
             'bold' => true
@@ -299,7 +301,7 @@ function GenerateContrat($id_user)
                 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT, // Aligné à gauche
             ]
         );
-        $section->addTextBreak(); 
+        $section->addTextBreak();
 
 
         // Ajouter le texte explicatif avec une taille de police de 9
@@ -331,7 +333,7 @@ function GenerateContrat($id_user)
             ]
         );
 
-        $section->addTextBreak(); 
+        $section->addTextBreak();
 
         $section->addText(
             "A la signature du présent contrat, l'adhérent s'acquitte par chèque / espèce/ carte/ virement des sommes ci-après définies.",
@@ -379,7 +381,7 @@ function GenerateContrat($id_user)
                 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT, // Aligné à gauche
             ]
         );
-        $section->addTextBreak(); 
+        $section->addTextBreak();
 
         // Créer un tableau pour les boutons radio
         // Créer un tableau pour les boutons radio
@@ -439,14 +441,14 @@ function GenerateContrat($id_user)
         // Ajouter une ligne pour le type d'abonnement en utilisant le nom du pack
         $table->addRow();
 
-        $pack_name=$user['pack_name'];
+        $pack_name = $user['pack_name'];
 
-        if($pack_code == 'FG'){
-            $pack_name='Familial Gold';
-        }elseif($pack_name == 'FP'){
-            $pack_name='Familial Platinum';
-        }elseif($pack_name == 'FS'){
-            $pack_name='Familial Silver';
+        if ($pack_code == 'FG') {
+            $pack_name = 'Familial Gold';
+        } elseif ($pack_name == 'FP') {
+            $pack_name = 'Familial Platinum';
+        } elseif ($pack_name == 'FS') {
+            $pack_name = 'Familial Silver';
         }
         // Ajouter une cellule pour afficher le nom du pack
         $table->addCell(2000)->addText(strtoupper($pack_name) . ' :', ['name' => 'Arial', 'size' => 10, 'bold' => true]); // Étiquette avec le nom du pack
@@ -497,7 +499,7 @@ function GenerateContrat($id_user)
                 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT, // Aligné à gauche
             ]
         );
-        $section->addTextBreak(); 
+        $section->addTextBreak();
 
         // Créer une table pour le texte avec deux colonnes
         $table = $section->addTable([
