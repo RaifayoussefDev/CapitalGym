@@ -443,15 +443,24 @@ GROUP BY
 
         $pack_name = $user['pack_name'];
 
-        if ($pack_code == 'FG') {
-            $pack_name = 'Familial Gold';
-        } elseif ($pack_name == 'FP') {
-            $pack_name = 'Familial Platinum';
-        } elseif ($pack_name == 'FS') {
+        // Assign the pack name based on pack_code
+        if ($pack_code == 'FS') {
             $pack_name = 'Familial Silver';
+        } elseif ($pack_code == 'FG') {
+            $pack_name = 'Familial Gold';
+        } elseif ($pack_code == 'FP') {
+            $pack_name = 'Familial Platinum';
+        } elseif ($pack_code == 'G') {
+            $pack_name = 'Gold';
+        } elseif ($pack_code == 'P') {
+            $pack_name = 'Platinum';
+        } elseif ($pack_code == 'S') {
+            $pack_name = 'Silver';
         }
-        // Ajouter une cellule pour afficher le nom du pack
-        $table->addCell(2000)->addText(strtoupper($pack_name) . ' :', ['name' => 'Arial', 'size' => 10, 'bold' => true]); // Étiquette avec le nom du pack
+
+        // Add a cell to display the pack name in uppercase
+        $table->addCell(2000)->addText(strtoupper($pack_name) . ' :', ['name' => 'Arial', 'size' => 10, 'bold' => true]);
+
 
         // Ajouter des cellules pour "Du", "Au", et "Soit" en utilisant les valeurs de $user
         $table->addCell(3000)->addText('Du :   ' . ($user['date_debut'] ?? '……………'), ['name' => 'Arial', 'size' => 8]); // Date de début
