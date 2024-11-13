@@ -49,7 +49,9 @@ function GenerateContrat($id_user)
         py.reste AS reste, 
         DATE_FORMAT(a.date_debut, '%d/%m/%Y') AS date_debut, 
         DATE_FORMAT(a.date_fin, '%d/%m/%Y') AS date_fin ,
-        DATE_FORMAT(a.date_abonnement, '%d/%m/%Y') AS date_abonnement 
+        DATE_FORMAT(a.date_abonnement, '%d/%m/%Y') AS date_abonnement ,
+        GROUP_CONCAT(ua.activite_id ORDER BY ua.activite_id ASC) AS activites_list,
+        GROUP_CONCAT(ua.periode_activites ORDER BY ua.activite_id ASC) AS activites_periode
     FROM 
         users u 
     JOIN 
@@ -57,7 +59,9 @@ function GenerateContrat($id_user)
     JOIN 
         packages p ON p.id = a.type_abonnement 
     JOIN 
-        payments py ON py.abonnement_id = a.id 
+        payments py ON py.abonnement_id = a.id
+    LEFT JOIN 
+        user_activites ua ON ua.user_id = u.id 
     WHERE 
         u.role_id = 3 
         AND u.id = '$id_user'
@@ -111,7 +115,7 @@ function GenerateContrat($id_user)
         // Add centered club name text at the bottom
         $section->addText('PRIVILEGE LUXURY FITNESS CLUB', [
             'name' => 'Arial',
-            'size' =>12,
+            'size' => 12,
             'bold' => true
         ], [
             'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER
@@ -167,8 +171,33 @@ function GenerateContrat($id_user)
         // Créer le numéro de contrat en utilisant uniquement la partie numérique du matricule
         $numeroContrat = $numericPart;
 
+        $code_pack = '';
+        $pack_name = $user['pack_name'];
+        $activites_list = $user['activites_list'];
+        $activites_periode = $user['activites_periode'];
+
+        if ($pack_name == 'Familial') {
+            if ($activites_list == '53' && $activites_periode == '12') {
+                $code_pack = 'FG';
+            } elseif ($activites_list == '53,54,55,56' && $activites_periode == '12,10,10,10') {
+                $code_pack = 'FP';
+            } else {
+                $code_pack = 'FS';
+            }
+        } elseif ($pack_name == 'Silver') {
+            $code_pack = 'S';
+        } elseif ($pack_name == 'Gold') {
+            $code_pack = 'G';
+        } elseif ($pack_name == 'Platinum') {
+            $code_pack = 'P';
+        }
+
+        // Output or use $code_pack as needed
+        echo $code_pack;
+
+
         // Ajouter le texte au cadre
-        $frame->addText('CONTRAT N° :        ' . $numeroContrat, [
+        $frame->addText('CONTRAT N° :        ' .$code_pack. $numeroContrat, [
             'name' => 'Arial',
             'size' => 10,
             'bold' => true
@@ -180,7 +209,7 @@ function GenerateContrat($id_user)
 
 
         // Add the title "ENTREE" to the left cell, setting a wider width to span half the table width
-        $section->addText('Entree', [ // Adjust cell width as needed
+        $section->addText('Entre', [ // Adjust cell width as needed
             'name' => 'Arial',
             'size' => 10,
             'bold' => true,
@@ -191,7 +220,7 @@ function GenerateContrat($id_user)
 
         // Add a new row for additional information
         // Ajouter le texte pour le Club et l'adhérent dans le même bloc, sans table
-        $section->addText("PRIVILEGE LUXURY FITNESS CLUB ayant son siège social à Casablanca, 111 boulevard MODIBO KEITA.\nD’une part ;", [
+        $section->addText("PRIVILEGE LUXURY FITNESS CLUB sis à 711 boulevard MODIBO KEITA , Casablanca D’une part ;", [
             'name' => 'Times New Roman',
             'size' => 10,
         ]);
@@ -1264,5 +1293,5 @@ function GenerateContrat($id_user)
     }
 
     // Return only the contract name to the client (no success message)
-    return $contractName ;
+    return $contractName;
 }
