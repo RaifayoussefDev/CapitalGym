@@ -401,6 +401,8 @@ function GenerateContrat($id_user)
         $groupeRadio = $unselectedRadio;
         $conventionRadio = $unselectedRadio;
 
+
+
         if (in_array($user['pack_name'], ['Silver', 'Gold', 'Platinum'])) {
             $individuelRadio = $selectedRadio;
         } elseif ($user['pack_name'] === 'Familial') {
@@ -436,8 +438,18 @@ function GenerateContrat($id_user)
 
         // Ajouter une ligne pour le type d'abonnement en utilisant le nom du pack
         $table->addRow();
+
+        $pack_name=$user['pack_name'];
+
+        if($pack_code == 'FG'){
+            $pack_name='Familial Gold';
+        }elseif($pack_name == 'FP'){
+            $pack_name='Familial Platinum';
+        }elseif($pack_name == 'FS'){
+            $pack_name='Familial Silver';
+        }
         // Ajouter une cellule pour afficher le nom du pack
-        $table->addCell(2000)->addText(strtoupper($user['pack_name']) . ' :', ['name' => 'Arial', 'size' => 10, 'bold' => true]); // Étiquette avec le nom du pack
+        $table->addCell(2000)->addText(strtoupper($pack_name) . ' :', ['name' => 'Arial', 'size' => 10, 'bold' => true]); // Étiquette avec le nom du pack
 
         // Ajouter des cellules pour "Du", "Au", et "Soit" en utilisant les valeurs de $user
         $table->addCell(3000)->addText('Du :   ' . ($user['date_debut'] ?? '……………'), ['name' => 'Arial', 'size' => 8]); // Date de début
