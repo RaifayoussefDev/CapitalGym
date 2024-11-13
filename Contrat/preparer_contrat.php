@@ -220,7 +220,7 @@ function GenerateContrat($id_user)
 
         // Add a new row for additional information
         // Ajouter le texte pour le Club et l'adhérent dans le même bloc, sans table
-        $section->addText("PRIVILEGE LUXURY FITNESS CLUB sis à 711 boulevard MODIBO KEITA , Casablanca D’une part ;", [
+        $section->addText("PRIVILEGE LUXURY FITNESS CLUB, sis au 711 boulevard Modibo Keita, Casablanca, d’une part ;", [
             'name' => 'Times New Roman',
             'size' => 10,
         ]);
@@ -299,6 +299,7 @@ function GenerateContrat($id_user)
                 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT, // Aligné à gauche
             ]
         );
+        $section->addTextBreak(); 
 
 
         // Ajouter le texte explicatif avec une taille de police de 9
@@ -329,6 +330,8 @@ function GenerateContrat($id_user)
                 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT, // Aligné à gauche
             ]
         );
+
+        $section->addTextBreak(); 
 
         $section->addText(
             "A la signature du présent contrat, l'adhérent s'acquitte par chèque / espèce/ carte/ virement des sommes ci-après définies.",
@@ -376,6 +379,7 @@ function GenerateContrat($id_user)
                 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT, // Aligné à gauche
             ]
         );
+        $section->addTextBreak(); 
 
         // Créer un tableau pour les boutons radio
         // Créer un tableau pour les boutons radio
@@ -481,7 +485,7 @@ function GenerateContrat($id_user)
                 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT, // Aligné à gauche
             ]
         );
-
+        $section->addTextBreak(); 
 
         // Créer une table pour le texte avec deux colonnes
         $table = $section->addTable([
