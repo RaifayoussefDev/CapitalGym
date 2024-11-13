@@ -176,6 +176,7 @@ function GenerateContrat($id_user)
             'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER
         ]);
 
+        $section->addTextBreak(); // Adds a single line break (empty line)
 
 
         // Add the title "ENTREE" to the left cell, setting a wider width to span half the table width
@@ -194,12 +195,15 @@ function GenerateContrat($id_user)
             'name' => 'Times New Roman',
             'size' => 10,
         ]);
+        $section->addTextBreak(); // Adds a single line break (empty line)
+
 
         $section->addText("Ci-après dénommé « Club »", [
             'name' => 'Times New Roman',
             'size' => 10,
             'bold' => true,
         ]);
+        $section->addTextBreak(); // Adds a single line break (empty line)
 
         $section->addText("ET :", [
             'name' => 'Times New Roman',
@@ -222,6 +226,7 @@ function GenerateContrat($id_user)
                 'size' => 10,
             ]
         );
+        $section->addTextBreak(); // Adds a single line break (empty line)
 
 
 
@@ -431,6 +436,7 @@ function GenerateContrat($id_user)
                 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT, // Aligné à gauche
             ]
         );
+        $section->addTextBreak(); // Adds a single line break (empty line)
 
         // Ajouter le titre "IV - MODALITES DE REGLEMENT" avec style
         $section->addText(
@@ -638,6 +644,7 @@ function GenerateContrat($id_user)
         $date_inscription = $user['date_abonnement'];
         $section->addText("Fait en double exemplaire à Casablanca le " . $date_inscription . "");
         $section->addText("L'adhérent reconnait avoir pris connaissance et accepte les conditions générales au verso sans réserve. ");
+        $section->addTextBreak(); // Adds a single line break (empty line)
 
         // Ajouter une table pour les signatures
         $signatureTable = $section->addTable([
