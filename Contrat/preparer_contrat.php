@@ -711,9 +711,9 @@ GROUP BY
         // Ajouter la première ligne avec deux cellules (signature de l'adhérent à gauche, signature du club à droite)
         $signatureTable->addRow();
 
-        // Ajouter la cellule gauche pour la signature de l'adhérent avec texte aligné à gauche
         $signatureTable->addCell(6000, ['align' => 'left'])->addText(
-            "Signature de l’adhérent précédée de la mention « lu et approuvé »",
+            "Signature de l’adhérent précédée de la mention « lu et approuvé »\n" . 
+            $user['nom'] . " " . $user['prenom'],
             ['name' => 'Arial', 'size' => 8]
         );
 
