@@ -538,7 +538,7 @@ $conn->close();
 
                                                     <input type="hidden" name="type_activite[]" value="<?php echo $activite['type']; ?>">
 
-                                                    <div class="col-md-6 <?php echo $isChecked ? '' : 'd-none'; ?>">
+                                                    <div class="col-md-6 <?php echo $isChecked ? '' : ''; ?>">
                                                         <div class="form-group">
                                                             <label class="form-label">
                                                                 <?php echo ($activite['type'] == 'par mois') ? 'Période d\'activité' : 'Nombre des séances'; ?>
