@@ -1,6 +1,7 @@
 <?php
 require "../inc/app.php";
 require "../inc/conn_db.php";
+ob_start(); // Start output buffering (this prevents any output being sent prematurely)
 
 // Retrieve user ID from URL and user details
 if (isset($_GET['id_user'])) {
@@ -310,30 +311,33 @@ $conn->close();
                         $has_contract = !empty($user['contract_name']); // Vérifie si un nom de contrat existe
 
                         // Exemple d'ID utilisateur (assurez-vous que $user['id'] est défini dans votre code)
-                        $user_id = $user_id;
                         $contract_name = $user['contract_name']; // Nom du contrat
+                        
                         ?>
 
                         <?php if ($has_contract): ?>
                             <!-- Si un contrat existe, afficher le bouton de téléchargement -->
-                            <button id="downloadContractBtn" class="btn btn-secondary mt-3" onclick="downloadContract('<?php echo $contract_name; ?>')">
-                                Télécharger le Contrat
-                            </button>
-                            <button id="prepareContractBtn" class="btn btn-success" onclick="prepareContract(<?php echo $user_id; ?>)">
-                                Préparer Un Autre Contrat
-                            </button>
+                            <form action="../contrat/<?php echo htmlspecialchars($contract_name); ?>" target="_blank" method="GET">
+                                <button type="submit" class="btn btn-secondary mt-3">Télécharger le Contrat</button>
+                            </form>
+                            <form action="../Contrat/generate_contrats.php" method="GET">
+                                <input type="hidden" name="id_user" value="<?php echo $user_id; ?>">
+                                <button type="submit" class="btn btn-success mt-3">
+                                    Préparer Un Autre Contrat
+                                </button>
+                            </form>
                         <?php else: ?>
                             <!-- Si aucun contrat n'existe, afficher le bouton pour préparer le contrat -->
-                            <button id="prepareContractBtn" class="btn btn-success" onclick="prepareContract(<?php echo $user_id; ?>)">
-                                Préparer le Contrat
-                            </button>
+                            <form action="../Contrat/generate_contrats.php" method="GET">
+                                <input type="hidden" name="id_user" value="<?php echo $user_id; ?>">
+                                <button type="submit" class="btn btn-success mt-3">
+                                    Préparer le Contrat
+                                </button>
+                            </form>
                         <?php endif; ?>
-
-                        <!-- Section d'affichage du contrat -->
-                        <div id="contractContent" class="mt-3" style="display: none;">
-                            <!-- Le contenu du contrat sera chargé ici par JavaScript -->
-                        </div>
                     </section>
+
+
 
 
                 </div>
@@ -342,40 +346,7 @@ $conn->close();
     </div>
 </div>
 
-<script>
-    // Fonction pour préparer le contrat
-    function prepareContract(userId) {
-        // Utiliser AJAX pour préparer le contrat et ensuite l'afficher
-        fetch(`../contrat/preparer_contrat.php?id_user=${userId}`)
-            .then(response => response.text())
-            .then(data => {
-                // Supposons que la réponse contient le nom du contrat après préparation
-                const contractName = data.trim(); // Extraire le nom du contrat de la réponse
 
-                // Masquer le bouton Préparer le Contrat une fois qu'il est préparé
-                document.getElementById("prepareContractBtn").style.display = 'none';
-
-                // Afficher le bouton de téléchargement du contrat
-                const downloadBtn = document.getElementById("downloadContractBtn");
-                downloadBtn.style.display = 'block'; // S'assurer que le bouton est visible
-
-                // Mettre à jour l'attribut onclick pour télécharger le bon contrat
-                downloadBtn.setAttribute("onclick", `downloadContract('${contractName}')`);
-
-                // Rediriger vers la page consult.php après préparation du contrat
-                window.location.href = 'consult.php'; // Redirection vers consult.php
-            })
-            .catch(error => console.error('Erreur lors de la préparation du contrat:', error));
-    }
-
-
-
-    // Fonction pour télécharger le contrat
-    function downloadContract(contractName) {
-        // Déclencher le téléchargement du fichier pour le contrat préparé en utilisant son nom
-        window.location.href = `../contrat/${contractName}`;
-    }
-</script>
 
 
 <style>

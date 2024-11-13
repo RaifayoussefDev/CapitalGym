@@ -9,7 +9,8 @@ $users_sql = "SELECT
     u.prenom, 
     u.phone, 
     u.cin, 
-    u.email, 
+    u.email,
+    u.date_naissance,
     u.genre, 
     p.pack_name, 
     u.etat, 
@@ -73,6 +74,7 @@ $conn->close();
                                     <th>CIN</th>
                                     <th>Numéro GSM</th>
                                     <th>Genre</th>
+                                    <th>Date de Naissance</th>
                                     <th>Email</th>
                                     <th>Type d'abonnement</th>
                                     <th>Statut</th>
@@ -97,6 +99,7 @@ $conn->close();
                                                 }
                                                 ?>
                                             </td>
+                                            <td class="text-capitalize"><?php echo htmlspecialchars($user['date_naissance']); ?></td>
                                             <td class="text-capitalize"><?php echo htmlspecialchars($user['email']); ?></td>
                                             <td class="text-capitalize">
                                                 <?php

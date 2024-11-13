@@ -1257,5 +1257,5 @@ function GenerateContrat($id_user)
     }
 
     // Return only the contract name to the client (no success message)
-    echo $contractName . "<br>";
+    return $contractName ;
 }
