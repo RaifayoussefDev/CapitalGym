@@ -109,6 +109,17 @@ if ($resulta->num_rows > 0) {
     }
 }
 
+
+$sql_user_activities = "SELECT * FROM `user_activites` WHERE user_id = $id_user";
+$result_user_activities = $conn->query($sql_user_activities);
+
+$user_activities = [];
+if ($result_user_activities->num_rows > 0) {
+    while ($row_user_activity = $result_user_activities->fetch_assoc()) {
+        $user_activities[$row_user_activity['activite_id']] = $row_user_activity;
+    }
+}
+
 $conn->close();
 ?>
 <style>
@@ -504,42 +515,47 @@ $conn->close();
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label class="form-label">Activités</label>
-                                            <?php foreach ($activites as $activite) { ?>
+                                            <?php foreach ($activites as $activite) {
+                                                $isChecked = isset($user_activities[$activite['id']]);
+                                                $selectedPeriod = $isChecked ? $user_activities[$activite['id']]['periode_activites'] : null;
+                                            ?>
                                                 <div class="row">
                                                     <div class="col-md-6">
                                                         <div class="form-group">
-                                                            <label for=""></label><br>
                                                             <input
                                                                 class="form-check-input activite-checkbox"
                                                                 type="checkbox"
                                                                 name="value[]"
                                                                 value="<?php echo $activite['id']; ?>"
                                                                 data-price="<?php echo $activite['prix']; ?>"
-                                                                id="<?php echo $activite['nom']; ?>" />
-                                                            <label class="form-check-label" for="<?php echo $activite['nom']; ?>"><?php echo $activite['nom']; ?></label>
+                                                                id="<?php echo $activite['nom']; ?>"
+                                                                <?php echo $isChecked ? 'checked' : ''; ?> />
+                                                            <label class="form-check-label" for="<?php echo $activite['nom']; ?>">
+                                                                <?php echo $activite['nom']; ?>
+                                                            </label>
                                                         </div>
                                                     </div>
-                                                    <input type="text" name="type_activite[]" value="<?php echo $activite['type']; ?>" style="display:none">
 
-                                                    <div class="col-md-6 d-none">
+                                                    <input type="hidden" name="type_activite[]" value="<?php echo $activite['type']; ?>">
+
+                                                    <div class="col-md-6 <?php echo $isChecked ? '' : 'd-none'; ?>">
                                                         <div class="form-group">
                                                             <label class="form-label">
                                                                 <?php echo ($activite['type'] == 'par mois') ? 'Période d\'activité' : 'Nombre des séances'; ?>
                                                             </label>
-                                                            <select name="periode_activite[<?php echo $activite['id']; ?>]" class="form-select form-control-lg period-select" disabled>
+                                                            <select name="periode_activite[<?php echo $activite['id']; ?>]" class="form-select form-control-lg period-select" <?php echo $isChecked ? '' : 'disabled'; ?>>
                                                                 <?php if ($activite['type'] == 'par mois') { ?>
-                                                                    <option value="1">Mensuel</option>
-                                                                    <option value="3">Trimestriel</option>
-                                                                    <option value="6">Semestriel</option>
-                                                                    <option value="12" selected>Annuel</option>
+                                                                    <option value="1" <?php echo ($selectedPeriod == 1) ? 'selected' : ''; ?>>Mensuel</option>
+                                                                    <option value="3" <?php echo ($selectedPeriod == 3) ? 'selected' : ''; ?>>Trimestriel</option>
+                                                                    <option value="6" <?php echo ($selectedPeriod == 6) ? 'selected' : ''; ?>>Semestriel</option>
+                                                                    <option value="12" <?php echo ($selectedPeriod == 12) ? 'selected' : ''; ?>>Annuel</option>
                                                                 <?php } else { ?>
                                                                     <?php for ($i = 1; $i <= 10; $i++) { ?>
-                                                                        <option value="<?php echo $i; ?>" <?php echo ($i === 10) ? 'selected' : ''; ?>>
+                                                                        <option value="<?php echo $i; ?>" <?php echo ($selectedPeriod == $i) ? 'selected' : ''; ?>>
                                                                             <?php echo $i . ' séance' . ($i > 1 ? 's' : ''); ?>
                                                                         </option>
                                                                     <?php } ?>
                                                                 <?php } ?>
-
                                                             </select>
                                                         </div>
                                                     </div>
@@ -548,6 +564,7 @@ $conn->close();
                                         </div>
                                     </div>
                                 </div>
+
 
                                 <div class="row">
                                     <div class="col-md-6">
@@ -692,7 +709,7 @@ $conn->close();
                                             <div class="row d-none">
                                                 <div class="col-md-12">
                                                     <label for="badge-number">Badge Number:</label>
-                                                    <input type="text" id="badge-number" name="badge_number" class="form-control" placeholder="Enter badge number" value="<?php echo $user['id_card'];?>" readonly>
+                                                    <input type="text" id="badge-number" name="badge_number" class="form-control" placeholder="Enter badge number" value="<?php echo $user['id_card']; ?>" readonly>
                                                 </div>
                                             </div>
 
@@ -1406,6 +1423,8 @@ $conn->close();
 
         const remaining = total - totalPaid - additionalPaid;
         resteInput.value = remaining.toFixed(2) + ' MAD';
+
+        calculateTotalPrice()
     }
 
 
