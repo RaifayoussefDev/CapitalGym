@@ -76,7 +76,35 @@ $conn->close();
                                                 ?>
                                             </td>
                                             <td class="text-capitalize"><?php echo htmlspecialchars($user['email']); ?></td>
-                                            <td class="text-capitalize"><?php echo htmlspecialchars($user['pack_name']); ?></td>
+                                            <td class="text-capitalize">
+                                                <?php
+                                                if ($user['pack_name'] === 'familial') {
+                                                    // Extraire les valeurs des activités et des périodes sous forme de tableaux
+                                                    $activites_list = !empty($user['activites_list']) ? explode(',', $user['activites_list']) : [];
+                                                    $activites_periode = !empty($user['activites_periode']) ? explode(',', $user['activites_periode']) : [];
+
+                                                    // Vérifier les conditions spécifiques
+                                                    if (empty($activites_list)) {
+                                                        echo "Familial Silver";
+                                                    } elseif (count($activites_list) === 1 && $activites_list[0] == 53 && $activites_periode[0] == 12) {
+                                                        echo "Familial Gold";
+                                                    } elseif (
+                                                        count($activites_list) === 4 &&
+                                                        $activites_list === ['53', '54', '55', '56'] &&
+                                                        $activites_periode === ['12', '10', '10', '10']
+                                                    ) {
+                                                        echo "Familial Platinum";
+                                                    } else {
+                                                        // Si aucune condition spécifique n'est remplie, afficher le nom du pack tel quel
+                                                        echo "Familial";
+                                                    }
+                                                } else {
+                                                    // Si le pack n'est pas "familial", afficher simplement le nom du pack
+                                                    echo htmlspecialchars(ucfirst($user['pack_name']));
+                                                }
+                                                ?>
+                                            </td>
+
                                             <td class="text-capitalize"><?php echo htmlspecialchars($user['etat']); ?></td>
                                         </tr>
                                     <?php endforeach; ?>
