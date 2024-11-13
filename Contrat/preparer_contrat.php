@@ -443,18 +443,18 @@ GROUP BY
 
         $pack_name = $user['pack_name'];
 
-        // Assign the pack name based on pack_code
-        if ($pack_code == 'FS') {
+        // Assign the pack name based on code_pack
+        if ($code_pack == 'FS') {
             $pack_name = 'Familial Silver';
-        } elseif ($pack_code == 'FG') {
+        } elseif ($code_pack == 'FG') {
             $pack_name = 'Familial Gold';
-        } elseif ($pack_code == 'FP') {
+        } elseif ($code_pack == 'FP') {
             $pack_name = 'Familial Platinum';
-        } elseif ($pack_code == 'G') {
+        } elseif ($code_pack == 'G') {
             $pack_name = 'Gold';
-        } elseif ($pack_code == 'P') {
+        } elseif ($code_pack == 'P') {
             $pack_name = 'Platinum';
-        } elseif ($pack_code == 'S') {
+        } elseif ($code_pack == 'S') {
             $pack_name = 'Silver';
         }
 
