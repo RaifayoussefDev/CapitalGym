@@ -13,10 +13,8 @@ $users_sql = "SELECT u.id, u.nom, u.prenom, p.pack_name, a.date_abonnement, u.ma
             -- For all other payment types, include montant_paye in the sum
             ELSE py.montant_paye
         END
-    ) AS montant_total, 
-    SUM(py.total) AS total,  -- Add this line to calculate the sum of `total`
-    sp.nom AS saisie_par_nom, 
-    sp.prenom AS saisie_par_prenom -- Retrieve the name and surname of 'saisie_par'
+    ) AS montant_total, py.total,
+    sp.nom AS saisie_par_nom, sp.prenom AS saisie_par_prenom -- Retrieve the name and surname of 'saisie_par'
 FROM users u
 JOIN abonnements a ON u.id = a.user_id
 JOIN packages p ON a.type_abonnement = p.id
