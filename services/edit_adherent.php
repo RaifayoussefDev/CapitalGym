@@ -69,7 +69,7 @@ if (!$stmt) {
     $conn->rollback();
     throw new Exception("Failed to prepare user update: " . $conn->error);
 }
-$stmt->bind_param("sssssssssssisi", $nom, $prenom, $cin, $phone, $email,$date_naissance, $photo_name, $adresse, $fonction, $num_urgence, $employeur, $changer_par, $badge_number, $user_id);
+$stmt->bind_param("sssssssssssisi", $nom, $prenom, $cin, $phone, $email, $date_naissance, $photo_name, $adresse, $fonction, $num_urgence, $employeur, $changer_par, $badge_number, $user_id);
 if (!$stmt->execute()) {
     $conn->rollback();
     throw new Exception("User update failed: " . $stmt->error);
@@ -181,7 +181,7 @@ if (isset($_POST['type_paiement'], $_POST['montant_paye'], $_POST['reste'], $_PO
                 $stmt->execute();
                 $result = $stmt->get_result();
                 $row = $result->fetch_assoc();
-                
+
                 // Si un paiement existe, mettez à jour le total
                 if ($row) {
                     $existing_total = floatval($row['total']);
@@ -200,10 +200,11 @@ if (isset($_POST['type_paiement'], $_POST['montant_paye'], $_POST['reste'], $_PO
             }
 
             // Insérer les nouvelles lignes dans `payments` avec `total = 0`
-            $payment_sql = "INSERT INTO `payments` (`montant_paye`, `reste`, `total`, `user_id`, `abonnement_id`, `type_paiement_id`) 
-                            VALUES (?, ?, 0, ?, ?, ?)";
+            $$payment_sql = "INSERT INTO `payments` (`montant_paye`, `reste`, `total`, `user_id`, `abonnement_id`, `type_paiement_id`) 
+            VALUES (?, ?, 0, ?, ?, ?)";
             $stmt = $conn->prepare($payment_sql);
             if ($stmt) {
+                // Vérifiez que toutes les variables sont correctement définies
                 $stmt->bind_param("ddiiii", $montant_paye, $reste, $user_id, $abonnement_id, $type_paiement_id);
                 $stmt->execute();
                 $payment_id = $conn->insert_id; // Get the last inserted payment ID
