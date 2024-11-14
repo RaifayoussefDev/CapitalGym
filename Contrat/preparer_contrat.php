@@ -12,7 +12,7 @@ use PhpOffice\PhpWord\Style\Table;
 // Helper function to check if a field exists and is not empty, otherwise return "---"
 function safeField($field)
 {
-    return !empty($field) ? $field : '.....................';
+    return !empty($field) ? $field : '...........................................................';
 }
 function GenerateContrat($id_user)
 {
