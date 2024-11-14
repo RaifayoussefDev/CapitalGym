@@ -192,7 +192,7 @@ if (isset($_POST['type_paiement'], $_POST['montant_paye'], $_POST['reste'], $_PO
                             VALUES (?, ?, 0, ?, ?, ?)";
             $stmt = $conn->prepare($payment_sql);
             if ($stmt) {
-                $stmt->bind_param("ddiiii", $montant_paye, $reste, $user_id, $abonnement_id, $type_paiement_id);
+                $stmt->bind_param("ddiii", $montant_paye, $reste, $user_id, $abonnement_id, $type_paiement_id);
                 $stmt->execute();
                 $payment_id = $conn->insert_id; // Get the last inserted payment ID
                 $stmt->close();
