@@ -211,7 +211,7 @@ GROUP BY
 
 
         // Add the title "ENTREE" to the left cell, setting a wider width to span half the table width
-        $section->addText('Entre', [ // Adjust cell width as needed
+        $section->addText('Entre :', [ // Adjust cell width as needed
             'name' => 'Arial',
             'size' => 10,
             'bold' => true,
@@ -245,7 +245,7 @@ GROUP BY
         $section->addText(
             "Mme / Mr : " . safeField($user['nom']) . " " . safeField($user['prenom']) .
                 ", né le " . safeField($user['date_naissance']) .
-                ", demeurant à " . safeField($user['adresse']) .
+                ", à " . safeField($user['adresse']) .
                 " , titulaire de la CIN :" . safeField($user['cin']) .
                 ", GSM : " . safeField($user['phone']) .
                 ", Profession : " . safeField($user['fonction']) .
@@ -445,11 +445,11 @@ GROUP BY
 
         // Assign the pack name based on code_pack
         if ($code_pack == 'FS') {
-            $pack_name = 'Familial Silver';
+            $pack_name = 'Famille Silver';
         } elseif ($code_pack == 'FG') {
-            $pack_name = 'Familial Gold';
+            $pack_name = 'Famille Gold';
         } elseif ($code_pack == 'FP') {
-            $pack_name = 'Familial Platinum';
+            $pack_name = 'Famille Platinum';
         } elseif ($code_pack == 'G') {
             $pack_name = 'Gold';
         } elseif ($code_pack == 'P') {
@@ -605,70 +605,17 @@ GROUP BY
         );
 
 
-        // Query payments for the specific user
-        $sqlPayments = "SELECT `type_paiement_id`, SUM(`montant_paye`) AS montant_paye FROM `payments` WHERE `user_id` = '$id_user' GROUP BY `type_paiement_id`;";
-        $resultPayments = $conn->query($sqlPayments);
+        // Get the total paid amount from user
+        $totalAmountPaid = $user['total']; // Assuming this is the total amount paid
 
-        // Initialize payment data placeholders for each payment type
-        $paymentData = [
-            1 => ['mode' => 'Espèces', 'amount' => '…………DH', 'reference' => '................'],
-            2 => ['mode' => 'Carte', 'amount' => 'N/A', 'reference' => '................'],
-            3 => ['mode' => 'Chèque', 'amount' => 'N/A', 'reference' => '................'],
-            4 => ['mode' => 'Virement', 'amount' => 'N/A', 'reference' => '................']
-        ];
-
-        // Track which payment types are available
-        $availablePayments = [];
-
-        // Fill payment data based on database records
-        if ($resultPayments->num_rows > 0) {
-            while ($payment = $resultPayments->fetch_assoc()) {
-                $type = $payment['type_paiement_id'];
-                if (isset($paymentData[$type])) {
-                    // Update amount and reference if payment data exists for the type
-                    $paymentData[$type]['amount'] = $payment['montant_paye'] . ' DH';
-                    $paymentData[$type]['reference'] = !empty($payment['user_activites_id']) ? $payment['user_activites_id'] : '................';
-                    $availablePayments[] = $type; // Mark this payment type as available
-                }
-            }
-        }
-
-        // Create payment table in the Word document
-        $paymentTable = $leftCell->addTable([
-            'borderColor' => '000000',
-            'borderSize' => 6,
-        ]);
-
-        // Add column headers
-        $paymentTable->addRow();
-        $paymentTable->addCell(3000)->addText("Mode", [
+        // Create a paragraph in the Word document with the total amount paid
+        $leftCell->addText("Montant payé : " . $totalAmountPaid . " DH", [
             'name' => 'Arial',
             'size' => 10,
             'bold' => true,
-            'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER
-        ]);
-        $paymentTable->addCell(1500)->addText("Montant", [
-            'name' => 'Arial',
-            'size' => 10,
-            'bold' => true,
-            'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER
-        ]);
-        $paymentTable->addCell(3000)->addText("N° Pièce", [
-            'name' => 'Arial',
-            'size' => 10,
-            'bold' => true,
-            'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER
+            'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT
         ]);
 
-        // Populate rows only for available payment types
-        foreach ($availablePayments as $type) {
-            $paymentType = $paymentData[$type];
-            $borderBottom = ($paymentType['mode'] === 'Virement') ? ['borderBottomSize' => 8, 'borderBottomColor' => '000000'] : [];
-            $paymentTable->addRow();
-            $paymentTable->addCell(3000, $borderBottom)->addText($paymentType['mode'], ['name' => 'Arial', 'size' => 8]);
-            $paymentTable->addCell(1500, $borderBottom)->addText($paymentType['amount'], ['name' => 'Arial', 'size' => 8]);
-            $paymentTable->addCell(3000, $borderBottom)->addText($paymentType['reference'], ['name' => 'Arial', 'size' => 8]);
-        }
 
         // Colonne de droite : Observations avec un cadre de texte simple
         $rightCell = $mainTable->addCell(5000);
@@ -712,8 +659,8 @@ GROUP BY
         $signatureTable->addRow();
 
         $signatureTable->addCell(6000, ['align' => 'left'])->addText(
-            "Signature de l’adhérent précédée de la mention « lu et approuvé »\n" . 
-            $user['nom'] . " " . $user['prenom'],
+            "Signature de l’adhérent précédée de la mention « lu et approuvé »\n" .
+                $user['nom'] . " " . $user['prenom'],
             ['name' => 'Arial', 'size' => 8]
         );
 
