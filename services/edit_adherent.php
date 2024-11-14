@@ -172,33 +172,32 @@ if (isset($_POST['type_paiement'], $_POST['montant_paye'], $_POST['reste'], $_PO
             $reste = floatval($_POST['reste'][$index]);
             $total = floatval($_POST['total_activites']);
 
-            // Insert or update payment details based on condition
+            // If total + montant_paye != 0, update the payment record
             if ($total + $montant_paye != 0) {
-                // Update existing payment record
                 $payment_sql = "UPDATE `payments` 
-                                SET `montant_paye` = ?, `reste` = ?, `total` = ? 
+                                SET `total` = total + ? 
                                 WHERE `user_id` = ? AND `abonnement_id` = ? AND `type_paiement_id` = ?";
                 $stmt = $conn->prepare($payment_sql);
                 if ($stmt) {
-                    $stmt->bind_param("ddiiii", $montant_paye, $reste, $total, $user_id, $abonnement_id, $type_paiement_id);
+                    $stmt->bind_param("ddiii", $montant_paye, $user_id, $abonnement_id, $type_paiement_id);
                     $stmt->execute();
                     $stmt->close();
                 } else {
                     throw new Exception("Failed to prepare payment update: " . $conn->error);
                 }
+            }
+
+            // Insert a new payment record with 0 total after the update
+            $payment_sql = "INSERT INTO `payments` (`montant_paye`, `reste`, `total`, `user_id`, `abonnement_id`, `type_paiement_id`) 
+                            VALUES (?, ?, 0, ?, ?, ?)";
+            $stmt = $conn->prepare($payment_sql);
+            if ($stmt) {
+                $stmt->bind_param("ddiiii", $montant_paye, $reste, $user_id, $abonnement_id, $type_paiement_id);
+                $stmt->execute();
+                $payment_id = $conn->insert_id; // Get the last inserted payment ID
+                $stmt->close();
             } else {
-                // Insert new payment record with 0 total
-                $payment_sql = "INSERT INTO `payments` (`montant_paye`, `reste`, `total`, `user_id`, `abonnement_id`, `type_paiement_id`) 
-                                VALUES (?, ?, 0, ?, ?, ?)";
-                $stmt = $conn->prepare($payment_sql);
-                if ($stmt) {
-                    $stmt->bind_param("ddiiii", $montant_paye, $reste, $user_id, $abonnement_id, $type_paiement_id);
-                    $stmt->execute();
-                    $payment_id = $conn->insert_id; // Get the last inserted payment ID
-                    $stmt->close();
-                } else {
-                    throw new Exception("Failed to prepare payment insert: " . $conn->error);
-                }
+                throw new Exception("Failed to prepare payment insert: " . $conn->error);
             }
 
             // If payment type is cheque, insert cheque details
@@ -256,6 +255,7 @@ if (isset($_POST['type_paiement'], $_POST['montant_paye'], $_POST['reste'], $_PO
         echo "Error: " . $e->getMessage();
     }
 }
+
 
 
 
