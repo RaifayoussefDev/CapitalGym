@@ -179,7 +179,7 @@ if (isset($_POST['type_paiement'], $_POST['montant_paye'], $_POST['reste'], $_PO
                                 WHERE `user_id` = ? AND `abonnement_id` = ? AND `type_paiement_id` = ?";
                 $stmt = $conn->prepare($payment_sql);
                 if ($stmt) {
-                    $stmt->bind_param("ddiii", $montant_paye, $user_id, $abonnement_id, $type_paiement_id);
+                    $stmt->bind_param("diii", $montant_paye, $user_id, $abonnement_id, $type_paiement_id);
                     $stmt->execute();
                     $stmt->close();
                 } else {
