@@ -14,7 +14,7 @@ $users_sql = "SELECT u.id, u.nom, u.prenom, p.pack_name, a.date_abonnement, u.ma
             ELSE py.montant_paye
         END
     ) AS montant_total, 
-    SUM(py.total) AS total_sum,  -- Add this line to calculate the sum of `total`
+    SUM(py.total) AS total,  -- Add this line to calculate the sum of `total`
     sp.nom AS saisie_par_nom, 
     sp.prenom AS saisie_par_prenom -- Retrieve the name and surname of 'saisie_par'
 FROM users u
