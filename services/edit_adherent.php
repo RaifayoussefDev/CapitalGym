@@ -167,17 +167,44 @@ if (isset($_POST['type_paiement'], $_POST['montant_paye'], $_POST['reste'], $_PO
     $conn->begin_transaction(); // Start a transaction
 
     try {
+        // Parcourir les types de paiement
         foreach ($_POST['type_paiement'] as $index => $type_paiement_id) {
             $montant_paye = floatval($_POST['montant_paye'][$index]);
             $reste = floatval($_POST['reste'][$index]);
             $total = floatval($_POST['total_activites']);
 
-            // Insert payment details
-            $payment_sql = "INSERT INTO `payments` (`montant_paye`, `reste`, `total`, `user_id`, `abonnement_id`, `type_paiement_id`) 
-                            VALUES (?, ?, ?, ?, ?, ?)";
+            // Récupérer le premier paiement existant pour l'abonnement
+            $payment_sql = "SELECT total FROM `payments` WHERE `abonnement_id` = ? ORDER BY `id` LIMIT 1";
             $stmt = $conn->prepare($payment_sql);
             if ($stmt) {
-                $stmt->bind_param("ddiiii", $montant_paye, $reste, $total, $user_id, $abonnement_id, $type_paiement_id);
+                $stmt->bind_param("i", $abonnement_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $row = $result->fetch_assoc();
+                
+                // Si un paiement existe, mettez à jour le total
+                if ($row) {
+                    $existing_total = floatval($row['total']);
+                    $new_total = $existing_total + $total;
+
+                    // Mettre à jour le total dans le premier paiement
+                    $update_sql = "UPDATE `payments` SET `total` = ? WHERE `abonnement_id` = ? ORDER BY `id` LIMIT 1";
+                    $update_stmt = $conn->prepare($update_sql);
+                    $update_stmt->bind_param("di", $new_total, $abonnement_id);
+                    $update_stmt->execute();
+                    $update_stmt->close();
+                }
+                $stmt->close();
+            } else {
+                throw new Exception("Failed to prepare payment select: " . $conn->error);
+            }
+
+            // Insérer les nouvelles lignes dans `payments` avec `total = 0`
+            $payment_sql = "INSERT INTO `payments` (`montant_paye`, `reste`, `total`, `user_id`, `abonnement_id`, `type_paiement_id`) 
+                            VALUES (?, ?, 0, ?, ?, ?)";
+            $stmt = $conn->prepare($payment_sql);
+            if ($stmt) {
+                $stmt->bind_param("ddiiii", $montant_paye, $reste, $user_id, $abonnement_id, $type_paiement_id);
                 $stmt->execute();
                 $payment_id = $conn->insert_id; // Get the last inserted payment ID
                 $stmt->close();
@@ -185,7 +212,7 @@ if (isset($_POST['type_paiement'], $_POST['montant_paye'], $_POST['reste'], $_PO
                 throw new Exception("Failed to prepare payment insert: " . $conn->error);
             }
 
-            // If payment type is cheque, insert cheque details
+            // Si le paiement est par chèque, insérer les détails du chèque
             if ($type_paiement_id == 3) {
                 $nomTitulaire = $_POST['nomTitulaire'][$index] ?? null;
                 $numeroCheque = $_POST['numeroCheque'][$index] ?? null;
@@ -207,14 +234,14 @@ if (isset($_POST['type_paiement'], $_POST['montant_paye'], $_POST['reste'], $_PO
                 }
             }
 
-            // If payment type is virement, insert virement details
+            // Si le paiement est par virement, insérer les détails du virement
             elseif ($type_paiement_id == 4) {
                 $nomEmetteur = $_POST['nomEmetteur'][$index] ?? null;
                 $dateImitation = $_POST['dateImitation'][$index] ?? null;
                 $reference = $_POST['reference'][$index] ?? null;
                 $banqueEmettrice = $_POST['banqueEmettrice'][$index] ?? null;
 
-                // Validate virement details
+                // Valider les détails du virement
                 if (!empty($nomEmetteur) && !empty($dateImitation) && !empty($reference) && !empty($banqueEmettrice)) {
                     $virement_sql = "INSERT INTO `virement` (nomEmetteur, dateImitation, reference, banqueEmettrice, id_utilisateur, abonnement_id, payment_id)
                                      VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -240,6 +267,7 @@ if (isset($_POST['type_paiement'], $_POST['montant_paye'], $_POST['reste'], $_PO
         echo "Error: " . $e->getMessage();
     }
 }
+
 
 
 $conn->commit();

@@ -3,25 +3,25 @@ require "../inc/app.php";
 require "../inc/conn_db.php";
 
 // Fetch users using your SQL query
-$users_sql = "SELECT u.id, u.nom, u.prenom, p.pack_name, a.date_abonnement, u.matricule, a.date_debut, a.date_fin,
-    SUM(
-        CASE 
-            -- If payment is by cheque and cheque status is 'payer' or 'en cours', include montant_paye in the sum
-            WHEN py.type_paiement_id = 3 AND ch.statut IN ('payer', 'en cours') THEN py.montant_paye
-            -- If cheque status is 'non payer', do not include montant_paye in the sum
-            WHEN py.type_paiement_id = 3 AND ch.statut = 'non payer' THEN 0
-            -- For all other payment types, include montant_paye in the sum
-            ELSE py.montant_paye
-        END
-    ) AS montant_total, py.total,
-    sp.nom AS saisie_par_nom, sp.prenom AS saisie_par_prenom -- Retrieve the name and surname of 'saisie_par'
-FROM users u
-JOIN abonnements a ON u.id = a.user_id
-JOIN packages p ON a.type_abonnement = p.id
-JOIN payments py ON a.id = py.abonnement_id
-LEFT JOIN cheque ch ON py.id = ch.payment_id -- Join with cheque table to check status for cheque payments
-LEFT JOIN users sp ON u.saisie_par = sp.id -- Self join to get the 'saisie_par' user details
-GROUP BY u.id, u.nom, u.prenom, p.pack_name, u.matricule, a.date_debut, a.date_fin, sp.nom, sp.prenom;";
+    $users_sql = "SELECT u.id, u.nom, u.prenom, p.pack_name, a.date_abonnement, u.matricule, a.date_debut, a.date_fin,
+        SUM(
+            CASE 
+                -- If payment is by cheque and cheque status is 'payer' or 'en cours', include montant_paye in the sum
+                WHEN py.type_paiement_id = 3 AND ch.statut IN ('payer', 'en cours') THEN py.montant_paye
+                -- If cheque status is 'non payer', do not include montant_paye in the sum
+                WHEN py.type_paiement_id = 3 AND ch.statut = 'non payer' THEN 0
+                -- For all other payment types, include montant_paye in the sum
+                ELSE py.montant_paye
+            END
+        ) AS montant_total, py.total,
+        sp.nom AS saisie_par_nom, sp.prenom AS saisie_par_prenom -- Retrieve the name and surname of 'saisie_par'
+    FROM users u
+    JOIN abonnements a ON u.id = a.user_id
+    JOIN packages p ON a.type_abonnement = p.id
+    JOIN payments py ON a.id = py.abonnement_id
+    LEFT JOIN cheque ch ON py.id = ch.payment_id -- Join with cheque table to check status for cheque payments
+    LEFT JOIN users sp ON u.saisie_par = sp.id -- Self join to get the 'saisie_par' user details
+    GROUP BY u.id, u.nom, u.prenom, p.pack_name, u.matricule, a.date_debut, a.date_fin, sp.nom, sp.prenom;";
 $users_result = $conn->query($users_sql);
 
 $users = [];
