@@ -222,7 +222,7 @@ GROUP BY
 
         // Add a new row for additional information
         // Ajouter le texte pour le Club et l'adhérent dans le même bloc, sans table
-        $section->addText("PRIVILEGE LUXURY FITNESS CLUB, sis au 711 boulevard Modibo Keita, Casablanca, d’une part ;", [
+        $section->addText("PRIVILEGE LUXURY FITNESS CLUB, sis au 711 Boulevard Modibo Keita, Casablanca, d’une part ;", [
             'name' => 'Times New Roman',
             'size' => 10,
         ]);
@@ -245,11 +245,10 @@ GROUP BY
         $section->addText(
             "Mme / Mr : " . safeField($user['nom']) . " " . safeField($user['prenom']) .
                 ", né le " . safeField($user['date_naissance']) .
-                ", à " . safeField($user['adresse']) .
+                ", Résident à " . safeField($user['adresse']) .
                 " , titulaire de la CIN :" . safeField($user['cin']) .
                 ", GSM : " . safeField($user['phone']) .
                 ", Profession : " . safeField($user['fonction']) .
-                ", Employeur : " . safeField($user['employeur']) .
                 ", E-mail : " . safeField($user['email']) .
                 ", Personne à contacter en cas d’urgence : " . safeField($user['num_urgence']),
             [
@@ -523,7 +522,7 @@ GROUP BY
 
         // Ajouter une ligne pour "SOIT UN MONTANT TOTAL..."
         $table->addRow();
-        $table->addCell(8000)->addText("SOIT UN MONTANT TOTAL (frais d’inscription au club Assurance + Abonnement)", [
+        $table->addCell(8000)->addText("SOIT UN MONTANT TOTAL (frais d’inscription au club + Assurance + Abonnement)", [
             'name' => 'Arial',
             'size' => 10,
         ]);
@@ -649,7 +648,7 @@ GROUP BY
 
         $date_inscription = $user['date_abonnement'];
         $section->addText("Fait en double exemplaire à Casablanca le " . $date_inscription . "");
-        $section->addText("L'adhérent reconnait avoir pris connaissance et accepte les conditions générales au verso sans réserve. ");
+        $section->addText("L'adhérent reconnaît avoir pris connaissance et accepte les conditions générales au verso sans réserve.");
         $section->addTextBreak(); // Adds a single line break (empty line)
 
         // Ajouter une table pour les signatures
@@ -662,7 +661,8 @@ GROUP BY
         $signatureTable->addRow();
 
         $signatureTable->addCell(6000, ['align' => 'left'])->addText(
-            "Signature de l’adhérent précédée de la mention « lu et approuvé »\n" .
+            "Signature de l’adhérent précédée de la mention « lu et approuvé »
+            \n Mme /Mr " .
                 $user['nom'] . " " . $user['prenom'],
             ['name' => 'Arial', 'size' => 8]
         );
