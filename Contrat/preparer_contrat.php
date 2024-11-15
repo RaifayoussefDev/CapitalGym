@@ -18,8 +18,7 @@ function GenerateContrat($id_user)
 {
     require '../inc/conn_db.php';
     // $id_user = $_GET['id_user'];
-    $sql = "
-    SELECT 
+    $sql = "SELECT 
     u.id, 
     u.matricule, 
     u.id_card, 
@@ -42,7 +41,13 @@ function GenerateContrat($id_user)
     a.offres_promotionnelles, 
     a.description, 
     p.id AS id_pack, 
-    SUM(py.montant_paye) AS montant_paye_total,
+    SUM(
+        CASE 
+            WHEN py.type_paiement_id = 3 AND ch.statut IN ('payer', 'en cours') THEN py.montant_paye
+            WHEN py.type_paiement_id = 3 AND ch.statut = 'non payer' THEN 0
+            ELSE py.montant_paye
+        END
+    ) AS montant_paye_total,
     py.id AS payement_id, 
     py.total AS total, 
     p.pack_name AS pack_name, 
@@ -65,12 +70,14 @@ JOIN
     payments py ON py.abonnement_id = a.id
 LEFT JOIN 
     user_activites ua ON ua.user_id = u.id 
+LEFT JOIN 
+    cheques ch ON py.cheque_id = ch.id -- Assurez-vous d'avoir une jointure avec la table `cheques` si nécessaire
 WHERE 
     u.role_id = 3 
     AND u.id = '$id_user'
 GROUP BY 
     u.id, a.id, p.id;
-    ";
+";
 
 
 
