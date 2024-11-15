@@ -18,8 +18,7 @@ function GenerateContrat($id_user)
 {
     require '../inc/conn_db.php';
     // $id_user = $_GET['id_user'];
-    $sql = "
-    SELECT 
+    $sql = "SELECT 
     u.id, 
     u.matricule, 
     u.id_card, 
@@ -42,35 +41,48 @@ function GenerateContrat($id_user)
     a.offres_promotionnelles, 
     a.description, 
     p.id AS id_pack, 
-    SUM(py.montant_paye) AS montant_paye_total,
-    py.id AS payement_id, 
-    py.total AS total, 
+
+    -- Utilisation de la sous-requête pour obtenir le montant payé total, agrégé par abonnement
+    COALESCE(py.montant_paye_total, 0) AS montant_paye_total, -- Default to 0 if no payments found
+
     p.pack_name AS pack_name, 
-    py.reste AS reste, 
+    COALESCE(py.reste, 0) AS reste,  -- Handle NULL values for 'reste'
+    COALESCE(py.total, 0) AS total,  -- Handle NULL values for 'total'
+    
+    -- Formatage des dates
     DATE_FORMAT(a.date_debut, '%d/%m/%Y') AS date_debut, 
     DATE_FORMAT(a.date_fin, '%d/%m/%Y') AS date_fin,
     DATE_FORMAT(a.date_abonnement, '%d/%m/%Y') AS date_abonnement,
 
-    -- Use DISTINCT to remove duplicates in activites_list and activites_periode
+    -- Suppression des doublons dans les activités et périodes
     GROUP_CONCAT(DISTINCT ua.activite_id ORDER BY ua.activite_id ASC) AS activites_list,
     GROUP_CONCAT(DISTINCT ua.periode_activites ORDER BY ua.activite_id ASC) AS activites_periode
 
 FROM 
-    users u 
+    users u
 JOIN 
     abonnements a ON u.id = a.user_id 
 JOIN 
     packages p ON p.id = a.type_abonnement 
-JOIN 
-    payments py ON py.abonnement_id = a.id
 LEFT JOIN 
-    user_activites ua ON ua.user_id = u.id 
+    (SELECT 
+        abonnement_id, 
+        SUM(montant_paye) AS montant_paye_total,
+        MAX(reste) AS reste, -- Prendre le reste maximum
+        MAX(total) AS total  -- Prendre le total maximum
+     FROM 
+        payments 
+     GROUP BY 
+        abonnement_id) py ON py.abonnement_id = a.id  -- Sous-requête pour agrégat des paiements
+LEFT JOIN 
+    user_activites ua ON ua.user_id = u.id  -- Joindre les activités de l'utilisateur
+
 WHERE 
     u.role_id = 3 
     AND u.id = '$id_user'
+
 GROUP BY 
-    u.id, a.id, p.id;
-    ";
+    u.id, a.id, p.id;";
 
 
 
