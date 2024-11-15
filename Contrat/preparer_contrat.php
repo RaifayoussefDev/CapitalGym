@@ -204,7 +204,10 @@ GROUP BY
             $code_pack = 'G';
         } elseif ($pack_name == 'Platinum') {
             $code_pack = 'P';
+        } elseif (strpos($pack_name, 'Groupe') === 0) {  // Checks if pack_name starts with "Groupe"
+            $code_pack = 'GP';
         }
+
 
         // Output or use $code_pack as needed
         echo $code_pack;
@@ -258,10 +261,10 @@ GROUP BY
             "Mme / Mr : " . safeField($user['nom']) . " " . safeField($user['prenom']) .
                 ", né le " . safeField($user['date_naissance']) .
                 ", Résident à " . safeField($user['adresse']) .
-                " , titulaire de la CIN :" . safeField($user['cin']) .
-                ", GSM : " . safeField($user['phone']) .
+                " , titulaire de la CIN :..............................." .
                 ", Profession : " . safeField($user['fonction']) .
                 ", E-mail : ......................................" .
+                ", GSM : " . safeField($user['phone']) .
                 ", Personne à contacter en cas d’urgence : " . safeField($user['num_urgence']),
             [
                 'name' => 'Times New Roman',
