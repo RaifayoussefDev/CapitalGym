@@ -460,12 +460,16 @@ GROUP BY
 
         // Add a cell to display the pack name in uppercase
         $table->addCell(2000)->addText(strtoupper($pack_name) . ' :', ['name' => 'Arial', 'size' => 10, 'bold' => true]);
+        // Get the total paid amount from user
+        $totalAmountPaid = $user['total']; // Assuming this is the total amount paid
 
+        // Format the total amount with a space as thousands separator
+        $totalAmountPaid = number_format($totalAmountPaid, 2, '.', ' ');
 
         // Ajouter des cellules pour "Du", "Au", et "Soit" en utilisant les valeurs de $user
         $table->addCell(3000)->addText('Du :   ' . ($user['date_debut'] ?? '……………'), ['name' => 'Arial', 'size' => 8]); // Date de début
         $table->addCell(3000)->addText('Au :   ' . ($user['date_fin'] ?? '……………'), ['name' => 'Arial', 'size' => 8]); // Date de fin
-        $table->addCell(3000)->addText('Soit :   ' . ($user['total'] ?? '……………') . ' DH TTC', ['name' => 'Arial', 'size' => 8]); // Montant total
+        $table->addCell(3000)->addText('Soit :   ' . ($totalAmountPaid ?? '……………') . ' DH TTC', ['name' => 'Arial', 'size' => 8]); // Montant total
 
         // Récupérer les dates au format DD/MM/YYYY
         $dateDebut = DateTime::createFromFormat('d/m/Y', $user['date_debut'] ?? 'now');
@@ -525,7 +529,7 @@ GROUP BY
         ]);
 
         // Ajouter la deuxième cellule avec montant aligné à droite
-        $table->addCell(3000)->addText("DE : " . ($user['total'] ?? '……………') . " DH TTC", [
+        $table->addCell(3000)->addText("DE : " . ($totalAmountPaid ?? '……………') . " DH TTC", [
             'name' => 'Arial',
             'size' => 10,
         ], [
@@ -536,7 +540,7 @@ GROUP BY
         // Ajouter une nouvelle ligne avec première cellule vide et texte dans la deuxième cellule
         $table->addRow();
         $table->addCell(7000); // Cellule vide à gauche
-        $table->addCell(4000)->addText("TOTAL A REGLER : " . ($user['total'] ?? '……………') . "DH TTC", [
+        $table->addCell(4000)->addText("TOTAL A REGLER : " . ($totalAmountPaid ?? '……………') . "DH TTC", [
             'name' => 'Arial',
             'size' => 10,
         ], [
@@ -605,8 +609,7 @@ GROUP BY
         );
 
 
-        // Get the total paid amount from user
-        $totalAmountPaid = $user['total']; // Assuming this is the total amount paid
+
 
         // Create a paragraph in the Word document with the total amount paid
         $leftCell->addText("Montant payé : " . $totalAmountPaid . " DH", [
