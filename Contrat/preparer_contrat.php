@@ -249,7 +249,7 @@ GROUP BY
                 " , titulaire de la CIN :" . safeField($user['cin']) .
                 ", GSM : " . safeField($user['phone']) .
                 ", Profession : " . safeField($user['fonction']) .
-                ", E-mail : " . safeField($user['email']) .
+                ", E-mail : ......................................" .
                 ", Personne à contacter en cas d’urgence : " . safeField($user['num_urgence']),
             [
                 'name' => 'Times New Roman',
@@ -608,7 +608,10 @@ GROUP BY
         );
 
 
+        $totalAmountPaid = $user['montant_paye_total']; // Assuming this is the total amount paid
 
+        // Format the total amount with a space as thousands separator
+        $totalAmountPaid = number_format($totalAmountPaid, 2, '.', ' ');
 
         // Create a paragraph in the Word document with the total amount paid
         $leftCell->addText("Montant payé : " . $totalAmountPaid . " DH", [
@@ -636,7 +639,7 @@ GROUP BY
         ]);
 
         // Ajouter "Observation :" suivi de la note de l'utilisateur dans la même cellule
-        $observationText = "Observation : " . (!empty($user['note']) ? $user['note'] : "..........."); // Affiche "---" si la note est vide
+        $observationText = "Observation : " . (!empty($user['Note']) ? $user['Note'] : "..........."); // Affiche "---" si la note est vide
 
         $observationTable->addRow();
         $observationTable->addCell(5000)->addText($observationText, [
