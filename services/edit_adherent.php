@@ -70,7 +70,7 @@ if (!$stmt) {
     $conn->rollback();
     throw new Exception("Failed to prepare user update: " . $conn->error);
 }
-$stmt->bind_param("sssssssssssissi", $nom, $prenom, $cin, $phone, $email, $date_naissance, $photo_name, $adresse, $fonction, $num_urgence, $employeur, $changer_par, $badge_number,$note, $user_id);
+$stmt->bind_param("sssssssssssissi", $nom, $prenom, $cin, $phone, $email, $date_naissance, $photo_name, $adresse, $fonction, $num_urgence, $employeur, $changer_par, $badge_number, $note, $user_id);
 if (!$stmt->execute()) {
     $conn->rollback();
     throw new Exception("User update failed: " . $stmt->error);
@@ -134,6 +134,31 @@ if (isset($_POST['value']) && is_array($_POST['value'])) {
             $date_fin = date('Y-m-d', strtotime("+$periode_activite month")); // Example: add the period to the current date
         }
 
+        // Check if the user already has this activity
+        $check_activite_sql = "SELECT 1 FROM `user_activites` WHERE `user_id` = ? AND `activite_id` = ?";
+        $check_stmt = $conn->prepare($check_activite_sql);
+        if ($check_stmt === false) {
+            $conn->rollback(); // Rollback if prepare fails
+            throw new Exception("Failed to prepare check statement: " . $conn->error);
+        }
+
+        // Bind parameters for the check
+        $check_stmt->bind_param("ii", $user_id, $activite_id);
+
+        // Execute the check statement
+        $check_stmt->execute();
+        $check_stmt->store_result();
+
+        // If the activity already exists for this user, skip insertion
+        if ($check_stmt->num_rows > 0) {
+            // Activity already exists, skip insertion
+            $check_stmt->close();
+            continue; // Skip this iteration of the loop
+        }
+
+        // Close check statement
+        $check_stmt->close();
+
         // SQL to insert into user_activites
         $insert_activite_sql = "INSERT INTO `user_activites` (`user_id`, `activite_id`, `abonnement_id`, `date_inscription`, `periode_activites`, `date_fin`, `type_activite`)
             VALUES (?, ?, ?, NOW(), ?, ?, ?)
@@ -145,7 +170,7 @@ if (isset($_POST['value']) && is_array($_POST['value'])) {
             throw new Exception("Failed to prepare insert statement: " . $conn->error);
         }
 
-        // Bind parameters
+        // Bind parameters for insertion
         $stmt->bind_param(
             "iiisss",
             $user_id,
@@ -163,6 +188,7 @@ if (isset($_POST['value']) && is_array($_POST['value'])) {
         $stmt->close();
     }
 }
+
 // Update payment details
 if (isset($_POST['type_paiement'], $_POST['montant_paye'], $_POST['reste'], $_POST['total_activites'])) {
     $conn->begin_transaction(); // Start a transaction
