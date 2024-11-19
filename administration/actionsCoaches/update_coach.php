@@ -1,6 +1,6 @@
 <?php
 // Database configuration
-require "../inc/conn_db.php";
+require "../../inc/conn_db.php";
 
 // Function to handle file upload for profile photo
 function uploadProfilePhoto($file) {
