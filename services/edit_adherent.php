@@ -189,6 +189,7 @@ if (isset($_POST['value']) && is_array($_POST['value'])) {
     }
 }
 
+
 // Update payment details
 if (isset($_POST['type_paiement'], $_POST['montant_paye'], $_POST['reste'], $_POST['total_activites'])) {
     $conn->begin_transaction(); // Start a transaction
@@ -282,8 +283,6 @@ if (isset($_POST['type_paiement'], $_POST['montant_paye'], $_POST['reste'], $_PO
         echo "Error: " . $e->getMessage();
     }
 }
-
-
 
 
 $conn->commit();

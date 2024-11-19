@@ -1,6 +1,6 @@
 <?php
 // SQL Server connection configuration
-$serverName = "DESKTOP-EE9DAKJ";
+$serverName = "51.77.194.236";
 $connectionOptions = [
     "Database" => "Card3500",
     "UID" => "sa",
