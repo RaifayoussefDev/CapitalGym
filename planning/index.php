@@ -537,7 +537,6 @@ $conn->close();
 </div>
 
 
-
 <!-- Add Session Modal -->
 <div class="modal fade" id="addActivityModal" tabindex="-1" role="dialog" aria-labelledby="addActivityModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">

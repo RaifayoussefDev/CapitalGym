@@ -25,7 +25,7 @@ $sessions_sql = "
     JOIN 
         coaches c ON s.coach_id = c.id
     JOIN 
-        users u ON c.user_id = u.id WHERE s.genre='femme'
+        users u ON c.user_id = u.id WHERE l.name='Cycling Zone';
 ";
 
 $sessions_result = $conn->query($sessions_sql);
