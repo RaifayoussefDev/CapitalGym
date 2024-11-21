@@ -15,6 +15,11 @@ $sql = "DELETE FROM sessions WHERE id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $session_id);
 
+// Delete the session from the database
+$sql = "DELETE FROM `session_planning` WHERE session_id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $session_id);
+
 if ($stmt->execute()) {
     // Success message
     echo "<script>window.location.href = 'index.php?date=" . date('Y-m-d') . "&msg=success&action=delete';</script>";

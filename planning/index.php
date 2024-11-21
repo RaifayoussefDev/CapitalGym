@@ -255,9 +255,9 @@ $conn->close();
                                             <td><?php echo htmlspecialchars($session['max_attendees']); ?></td>
                                             <td><?php echo htmlspecialchars($session['remaining_slots']); ?></td>
                                             <td>
-                                                <a href="update_session.php?session_id=<?php echo htmlspecialchars($session['session_id']); ?>" class="btn btn-primary btn-edit" role="button">
+                                                <button class="btn btn-primary btn-edit" data-id="<?php echo htmlspecialchars($session['session_id']); ?>" data-bs-toggle="modal" data-bs-target="#EditActivityModal">
                                                     <i class="fa fa-edit"></i>
-                                                </a>
+                                                </button>
                                                 <button class="btn btn-danger btn-delete" data-id="<?php echo htmlspecialchars($session['session_id']); ?>" data-bs-toggle="modal" data-bs-target="#deleteActivityModalM">
                                                     <i class="fa fa-trash"></i>
                                                 </button>
@@ -275,6 +275,7 @@ $conn->close();
                 </div>
             </div>
         </div>
+
         <!-- Delete Session Modal -->
         <div class="modal fade" id="deleteActivityModalM" tabindex="-1" role="dialog" aria-labelledby="deleteActivityModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
@@ -381,6 +382,158 @@ $conn->close();
             </div>
         </div>
     </div>
+    <!-- Delete Session Modal -->
+    <div class="modal fade" id="deleteActivityModal" tabindex="-1" role="dialog" aria-labelledby="deleteActivityModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteActivityModalLabel">Supprimer Séance</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="delete_session.php" method="POST">
+                    <div class="modal-body">
+                        <p>Êtes-vous sûr de vouloir supprimer cette séance ?</p>
+                        <!-- Hidden input to store session ID -->
+                        <input type="hidden" id="deleteSessionId" name="sessionId">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Non</button>
+                        <button type="submit" class="btn btn-danger">Oui</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Session Modal -->
+    <div class="modal fade" id="EditActivityModal" tabindex="-1" role="dialog" aria-labelledby="EditActivityModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="EditActivityModalLabel">Edit Séance</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="EditSessionForm" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="row">
+                            <!-- Libelle Field (Session Name) -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="libelle">Libellé de la Séance</label>
+                                    <input type="text" id="libelle" name="libelle" class="form-control" placeholder="Nom de la séance" required>
+                                </div>
+                            </div>
+
+                            <!-- Activité Field -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="activity">Activité</label>
+                                    <select id="activity" name="activity" class="form-control select2" required>
+                                        <option value="">Sélectionner une activité</option>
+                                        <?php foreach ($activites as $activite): ?>
+                                            <option value="<?php echo htmlspecialchars($activite['id']); ?>">
+                                                <?php echo htmlspecialchars($activite['nom']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Logo Field -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <img id="logoPreview" src="" alt="Logo actuel" style="max-width: 100px; display: none;">
+                                </div>
+                                <div class="form-group">
+                                    <label for="logo">Logo de la Séance</label>
+                                    <input type="file" id="logo" name="logo" class="form-control" accept="image/*">
+                                </div>
+                            </div>
+
+                            <!-- Coach Field -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="coach">Coach</label>
+                                    <select id="coach" name="coach" class="form-control select2" required>
+                                        <option value="">Sélectionner un coach</option>
+                                        <?php foreach ($coaches as $coach): ?>
+                                            <option value="<?php echo htmlspecialchars($coach['id']); ?>">
+                                                <?php echo htmlspecialchars($coach['name']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Lieu (Location) Field -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="location">Lieu</label>
+                                    <select id="location" name="location" class="form-control select2" required>
+                                        <option value="">Sélectionner un lieu</option>
+                                        <?php foreach ($locations as $location): ?>
+                                            <option value="<?php echo htmlspecialchars($location['id']); ?>" data-max-attendees="<?php echo htmlspecialchars($location['nomber_place']); ?>">
+                                                <?php echo htmlspecialchars($location['name']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+
+                                </div>
+                            </div>
+
+                            <!-- Genre Field -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="gender">Genre</label>
+                                    <select id="gender" name="gender" class="form-control select2" required>
+                                        <option value="Mix" selected>Mixte</option>
+                                        <option value="Homme">Homme</option>
+                                        <option value="Femme">Femme</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Days and Hours Selection -->
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="days">Sélectionnez les jours et les horaires :</label>
+                                    <?php
+                                    $days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+                                    foreach ($days as $index => $day): ?>
+                                        <?php if ($index % 2 === 0): ?> <!-- Start a new row every two days -->
+                                            <div class="row">
+                                            <?php endif; ?>
+                                            <div class="col-md-6">
+                                                <div class="form-check">
+                                                    <input class="form-check-input day-checkbox" type="checkbox" id="<?php echo $day; ?>" name="days[]" value="<?php echo $day; ?>">
+                                                    <label class="form-check-label" for="<?php echo $day; ?>"><?php echo ucfirst($day); ?></label>
+                                                    <select id="<?php echo $day; ?>Hours" name="<?php echo $day; ?>Hours" class="form-control time-select" disabled>
+                                                        <!-- Time options will be generated here -->
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <?php if ($index % 2 === 1): ?> <!-- Close the row after two days -->
+                                            </div>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 
@@ -531,99 +684,61 @@ $conn->close();
 </div>
 
 
+<script>
+    $(document).on('click', '.btn-edit', function() {
+        var sessionId = $(this).data('id'); // Get the session ID from the button
 
-<!-- Edit Session Modal -->
-<div class="modal fade" id="editActivityModal" tabindex="-1" role="dialog" aria-labelledby="editActivityModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editActivityModalLabel">Modifier Séance</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form action="update_session.php" method="POST">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="activity">Activité</label>
-                        <select id="activity" name="activity" class="form-control select2" required>
-                            <option value="">Sélectionner une activité</option>
-                            <?php foreach ($activites as $activite) : ?>
-                                <option value="<?php echo htmlspecialchars($activite['id']); ?>"><?php echo htmlspecialchars($activite['nom']); ?> - <?php echo htmlspecialchars($activite['prix']); ?>€</option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="coach">Coach</label>
-                        <select id="coach" name="coach" class="form-control select2" required>
-                            <option value="">Sélectionner un coach</option>
-                            <?php foreach ($coaches as $coach) : ?>
-                                <option value="<?php echo htmlspecialchars($coach['id']); ?>"><?php echo htmlspecialchars($coach['name']); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="location">Lieu</label>
-                        <select id="location" name="location" class="form-control select2" required>
-                            <option value="">Sélectionner un lieu</option>
-                            <?php foreach ($locations as $location) : ?>
-                                <option value="<?php echo htmlspecialchars($location['id']); ?>"><?php echo htmlspecialchars($location['name']); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="date">Date</label>
-                        <input type="date" id="date" name="date" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="startTime">Heure de début</label>
-                        <input type="time" id="startTime" name="startTime" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="endTime">Heure de fin</label>
-                        <input type="time" id="endTime" name="endTime" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="maxAttendees">Nombre de places</label>
-                        <input type="number" id="maxAttendees" name="maxAttendees" class="form-control" required>
-                    </div>
-                    <input type="hidden" id="sessionId" name="sessionId">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                    <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+        // Fetch session data from the database
+        $.ajax({
+            url: 'fetch_session_data.php', // Replace with your actual endpoint
+            method: 'GET',
+            data: {
+                id: sessionId
+            },
+            success: function(response) {
+                var session = JSON.parse(response); // Parse the JSON response
 
-<!-- Delete Session Modal -->
-<div class="modal fade" id="deleteActivityModal" tabindex="-1" role="dialog" aria-labelledby="deleteActivityModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteActivityModalLabel">Supprimer Séance</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form action="delete_session.php" method="POST">
-                <div class="modal-body">
-                    <p>Êtes-vous sûr de vouloir supprimer cette séance ?</p>
-                    <!-- Hidden input to store session ID -->
-                    <input type="hidden" id="deleteSessionId" name="sessionId">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Non</button>
-                    <button type="submit" class="btn btn-danger">Oui</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+                // Populate fields with the session data
+                $('#libelle').val(session.libelle); // Set session name
+                $('#activity').val(session.activite_id).trigger('change'); // Select activity
+                $('#coach').val(session.coach_id).trigger('change'); // Select coach
+                $('#location').val(session.location_id).trigger('change'); // Select location
+                $('#gender').val(session.genre).trigger('change'); // Select genre
 
-<!-- <script>
+                // Set the logo preview
+                if (session.logo) {
+                    $('#logoPreview').attr('src', session.logo).show(); // Show the logo
+                } else {
+                    $('#logoPreview').hide(); // Hide the logo preview if not available
+                }
+
+                // Clear all checkboxes and disable time selects
+                $('.day-checkbox').prop('checked', false);
+                $('.time-select').prop('disabled', true).val('');
+
+                // Populate days and times
+                session.days.forEach(function(day) {
+                    var formattedTime = session.times[day]?.slice(0, 5); // Extract HH:MM from the time (e.g., "11:00:00" -> "11:00")
+                    $('#' + day).prop('checked', true); // Check the day checkbox
+                    if (formattedTime) {
+                        $('#' + day + 'Hours')
+                            .prop('disabled', false) // Enable the time select
+                            .val(formattedTime); // Set the time value
+                    }
+                });
+
+                // Show the modal
+                $('#EditActivityModal').modal('show');
+            },
+            error: function() {
+                alert('Error fetching session data.');
+            }
+        });
+    });
+</script>
+
+
+<script>
     // Script to set the session ID in the delete modal
     $(document).ready(function() {
         $('.btn-delete').click(function() {
@@ -631,7 +746,7 @@ $conn->close();
             $('#deleteSessionId').val(sessionId); // Set session ID in the hidden input
         });
     });
-</script> -->
+</script>
 
 
 <!-- JavaScript -->
