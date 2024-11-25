@@ -473,7 +473,7 @@ $conn->close();
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="location">Lieu</label>
-                                    <select id="location" name="location" class="form-control select2" required>
+                                    <select id="Editlocation" name="location" class="form-control select2" required>
                                         <option value="">Sélectionner un lieu</option>
                                         <?php foreach ($locations as $location): ?>
                                             <option value="<?php echo htmlspecialchars($location['id']); ?>" data-max-attendees="<?php echo htmlspecialchars($location['nomber_place']); ?>">
@@ -509,9 +509,9 @@ $conn->close();
                                             <?php endif; ?>
                                             <div class="col-md-6">
                                                 <div class="form-check">
-                                                    <input class="form-check-input day-checkbox" type="checkbox" id="<?php echo $day; ?>" name="days[]" value="<?php echo $day; ?>">
-                                                    <label class="form-check-label" for="<?php echo $day; ?>"><?php echo ucfirst($day); ?></label>
-                                                    <select id="<?php echo $day; ?>Hours" name="<?php echo $day; ?>Hours" class="form-control time-select" disabled>
+                                                    <input class="form-check-input day-checkbox" type="checkbox" id="Edit-<?php echo $day; ?>" name="days[]" value="<?php echo $day; ?>">
+                                                    <label class="form-check-label" for="Edit-<?php echo $day; ?>"><?php echo ucfirst($day); ?></label>
+                                                    <select id="Edit-<?php echo $day; ?>Hours" name="<?php echo $day; ?>Hours" class="form-control time-select" disabled>
                                                         <!-- Time options will be generated here -->
                                                     </select>
                                                 </div>
@@ -691,9 +691,7 @@ $conn->close();
         $.ajax({
             url: 'fetch_session_data.php', // Replace with your actual endpoint
             method: 'GET',
-            data: {
-                id: sessionId
-            },
+            data: { id: sessionId },
             success: function(response) {
                 var session = JSON.parse(response); // Parse the JSON response
 
@@ -702,7 +700,7 @@ $conn->close();
                 $('#activity').val(session.activite_id).trigger('change'); // Select activity
                 $('#coach').val(session.coach_id).trigger('change'); // Select coach
                 $('#location').val(session.location_id).trigger('change'); // Select location
-                $('#gender').val(session.genre).trigger('change'); // Select genre
+                $('#gender').val(session.genre).trigger('change'); // Select gender
 
                 // Set the logo preview
                 if (session.logo) {
@@ -715,15 +713,16 @@ $conn->close();
                 $('.day-checkbox').prop('checked', false);
                 $('.time-select').prop('disabled', true).val('');
 
-                // Populate days and times
+                // Populate days and times based on the session data
                 session.days.forEach(function(day) {
-                    var formattedTime = session.times[day]?.slice(0, 5); // Extract HH:MM from the time (e.g., "11:00:00" -> "11:00")
-                    $('#' + day).prop('checked', true); // Check the day checkbox
-                    if (formattedTime) {
-                        $('#' + day + 'Hours')
-                            .prop('disabled', false) // Enable the time select
-                            .val(formattedTime); // Set the time value
-                    }
+                    // Check the checkbox for the specific day
+                    $('#Edit-' + day).prop('checked', true);
+
+                    // Enable the time select for that day
+                    var timeValue = session.times[day] || ''; // Get the time for the day
+                    $('#' + day + 'Hours')
+                        .prop('disabled', false) // Enable the time select
+                        .val(timeValue); // Set the time value (it could be an array or single value)
                 });
 
                 // Show the modal
@@ -734,7 +733,22 @@ $conn->close();
             }
         });
     });
+
+    // Event listener for day checkbox changes
+    $('.day-checkbox').change(function() {
+        var day = $(this).attr('id').replace('Edit-', ''); // Get the day from the checkbox ID
+        var timeSelect = $('#' + day + 'Hours'); // Corresponding time select
+
+        if ($(this).prop('checked')) {
+            // Enable the time select if checkbox is checked
+            timeSelect.prop('disabled', false);
+        } else {
+            // Disable the time select if checkbox is unchecked
+            timeSelect.prop('disabled', true).val('');
+        }
+    });
 </script>
+      
 
 
 <script>
@@ -788,11 +802,52 @@ $conn->close();
 </script>
 
 
+<!-- JavaScript -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Days in French
+        const days = ['Edit-lundi', 'Edit-mardi', 'Edit-mercredi', 'Edit-jeudi', 'Edit-vendredi', 'Edit-samedi', 'Edit-dimanche'];
+
+        // Specific times for all days
+        const times = [
+            "07:00", "08:00", "09:00", "10:00", "11:00",
+            "12:30", "13:30", "16:30", "17:30", "18:30",
+            "19:30", "20:00", "20:30"
+        ];
+
+        // Function to generate time options for each select
+        function generateTimeOptions() {
+            return times.map(time => `<option value="${time}">${time}</option>`).join('');
+        }
+
+        // Apply the time options to each day's select element
+        days.forEach(day => {
+            const checkbox = document.getElementById(day);
+            const select = document.getElementById(day + 'Hours');
+
+            // Insert time options in the select element
+            select.innerHTML = generateTimeOptions();
+
+            // Enable/disable time select based on the checkbox state
+            checkbox.addEventListener('change', function() {
+                select.disabled = !this.checked;
+                if (this.checked) {
+                    select.value = '07:00'; // Set default to the first option (07:00)
+                } else {
+                    select.value = ''; // Reset the selection when unchecked
+                }
+            });
+        });
+    });
+</script>
+
+
 
 <script>
     // Update maxAttendees when location is selected
     $('#location').on('change', function() {
         var maxAttendees = $(this).find('option:selected').data('max-attendees');
+
         $('#maxAttendees').val(maxAttendees); // Set the maxAttendees field
     });
 

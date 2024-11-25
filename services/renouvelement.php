@@ -10,7 +10,7 @@ $package_sql = "SELECT * FROM `packages` where package_type_id not like 9 ORDER 
 $package_result = $conn->query($package_sql);
 
 
-if($profil = 1){
+if($profil != 1){
     header('location:../Adherents/');
 }
 
