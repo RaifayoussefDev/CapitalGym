@@ -1,4 +1,5 @@
 <?php
+ob_start();
 require "../inc/app.php";
 require "../inc/conn_db.php";
 $profil = $_SESSION['profil'];
@@ -7,6 +8,11 @@ $_SESSION['user_insert'] = 0;
 $id_user = $_GET['id_user'];
 $package_sql = "SELECT * FROM `packages` where package_type_id not like 9 ORDER BY packages.annual_price DESC";
 $package_result = $conn->query($package_sql);
+
+
+if($profil = 1){
+    header('location:../Adherents/');
+}
 
 // Récupérer les types de paiement
 $type_paiements_sql = "SELECT id, type FROM type_paiements";
