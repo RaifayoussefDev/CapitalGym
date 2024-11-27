@@ -489,14 +489,22 @@ GROUP BY
         $dateDebut = DateTime::createFromFormat('d/m/Y', $user['date_debut'] ?? 'now');
         $dateFin = DateTime::createFromFormat('d/m/Y', $user['date_fin'] ?? 'now');
 
-
-        // Calcul de la différence en mois
+        // Calcul de la différence
         $diff = $dateDebut->diff($dateFin);
-        $nombreMois = ($diff->y * 12) + $diff->m; // Années en mois + mois
 
-        // Ajouter la cellule pour afficher le nombre de mois
-        // Ajouter une cellule pour afficher le nombre de mois sous le format "Durée : 12 mois"
-        $table->addCell(3000)->addText('Durée : ' . $nombreMois . ' mois', ['name' => 'Arial', 'size' => 8]); // Durée en mois
+        // Années converties en mois + mois
+        $nombreMois = ($diff->y * 12) + $diff->m;
+
+        // Vérifier si les jours sont 28 ou 29 pour arrondir au mois suivant
+        if ($diff->d >= 28) {
+            $nombreMois++;
+        }
+
+        // Ajouter une cellule pour afficher la durée sous le format "Durée : X mois"
+        $table->addCell(3000)->addText(
+            'Durée : ' . $nombreMois . ' mois',
+            ['name' => 'Arial', 'size' => 8]
+        );
 
 
         // Ajouter le texte sous la table

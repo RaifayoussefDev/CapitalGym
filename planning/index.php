@@ -407,12 +407,11 @@ $conn->close();
         </div>
     </div>
 
-    <!-- Edit Session Modal -->
     <div class="modal fade" id="EditActivityModal" tabindex="-1" role="dialog" aria-labelledby="EditActivityModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="EditActivityModalLabel">Edit Séance</h5>
+                    <h5 class="modal-title" id="EditActivityModalLabel">Modifier la Séance</h5>
                     <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -420,19 +419,19 @@ $conn->close();
                 <form id="EditSessionForm" enctype="multipart/form-data">
                     <div class="modal-body">
                         <div class="row">
-                            <!-- Libelle Field (Session Name) -->
+                            <!-- Libellé -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="libelle">Libellé de la Séance</label>
-                                    <input type="text" id="libelle" name="libelle" class="form-control" placeholder="Nom de la séance" required>
+                                    <label for="edit-libelle">Libellé de la Séance</label>
+                                    <input type="text" id="edit-libelle" name="libelle" class="form-control" placeholder="Nom de la séance" required>
                                 </div>
                             </div>
 
-                            <!-- Activité Field -->
+                            <!-- Activité -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="activity">Activité</label>
-                                    <select id="activity" name="activity" class="form-control select2" required>
+                                    <label for="edit-activity">Activité</label>
+                                    <select id="edit-activity" name="activity" class="form-control select2" required>
                                         <option value="">Sélectionner une activité</option>
                                         <?php foreach ($activites as $activite): ?>
                                             <option value="<?php echo htmlspecialchars($activite['id']); ?>">
@@ -443,22 +442,22 @@ $conn->close();
                                 </div>
                             </div>
 
-                            <!-- Logo Field -->
+                            <!-- Logo -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <img id="logoPreview" src="" alt="Logo actuel" style="max-width: 100px; display: none;">
+                                    <img id="edit-logoPreview" src="" alt="Logo actuel" style="max-width: 100px; display: none;">
                                 </div>
                                 <div class="form-group">
-                                    <label for="logo">Logo de la Séance</label>
-                                    <input type="file" id="logo" name="logo" class="form-control" accept="image/*">
+                                    <label for="edit-logo">Logo de la Séance</label>
+                                    <input type="file" id="edit-logo" name="logo" class="form-control" accept="image/*">
                                 </div>
                             </div>
 
-                            <!-- Coach Field -->
+                            <!-- Coach -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="coach">Coach</label>
-                                    <select id="coach" name="coach" class="form-control select2" required>
+                                    <label for="edit-coach">Coach</label>
+                                    <select id="edit-coach" name="coach" class="form-control select2" required>
                                         <option value="">Sélectionner un coach</option>
                                         <?php foreach ($coaches as $coach): ?>
                                             <option value="<?php echo htmlspecialchars($coach['id']); ?>">
@@ -469,11 +468,11 @@ $conn->close();
                                 </div>
                             </div>
 
-                            <!-- Lieu (Location) Field -->
+                            <!-- Lieu -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="location">Lieu</label>
-                                    <select id="Editlocation" name="location" class="form-control select2" required>
+                                    <label for="edit-location">Lieu</label>
+                                    <select id="edit-location" name="location" class="form-control select2" required>
                                         <option value="">Sélectionner un lieu</option>
                                         <?php foreach ($locations as $location): ?>
                                             <option value="<?php echo htmlspecialchars($location['id']); ?>" data-max-attendees="<?php echo htmlspecialchars($location['nomber_place']); ?>">
@@ -481,15 +480,14 @@ $conn->close();
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
-
                                 </div>
                             </div>
 
-                            <!-- Genre Field -->
+                            <!-- Genre -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="gender">Genre</label>
-                                    <select id="gender" name="gender" class="form-control select2" required>
+                                    <label for="edit-gender">Genre</label>
+                                    <select id="edit-gender" name="gender" class="form-control select2" required>
                                         <option value="Mix" selected>Mixte</option>
                                         <option value="Homme">Homme</option>
                                         <option value="Femme">Femme</option>
@@ -497,29 +495,213 @@ $conn->close();
                                 </div>
                             </div>
 
-                            <!-- Days and Hours Selection -->
                             <div class="row">
-                                <div class="form-group">
-                                    <label for="days">Sélectionnez les jours et les horaires :</label>
-                                    <?php
-                                    $days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
-                                    foreach ($days as $index => $day): ?>
-                                        <?php if ($index % 2 === 0): ?> <!-- Start a new row every two days -->
-                                            <div class="row">
-                                            <?php endif; ?>
-                                            <div class="col-md-6">
-                                                <div class="form-check">
-                                                    <input class="form-check-input day-checkbox" type="checkbox" id="Edit-<?php echo $day; ?>" name="days[]" value="<?php echo $day; ?>">
-                                                    <label class="form-check-label" for="Edit-<?php echo $day; ?>"><?php echo ucfirst($day); ?></label>
-                                                    <select id="Edit-<?php echo $day; ?>Hours" name="<?php echo $day; ?>Hours" class="form-control time-select" disabled>
-                                                        <!-- Time options will be generated here -->
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <?php if ($index % 2 === 1): ?> <!-- Close the row after two days -->
-                                            </div>
-                                        <?php endif; ?>
-                                    <?php endforeach; ?>
+                                <!-- Lundi -->
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <h3>Lundi</h3>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="Edit-lundi">Selectionner l'heure</label>
+                                        <select name="edit-lundi-hours" id="Edit-lundi" class="form-control">
+                                            <option value=""></option>
+                                            <option value="07:00">07:00</option>
+                                            <option value="08:00">08:00</option>
+                                            <option value="09:00">09:00</option>
+                                            <option value="10:00">10:00</option>
+                                            <option value="11:00">11:00</option>
+                                            <option value="12:30">12:30</option>
+                                            <option value="13:30">13:30</option>
+                                            <option value="16:30">16:30</option>
+                                            <option value="17:30">17:30</option>
+                                            <option value="18:30">18:30</option>
+                                            <option value="19:30">19:30</option>
+                                            <option value="20:00">20:00</option>
+                                            <option value="20:30">20:30</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <!-- Mardi -->
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <h3>Mardi</h3>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="Edit-mardi">Selectionner l'heure</label>
+                                        <select name="edit-mardi-hours" id="Edit-mardi" class="form-control">
+                                            <option value=""></option>
+                                            <option value="07:00">07:00</option>
+                                            <option value="08:00">08:00</option>
+                                            <option value="09:00">09:00</option>
+                                            <option value="10:00">10:00</option>
+                                            <option value="11:00">11:00</option>
+                                            <option value="12:30">12:30</option>
+                                            <option value="13:30">13:30</option>
+                                            <option value="16:30">16:30</option>
+                                            <option value="17:30">17:30</option>
+                                            <option value="18:30">18:30</option>
+                                            <option value="19:30">19:30</option>
+                                            <option value="20:00">20:00</option>
+                                            <option value="20:30">20:30</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <!-- Mercredi -->
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <h3>Mercredi</h3>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="Edit-mercredi">Selectionner l'heure</label>
+                                        <select name="edit-mercredi-hours" id="Edit-mercredi" class="form-control">
+                                            <option value=""></option>
+                                            <option value="07:00">07:00</option>
+                                            <option value="08:00">08:00</option>
+                                            <option value="09:00">09:00</option>
+                                            <option value="10:00">10:00</option>
+                                            <option value="11:00">11:00</option>
+                                            <option value="12:30">12:30</option>
+                                            <option value="13:30">13:30</option>
+                                            <option value="16:30">16:30</option>
+                                            <option value="17:30">17:30</option>
+                                            <option value="18:30">18:30</option>
+                                            <option value="19:30">19:30</option>
+                                            <option value="20:00">20:00</option>
+                                            <option value="20:30">20:30</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <!-- Jeudi -->
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <h3>Jeudi</h3>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="Edit-jeudi">Selectionner l'heure</label>
+                                        <select name="edit-jeudi-hours" id="Edit-jeudi" class="form-control">
+                                            <option value=""></option>
+                                            <option value="07:00">07:00</option>
+                                            <option value="08:00">08:00</option>
+                                            <option value="09:00">09:00</option>
+                                            <option value="10:00">10:00</option>
+                                            <option value="11:00">11:00</option>
+                                            <option value="12:30">12:30</option>
+                                            <option value="13:30">13:30</option>
+                                            <option value="16:30">16:30</option>
+                                            <option value="17:30">17:30</option>
+                                            <option value="18:30">18:30</option>
+                                            <option value="19:30">19:30</option>
+                                            <option value="20:00">20:00</option>
+                                            <option value="20:30">20:30</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <!-- Vendredi -->
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <h3>Vendredi</h3>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="Edit-vendredi">Selectionner l'heure</label>
+                                        <select name="edit-vendredi-hours" id="Edit-vendredi" class="form-control">
+                                            <option value=""></option>
+                                            <option value="07:00">07:00</option>
+                                            <option value="08:00">08:00</option>
+                                            <option value="09:00">09:00</option>
+                                            <option value="10:00">10:00</option>
+                                            <option value="11:00">11:00</option>
+                                            <option value="12:30">12:30</option>
+                                            <option value="13:30">13:30</option>
+                                            <option value="16:30">16:30</option>
+                                            <option value="17:30">17:30</option>
+                                            <option value="18:30">18:30</option>
+                                            <option value="19:30">19:30</option>
+                                            <option value="20:00">20:00</option>
+                                            <option value="20:30">20:30</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <!-- Samedi -->
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <h3>Samedi</h3>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="Edit-samedi">Selectionner l'heure</label>
+                                        <select name="edit-samedi-hours" id="Edit-samedi" class="form-control">
+                                            <option value=""></option>
+                                            <option value="07:00">07:00</option>
+                                            <option value="08:00">08:00</option>
+                                            <option value="09:00">09:00</option>
+                                            <option value="10:00">10:00</option>
+                                            <option value="11:00">11:00</option>
+                                            <option value="12:30">12:30</option>
+                                            <option value="13:30">13:30</option>
+                                            <option value="16:30">16:30</option>
+                                            <option value="17:30">17:30</option>
+                                            <option value="18:30">18:30</option>
+                                            <option value="19:30">19:30</option>
+                                            <option value="20:00">20:00</option>
+                                            <option value="20:30">20:30</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <!-- Dimanche -->
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <h3>Dimanche</h3>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="Edit-dimanche">Selectionner l'heure</label>
+                                        <select name="edit-dimanche-hours" id="Edit-dimanche" class="form-control">
+                                            <option value=""></option>
+                                            <option value="07:00">07:00</option>
+                                            <option value="08:00">08:00</option>
+                                            <option value="09:00">09:00</option>
+                                            <option value="10:00">10:00</option>
+                                            <option value="11:00">11:00</option>
+                                            <option value="12:30">12:30</option>
+                                            <option value="13:30">13:30</option>
+                                            <option value="16:30">16:30</option>
+                                            <option value="17:30">17:30</option>
+                                            <option value="18:30">18:30</option>
+                                            <option value="19:30">19:30</option>
+                                            <option value="20:00">20:00</option>
+                                            <option value="20:30">20:30</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -685,81 +867,88 @@ $conn->close();
 
 <script>
     $(document).on('click', '.btn-edit', function() {
-        var sessionId = $(this).data('id'); // Get the session ID from the button
+        var sessionId = $(this).data('id'); // ID de la séance à éditer
 
-        // Fetch session data from the database
+        // Récupération des données de la séance via AJAX
         $.ajax({
-            url: 'fetch_session_data.php', // Replace with your actual endpoint
+            url: 'fetch_session_data.php', // Endpoint pour récupérer les données de la séance
             method: 'GET',
-            data: { id: sessionId },
+            data: {
+                id: sessionId
+            },
             success: function(response) {
-                var session = JSON.parse(response); // Parse the JSON response
+                try {
+                    var session = JSON.parse(response); // Parser la réponse JSON
 
-                // Populate fields with the session data
-                $('#libelle').val(session.libelle); // Set session name
-                $('#activity').val(session.activite_id).trigger('change'); // Select activity
-                $('#coach').val(session.coach_id).trigger('change'); // Select coach
-                $('#location').val(session.location_id).trigger('change'); // Select location
-                $('#gender').val(session.genre).trigger('change'); // Select gender
+                    // Vérifier si les données nécessaires sont présentes
+                    if (!session) {
+                        alert('Données de session introuvables.');
+                        return;
+                    }
 
-                // Set the logo preview
-                if (session.logo) {
-                    $('#logoPreview').attr('src', session.logo).show(); // Show the logo
-                } else {
-                    $('#logoPreview').hide(); // Hide the logo preview if not available
+                    // Remplir les champs du formulaire
+                    $('#edit-libelle').val(session.libelle); // Nom de la séance
+                    $('#edit-activity').val(session.activite_id).trigger('change'); // Activité
+                    $('#edit-coach').val(session.coach_id).trigger('change'); // Coach
+                    $('#edit-location').val(session.location_id).trigger('change'); // Lieu
+                    $('#edit-gender').val(session.genre).trigger('change'); // Genre
+
+
+
+                    // Gestion de l'aperçu du logo
+                    if (session.logo) {
+                        $('#edit-logoPreview').attr('src', session.logo).show();
+                    } else {
+                        $('#edit-logoPreview').hide();
+                    }
+
+
+                    if (session.times.lundi) {
+                        var time = session.times.lundi.split(':')[0] + ':' + session.times.lundi.split(':')[1]; // Get only the hour and minute
+                        $('#Edit-lundi').val(time); // Set the select value to this formatted time
+                    }
+
+
+                    // Populate the days (check if the day exists in session.days)
+                    var days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+                    days.forEach(function(day) {
+                        var daySelect = $('#edit-' + day); // Identifying the select input for the day
+                        if (session.days.includes(day)) {
+                            daySelect.val(session.times[day]).prop('disabled', false); // Set time and enable
+                        } else {
+                            daySelect.val('').prop('disabled', true); // Clear value and disable
+                        }
+                    });
+
+                    // Afficher le modal d'édition
+                    $('#EditActivityModal').modal('show');
+                } catch (error) {
+                    console.error('Erreur lors du traitement des données:', error);
+                    alert('Erreur lors du chargement des données.');
                 }
-
-                // Clear all checkboxes and disable time selects
-                $('.day-checkbox').prop('checked', false);
-                $('.time-select').prop('disabled', true).val('');
-
-                // Populate days and times based on the session data
-                session.days.forEach(function(day) {
-                    // Check the checkbox for the specific day
-                    $('#Edit-' + day).prop('checked', true);
-
-                    // Enable the time select for that day
-                    var timeValue = session.times[day] || ''; // Get the time for the day
-                    $('#' + day + 'Hours')
-                        .prop('disabled', false) // Enable the time select
-                        .val(timeValue); // Set the time value (it could be an array or single value)
-                });
-
-                // Show the modal
-                $('#EditActivityModal').modal('show');
             },
             error: function() {
-                alert('Error fetching session data.');
+                alert('Erreur lors de la récupération des données de la séance.');
             }
         });
     });
 
-    // Event listener for day checkbox changes
-    $('.day-checkbox').change(function() {
-        var day = $(this).attr('id').replace('Edit-', ''); // Get the day from the checkbox ID
-        var timeSelect = $('#' + day + 'Hours'); // Corresponding time select
+    // Gestion du changement des sélecteurs des jours
+    $(document).on('change', '.edit-day-select', function() {
+        var day = $(this).attr('id').replace('edit-', ''); // Identifier le jour
+        var timeSelect = $('#edit-' + day); // Identifier le sélecteur de temps correspondant
 
-        if ($(this).prop('checked')) {
-            // Enable the time select if checkbox is checked
+        if ($(this).val()) {
+            // If the day is selected, enable the time select field
             timeSelect.prop('disabled', false);
         } else {
-            // Disable the time select if checkbox is unchecked
+            // If no day is selected, disable the time select field
             timeSelect.prop('disabled', true).val('');
         }
     });
 </script>
-      
 
 
-<script>
-    // Script to set the session ID in the delete modal
-    $(document).ready(function() {
-        $('.btn-delete').click(function() {
-            var sessionId = $(this).data('id');
-            $('#deleteSessionId').val(sessionId); // Set session ID in the hidden input
-        });
-    });
-</script>
 
 
 <!-- JavaScript -->
@@ -802,46 +991,16 @@ $conn->close();
 </script>
 
 
-<!-- JavaScript -->
+
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Days in French
-        const days = ['Edit-lundi', 'Edit-mardi', 'Edit-mercredi', 'Edit-jeudi', 'Edit-vendredi', 'Edit-samedi', 'Edit-dimanche'];
-
-        // Specific times for all days
-        const times = [
-            "07:00", "08:00", "09:00", "10:00", "11:00",
-            "12:30", "13:30", "16:30", "17:30", "18:30",
-            "19:30", "20:00", "20:30"
-        ];
-
-        // Function to generate time options for each select
-        function generateTimeOptions() {
-            return times.map(time => `<option value="${time}">${time}</option>`).join('');
-        }
-
-        // Apply the time options to each day's select element
-        days.forEach(day => {
-            const checkbox = document.getElementById(day);
-            const select = document.getElementById(day + 'Hours');
-
-            // Insert time options in the select element
-            select.innerHTML = generateTimeOptions();
-
-            // Enable/disable time select based on the checkbox state
-            checkbox.addEventListener('change', function() {
-                select.disabled = !this.checked;
-                if (this.checked) {
-                    select.value = '07:00'; // Set default to the first option (07:00)
-                } else {
-                    select.value = ''; // Reset the selection when unchecked
-                }
-            });
+    // Script to set the session ID in the delete modal
+    $(document).ready(function() {
+        $('.btn-delete').click(function() {
+            var sessionId = $(this).data('id');
+            $('#deleteSessionId').val(sessionId); // Set session ID in the hidden input
         });
     });
 </script>
-
-
 
 <script>
     // Update maxAttendees when location is selected
