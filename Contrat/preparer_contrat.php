@@ -495,14 +495,20 @@ GROUP BY
         // Années converties en mois + mois
         $nombreMois = ($diff->y * 12) + $diff->m;
 
-        // Vérifier si les jours sont 28 ou 29 pour arrondir au mois suivant
+        // Ajouter un mois si les jours sont 28 ou 29
         if ($diff->d >= 28) {
             $nombreMois++;
         }
 
-        // Ajouter une cellule pour afficher la durée sous le format "Durée : X mois"
+        // Format avec mois et jours
+        $duree = $nombreMois . ' mois';
+        if ($diff->d > 0 && $diff->d < 28) {
+            $duree .= ', ' . $diff->d . ' jours'; // Ajouter les jours s'ils sont pertinents
+        }
+
+        // Ajouter une cellule pour afficher la durée
         $table->addCell(3000)->addText(
-            'Durée : ' . $nombreMois . ' mois',
+            'Durée : ' . $duree,
             ['name' => 'Arial', 'size' => 8]
         );
 
