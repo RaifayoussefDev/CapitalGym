@@ -496,19 +496,13 @@ GROUP BY
         $nombreMois = ($diff->y * 12) + $diff->m;
 
         // Ajouter un mois si les jours sont 28 ou 29
-        if ($diff->d >= 28) {
+        if ($diff->d >= 27) {
             $nombreMois++;
         }
 
-        // Format avec mois et jours
-        $duree = $nombreMois . ' mois';
-        if ($diff->d > 0 && $diff->d < 28) {
-            $duree .= ', ' . $diff->d . ' jours'; // Ajouter les jours s'ils sont pertinents
-        }
-
-        // Ajouter une cellule pour afficher la durée
+        // Ajouter une cellule pour afficher la durée sous le format "Durée : X mois"
         $table->addCell(3000)->addText(
-            'Durée : ' . $duree,
+            'Durée : ' . $nombreMois . ' mois',
             ['name' => 'Arial', 'size' => 8]
         );
 
