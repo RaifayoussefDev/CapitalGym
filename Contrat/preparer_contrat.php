@@ -1294,7 +1294,10 @@ GROUP BY
         $updateQuery = "UPDATE users SET contract_name = '$contractName' WHERE id = $id_user";
         mysqli_query($conn, $updateQuery);
     }
+    
 
     // Return only the contract name to the client (no success message)
     return $contractName;
+
+    header('location:../Adherents/');
 }
