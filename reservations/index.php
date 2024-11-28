@@ -16,7 +16,8 @@ $start_times = [
     "18:30",
     "19:30",
     "20:00",
-    "20:30"
+    "20:30",
+    "21:30"
 ];
 
 // Générer les plages horaires
@@ -185,7 +186,7 @@ $conn->close();
                     const session = JSON.parse(response);
 
                     $('#reserveModal #activityName').text(session.activity_name || 'N/A');
-                    $('#reserveModal #sessionDate').text(session.date || 'N/A');
+                    $('#reserveModal #sessionDate').text(session.day || 'N/A');
                     $('#reserveModal #sessionTime').text((session.start_time || '') + ' - ' + (session.end_time || ''));
                     $('#reserveModal #sessionLocation').text(session.location || 'N/A');
                     $('#reserveModal #sessionCoach').text(session.coach_name || 'N/A');

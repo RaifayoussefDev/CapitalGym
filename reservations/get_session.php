@@ -15,7 +15,8 @@ if (isset($_GET['id'])) {
     l.name AS location, 
     CONCAT(u.nom, ' ', u.prenom) AS coach_name, 
     sp.max_attendees,
-    sp.remaining_slots
+    sp.remaining_slots,
+    sp.day
 FROM 
     sessions s 
 JOIN 
