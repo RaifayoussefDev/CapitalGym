@@ -472,7 +472,7 @@ $conn->close();
                                     // Si aucun logo n'existe, afficher la description et les détails
                                     echo "<td class='session bg-dark text-white' style='text-align: center; vertical-align: middle;text-transform: uppercase;border:2px solid #fff' rowspan='$rowspan' data-id='{$session['id']}' data-idsp='{$session['id_sp']}' data-bs-toggle='modal' data-bs-target='#reserveModal'>";
                                     echo "<strong>{$session['libelle']}</strong><br>";
-                                    echo "Coach: {$session['nom']} {$session['prenom']}<br>";
+                                    // echo "Coach: {$session['nom']} {$session['prenom']}<br>";
                                 // }
 
                                 // Fermer le <td>
