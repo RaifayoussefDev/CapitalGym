@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $sessionId = $stmt->insert_id; // Get the ID of the newly inserted session
 
             // Insert session planning data into session_planning table
-            $planningSql = "INSERT INTO session_planning (session_id, day, start_time, max_attendees, remaining_slots) VALUES (?, ?, ?, ?, ?)";
+            $planningSql = "INSERT INTO session_planning (session_id, day, start_time,  end_time , max_attendees, remaining_slots) VALUES (?, ?, ?,?, ?, ?)";
             $planningStmt = $conn->prepare($planningSql);
 
             // Handle repetitive planning (e.g., days of the week)
@@ -75,8 +75,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 foreach ($_POST['days'] as $day) {
                     $startTime = $_POST[$day . 'Hours']; // Retrieve the selected time slot for the day
                     if (!empty($startTime)) {
+                        // Convert start time to DateTime object and add 1 hour
+                        $startDateTime = DateTime::createFromFormat('H:i', $startTime); // Assuming the format is HH:MM (24-hour format)
+                        if ($startDateTime) {
+                            // Add 1 hour to the start time
+                            $startDateTime->modify('+1 hour');
+
+                            // Format the end time back to 'H:i' format (HH:MM)
+                            $endTime = $startDateTime->format('H:i');
+                        } else {
+                            // Handle invalid time format
+                            die('Invalid start time format');
+                        }
                         // Use only start time (no end time)
-                        $planningStmt->bind_param("issii", $sessionId, $day, $startTime, $maxAttendees, $maxAttendees);
+                        $planningStmt->bind_param("isssii", $sessionId, $day, $startTime,$endTime, $maxAttendees, $maxAttendees);
                         $planningStmt->execute();
                     }
                 }
@@ -104,4 +116,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header("Location: index.php");
     exit();
 }
-?>

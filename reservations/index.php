@@ -2,10 +2,23 @@
 require "../inc/app.php";
 require "../inc/conn_db.php";
 
-// Requête SQL corrigée avec s.id
+// Définir les créneaux horaires
+$start_times = [
+    "07:00", "08:00", "09:00", "10:00", "11:00",
+    "12:30", "13:30", "16:30", "17:30", "18:30",
+    "19:30", "20:00", "20:30"
+];
+
+// Générer les plages horaires
+$time_slots = [];
+for ($i = 0; $i < count($start_times) - 1; $i++) {
+    $time_slots[] = $start_times[$i] . " - " . $start_times[$i + 1];
+}
+
+// Requête SQL pour récupérer les sessions
 $sessions_sql = "
     SELECT 
-        sp.id as id_sp,
+        sp.id AS id_sp,
         s.id,
         u.nom, 
         u.prenom, 
@@ -25,11 +38,10 @@ $sessions_sql = "
     JOIN 
         coaches c ON s.coach_id = c.id
     JOIN 
-        users u ON c.user_id = u.id WHERE l.name='Cycling Zone';
+        users u ON c.user_id = u.id where sp.day='lundi';
 ";
 
 $sessions_result = $conn->query($sessions_sql);
-
 $sessions = [];
 if ($sessions_result->num_rows > 0) {
     while ($row = $sessions_result->fetch_assoc()) {
@@ -37,6 +49,47 @@ if ($sessions_result->num_rows > 0) {
     }
 }
 
+// Requête SQL pour récupérer les salles
+$locations_sql = "SELECT name FROM `locations`";
+$locations_result = $conn->query($locations_sql);
+$locations = [];
+if ($locations_result->num_rows > 0) {
+    while ($row = $locations_result->fetch_assoc()) {
+        $locations[] = $row['name'];
+    }
+}
+
+// Fonction pour vérifier si une session commence dans un créneau horaire
+function sessionStartsInTimeSlot($session, $time_slot)
+{
+    $start_time = strtotime($session['start_time']);
+    $time_slot_parts = explode(' - ', $time_slot);
+    $slot_start_time = strtotime($time_slot_parts[0]);
+    $slot_end_time = strtotime($time_slot_parts[1]);
+    return $start_time >= $slot_start_time && $start_time < $slot_end_time;
+}
+
+// Fonction pour calculer le rowspan
+function calculateRowspan($session, $time_slots)
+{
+    $start_time = strtotime($session['start_time']);
+    $end_time = strtotime($session['end_time']);
+    $rowspan = 0;
+
+    foreach ($time_slots as $time_slot) {
+        $time_slot_parts = explode(' - ', $time_slot);
+        $slot_start_time = strtotime($time_slot_parts[0]);
+        $slot_end_time = strtotime($time_slot_parts[1]);
+
+        if ($start_time < $slot_end_time && $end_time > $slot_start_time) {
+            $rowspan++;
+        }
+    }
+
+    return $rowspan;
+}
+
+// Fermer la connexion
 $conn->close();
 ?>
 
@@ -140,7 +193,7 @@ $conn->close();
                 data: {
                     session_id: sessionId,
                     user_ID: userId,
-                    session_IdSp:sessionIdSp
+                    session_IdSp: sessionIdSp
                 },
                 success: function(response) {
                     if (response.trim() === 'success') {
@@ -368,126 +421,56 @@ $conn->close();
         </button>
     </div>
     <div class="table-responsive">
-        <table class="table" style="position: relative;">
+        <table class="table table-bordered text-center">
             <thead>
                 <tr>
                     <th>Horaire</th>
-                    <th>Lundi</th>
-                    <th>Mardi</th>
-                    <th>Mercredi</th>
-                    <th>Jeudi</th>
-                    <th>Vendredi</th>
-                    <th>Samedi</th>
-                    <th>Dimanche</th>
+                    <?php foreach ($locations as $location): ?>
+                        <th><?= htmlspecialchars($location) ?></th>
+                    <?php endforeach; ?>
                 </tr>
             </thead>
             <tbody>
                 <?php
-                // Définir les créneaux horaires
-                $time_slots = [
-                    '08:00 - 09:00',
-                    '09:00 - 10:00',
-                    '10:00 - 11:00',
-                    '11:00 - 12:00',
-                    '12:00 - 13:00',
-                    '13:00 - 14:00',
-                    '14:00 - 15:00',
-                    '15:00 - 16:00',
-                    '16:00 - 17:00',
-                    '17:00 - 18:00',
-                    '18:00 - 19:00',
-                    '19:00 - 20:00',
-                    '20:00 - 21:00',
-                ];
-
-                // Mapper les noms des jours en minuscules
-                $day_mapping = [
-                    'lundi' => 1,
-                    'mardi' => 2,
-                    'mercredi' => 3,
-                    'jeudi' => 4,
-                    'vendredi' => 5,
-                    'samedi' => 6,
-                    'dimanche' => 7
-                ];
-
-                // Fonction pour vérifier si une session commence dans un créneau horaire
-                function sessionStartsInTimeSlot($session, $time_slot)
-                {
-                    $start_time = strtotime($session['start_time']);
-                    $time_slot_parts = explode(' - ', $time_slot);
-                    $slot_start_time = strtotime($time_slot_parts[0]);
-                    $slot_end_time = strtotime($time_slot_parts[1]);
-                    return $start_time >= $slot_start_time && $start_time < $slot_end_time;
-                }
-
-                // Fonction pour calculer le rowspan
-                function calculateRowspan($session, $time_slots)
-                {
-                    $start_time = strtotime($session['start_time']);
-                    $end_time = strtotime($session['end_time']);
-                    $rowspan = 0;
-
-                    foreach ($time_slots as $time_slot) {
-                        $time_slot_parts = explode(' - ', $time_slot);
-                        $slot_start_time = strtotime($time_slot_parts[0]);
-                        $slot_end_time = strtotime($time_slot_parts[1]);
-
-                        if ($start_time < $slot_end_time && $end_time > $slot_start_time) {
-                            $rowspan++;
-                        }
-                    }
-
-                    return $rowspan;
-                }
-
-                // Suivi des rowspan pour chaque jour
+                // Suivi des rowspan pour chaque salle
                 $rowspan_tracking = [];
 
                 // Parcourir les créneaux horaires
-                foreach ($time_slots as $time_slot) {
-                    echo "<tr style='margin:5px'>";
-                    echo "<td style='background:#262a2d;color:white;border-radius:50px'>$time_slot</td>";
-                    for ($day = 1; $day <= 7; $day++) {
-                        if (isset($rowspan_tracking[$day]) && $rowspan_tracking[$day] > 0) {
-                            $rowspan_tracking[$day]--;
+                foreach ($time_slots as $time_slot):
+                    echo "<tr>";
+                    echo "<td class='bg-secondary text-white'>$time_slot</td>";
+
+                    foreach ($locations as $location):
+                        if (isset($rowspan_tracking[$location]) && $rowspan_tracking[$location] > 0) {
+                            $rowspan_tracking[$location]--;
                             continue;
                         }
 
-                        // Filtrer les sessions correspondant au jour et au créneau horaire
-                        $filtered_sessions = array_filter($sessions, function ($session) use ($day, $time_slot, $day_mapping) {
-                            $session_day_number = $day_mapping[$session['day']];
-                            return $session_day_number == $day && sessionStartsInTimeSlot($session, $time_slot);
+                        // Filtrer les sessions pour la salle et le créneau horaire
+                        $filtered_sessions = array_filter($sessions, function ($session) use ($location, $time_slot) {
+                            return $session['location_name'] === $location && sessionStartsInTimeSlot($session, $time_slot);
                         });
 
                         if (!empty($filtered_sessions)) {
                             foreach ($filtered_sessions as $session) {
                                 $rowspan = calculateRowspan($session, $time_slots);
 
-                                // Check if the logo exists and set it as a background image
-                                if (!empty($session['logo'])) {
-                                    echo "<td class='session' style='background-image: url({$session['logo']}); background-size: cover; background-position: center; border-radius:50px' rowspan='$rowspan' data-id='{$session['id']}' data-idsp='{$session['id_sp']}' data-bs-toggle='modal' data-bs-target='#reserveModal'>";
-                                } else {
-                                    // Fallback if no logo is available
-                                    echo "<td class='session' style=' border-radius:50px' rowspan='$rowspan' data-id='{$session['id']}'  data-idsp='{$session['id_sp']}' data-bs-toggle='modal' data-bs-target='#reserveModal'>";
-                                    // Display the session details (libelle, location, coach)
-                                    echo "<strong>{$session['libelle']}</strong><br>";
-                                    echo "{$session['location_name']}<br>";
-                                    echo "{$session['nom']} {$session['prenom']}<br>";
-                                }
-
-
+                                // Afficher la session avec rowspan
+                                echo "<td class='bg-info text-white' rowspan='$rowspan'>";
+                                echo "<strong>{$session['libelle']}</strong><br>";
+                                echo "Coach: {$session['nom']} {$session['prenom']}<br>";
                                 echo "</td>";
 
-                                // Track the rowspan for the current day
-                                $rowspan_tracking[$day] = $rowspan - 1;
+                                // Mettre à jour le suivi du rowspan
+                                $rowspan_tracking[$location] = $rowspan - 1;
                             }
                         } else {
-                            echo "<td style='background:none'></td>";
+                            echo "<td></td>";
                         }
-                    }
+                    endforeach;
+
                     echo "</tr>";
-                }
+                endforeach;
                 ?>
             </tbody>
         </table>

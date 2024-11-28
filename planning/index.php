@@ -424,6 +424,7 @@ $conn->close();
                                 <div class="form-group">
                                     <label for="edit-libelle">Libellé de la Séance</label>
                                     <input type="text" id="edit-libelle" name="libelle" class="form-control" placeholder="Nom de la séance" required>
+                                    <input type="text" id="Edit_session_id" name="session_id" class="form-control d-none" required>
                                 </div>
                             </div>
 
@@ -471,11 +472,11 @@ $conn->close();
                             <!-- Lieu -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="edit-location">Lieu</label>
-                                    <select id="edit-location" name="location" class="form-control select2" required>
+                                    <label for="Edit-location">Lieu</label>
+                                    <select id="Edit-location" name="location" class="form-control select2" required>
                                         <option value="">Sélectionner un lieu</option>
                                         <?php foreach ($locations as $location): ?>
-                                            <option value="<?php echo htmlspecialchars($location['id']); ?>" data-max-attendees="<?php echo htmlspecialchars($location['nomber_place']); ?>">
+                                            <option value="<?php echo htmlspecialchars($location['id']); ?>" data-max-Edit-attendees="<?php echo htmlspecialchars($location['nomber_place']); ?>">
                                                 <?php echo htmlspecialchars($location['name']); ?>
                                             </option>
                                         <?php endforeach; ?>
@@ -494,17 +495,18 @@ $conn->close();
                                     </select>
                                 </div>
                             </div>
+                            <!-- Nombre de places (Max Attendees) -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="maxAttendees">Nombre de places</label>
+                                    <input type="number" id="Edit-maxAttendees" name="maxAttendees" class="form-control" readonly required>
+                                </div>
+                            </div>
 
                             <div class="row">
-                                <!-- Lundi -->
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <h3>Lundi</h3>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="Edit-lundi">Selectionner l'heure</label>
+                                        <label for="Edit-lundi">Lundi</label>
                                         <select name="edit-lundi-hours" id="Edit-lundi" class="form-control">
                                             <option value=""></option>
                                             <option value="07:00">07:00</option>
@@ -523,18 +525,11 @@ $conn->close();
                                         </select>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="row">
-                                <!-- Mardi -->
+
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <h3>Mardi</h3>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="Edit-mardi">Selectionner l'heure</label>
+                                        <label for="Edit-mardi">Mardi</label>
                                         <select name="edit-mardi-hours" id="Edit-mardi" class="form-control">
                                             <option value=""></option>
                                             <option value="07:00">07:00</option>
@@ -553,18 +548,12 @@ $conn->close();
                                         </select>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="row">
                                 <!-- Mercredi -->
+
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <h3>Mercredi</h3>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="Edit-mercredi">Selectionner l'heure</label>
+                                        <label for="Edit-mercredi">Mercredi</label>
                                         <select name="edit-mercredi-hours" id="Edit-mercredi" class="form-control">
                                             <option value=""></option>
                                             <option value="07:00">07:00</option>
@@ -583,18 +572,12 @@ $conn->close();
                                         </select>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="row">
                                 <!-- Jeudi -->
+
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <h3>Jeudi</h3>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="Edit-jeudi">Selectionner l'heure</label>
+                                        <label for="Edit-jeudi">Jeudi</label>
                                         <select name="edit-jeudi-hours" id="Edit-jeudi" class="form-control">
                                             <option value=""></option>
                                             <option value="07:00">07:00</option>
@@ -613,18 +596,12 @@ $conn->close();
                                         </select>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="row">
                                 <!-- Vendredi -->
+
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <h3>Vendredi</h3>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="Edit-vendredi">Selectionner l'heure</label>
+                                        <label for="Edit-vendredi">Vendredi</label>
                                         <select name="edit-vendredi-hours" id="Edit-vendredi" class="form-control">
                                             <option value=""></option>
                                             <option value="07:00">07:00</option>
@@ -643,18 +620,14 @@ $conn->close();
                                         </select>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="row">
+
+
                                 <!-- Samedi -->
+
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <h3>Samedi</h3>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="Edit-samedi">Selectionner l'heure</label>
+                                        <label for="Edit-samedi">Samedi</label>
                                         <select name="edit-samedi-hours" id="Edit-samedi" class="form-control">
                                             <option value=""></option>
                                             <option value="07:00">07:00</option>
@@ -673,18 +646,13 @@ $conn->close();
                                         </select>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="row">
+
+
                                 <!-- Dimanche -->
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <h3>Dimanche</h3>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="Edit-dimanche">Selectionner l'heure</label>
+                                        <label for="Edit-dimanche">Dimanche</label>
                                         <select name="edit-dimanche-hours" id="Edit-dimanche" class="form-control">
                                             <option value=""></option>
                                             <option value="07:00">07:00</option>
@@ -703,14 +671,15 @@ $conn->close();
                                         </select>
                                     </div>
                                 </div>
+
                             </div>
                         </div>
-                    </div>
 
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                        <button type="submit" class="btn btn-primary">Mettre à jour</button>
-                    </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                            <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                        </div>
+
                 </form>
             </div>
         </div>
@@ -888,10 +857,13 @@ $conn->close();
 
                     // Remplir les champs du formulaire
                     $('#edit-libelle').val(session.libelle); // Nom de la séance
+                    $('#Edit-maxAttendees').val(session.max_attendees); // Nom de la séance
+                    $('#Edit_session_id').val(session.id); // Nom de la séance
                     $('#edit-activity').val(session.activite_id).trigger('change'); // Activité
                     $('#edit-coach').val(session.coach_id).trigger('change'); // Coach
-                    $('#edit-location').val(session.location_id).trigger('change'); // Lieu
+                    $('#Edit-location').val(session.location_id).trigger('change'); // Lieu
                     $('#edit-gender').val(session.genre).trigger('change'); // Genre
+
 
 
 
@@ -903,10 +875,16 @@ $conn->close();
                     }
 
 
-                    if (session.times.lundi) {
-                        var time = session.times.lundi.split(':')[0] + ':' + session.times.lundi.split(':')[1]; // Get only the hour and minute
-                        $('#Edit-lundi').val(time); // Set the select value to this formatted time
-                    }
+                    // Tableau des jours de la semaine
+                    const jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+
+                    // Vérifier et définir la valeur pour chaque jour
+                    jours.forEach(jour => {
+                        if (session.times[jour]) {
+                            const time = session.times[jour].split(':')[0] + ':' + session.times[jour].split(':')[1]; // Extraire l'heure et les minutes
+                            $(`#Edit-${jour}`).val(time); // Définir la valeur de la liste déroulante
+                        }
+                    });
 
 
                     // Populate the days (check if the day exists in session.days)
@@ -1002,6 +980,52 @@ $conn->close();
     });
 </script>
 
+<script>
+    $('#Edit-location').on('change', function() {
+        // Get the max-attendees data attribute of the selected location
+        var maxAttendees = $(this).find('option:selected').data('max-edit-attendees');
+
+        // Log the maxAttendees value to the console for debugging
+        console.log("Max Attendees: " + maxAttendees);
+
+        // Set the value of the maxAttendees input field to the retrieved value
+        $('#Edit-maxAttendees').val(maxAttendees);
+    });
+
+    $(document).ready(function() {
+        // Update maxAttendees when location is selected
+        $('#EditSessionForm').on('submit', function(e) {
+            e.preventDefault(); // Prevent the form from submitting the traditional way
+
+            // Collect form data
+            var formData = new FormData(this);
+
+            // Optional: Log the formData to debug
+            console.log([...formData]);
+
+            // Send the data via AJAX
+            $.ajax({
+                url: 'Edit_session.php', // Replace with your endpoint URL
+                type: 'POST', // Or PUT if applicable
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    // Handle success (e.g., display a success message or reload part of the page)
+                    console.log('Session updated successfully:', response);
+                    $('#EditActivityModal').modal('hide'); // Close the modal
+
+                    // Refresh the page after a successful update
+                    location.reload();
+                },
+                error: function(error) {
+                    // Handle error (e.g., display error message)
+                    console.error('Error updating session:', error);
+                }
+            });
+        });
+    });
+</script>
 <script>
     // Update maxAttendees when location is selected
     $('#location').on('change', function() {

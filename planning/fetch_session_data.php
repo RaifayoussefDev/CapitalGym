@@ -18,16 +18,25 @@ if (isset($_GET['id'])) {
         $planningStmt->bind_param("i", $sessionId);
         $planningStmt->execute();
         $planningResult = $planningStmt->get_result();
+        
         $days = [];
         $times = [];
+        $maxAttendees = null; // To store max attendees, we will fetch it only once
+        
         while ($planningRow = $planningResult->fetch_assoc()) {
             $days[] = $planningRow['day'];
             $times[$planningRow['day']] = $planningRow['start_time']; // Assuming only start time is needed
+            
+            // Get the max_attendees from the first row (assuming all planning rows have the same max_attendees)
+            if ($maxAttendees === null) {
+                $maxAttendees = $planningRow['max_attendees']; // Store it only once
+            }
         }
 
         // Combine data and send as JSON
         $session['days'] = $days;
         $session['times'] = $times;
+        $session['max_attendees'] = $maxAttendees; // Add max attendees to the session response
         echo json_encode($session);
     }
 }
