@@ -4,9 +4,19 @@ require "../inc/conn_db.php";
 
 // Définir les créneaux horaires
 $start_times = [
-    "07:00", "08:00", "09:00", "10:00", "11:00",
-    "12:30", "13:30", "16:30", "17:30", "18:30",
-    "19:30", "20:00", "20:30"
+    "07:00",
+    "08:00",
+    "09:00",
+    "10:00",
+    "11:00",
+    "12:30",
+    "13:30",
+    "16:30",
+    "17:30",
+    "18:30",
+    "19:30",
+    "20:00",
+    "20:30"
 ];
 
 // Générer les plages horaires
@@ -38,7 +48,7 @@ $sessions_sql = "
     JOIN 
         coaches c ON s.coach_id = c.id
     JOIN 
-        users u ON c.user_id = u.id where sp.day='lundi' and l.name not in ('Reaxing' , 'I-motion');;
+        users u ON c.user_id = u.id where sp.day='lundi' and l.name not in ('Reaxing' , 'I-motion');
 ";
 
 $sessions_result = $conn->query($sessions_sql);
@@ -455,10 +465,17 @@ $conn->close();
                             foreach ($filtered_sessions as $session) {
                                 $rowspan = calculateRowspan($session, $time_slots);
 
-                                // Afficher la session avec rowspan
-                                echo "<td class='bg-info text-white' rowspan='$rowspan'>";
-                                echo "<strong>{$session['libelle']}</strong><br>";
-                                echo "Coach: {$session['nom']} {$session['prenom']}<br>";
+                                if (!empty($session['logo'])) {
+                                    // Si un logo existe, l'afficher comme arrière-plan
+                                    echo "<td class='session' style='background-image: url({$session['logo']}); background-size: cover; background-position: center;' rowspan='$rowspan' data-id='{$session['id']}' data-idsp='{$session['id_sp']}' data-bs-toggle='modal' data-bs-target='#reserveModal'>";
+                                } else {
+                                    // Si aucun logo n'existe, afficher la description et les détails
+                                    echo "<td class='bg-info text-white' style='text-align: center; vertical-align: middle; border-radius: 10px;' rowspan='$rowspan' data-id='{$session['id']}' data-idsp='{$session['id_sp']}' data-bs-toggle='modal' data-bs-target='#reserveModal'>";
+                                    echo "<strong>{$session['libelle']}</strong><br>";
+                                    echo "Coach: {$session['nom']} {$session['prenom']}<br>";
+                                }
+
+                                // Fermer le <td>
                                 echo "</td>";
 
                                 // Mettre à jour le suivi du rowspan
@@ -467,6 +484,7 @@ $conn->close();
                         } else {
                             echo "<td></td>";
                         }
+
                     endforeach;
 
                     echo "</tr>";
