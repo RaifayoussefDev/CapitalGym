@@ -580,6 +580,7 @@ $conn->close();
                                                                     <option value="Wafa Bank">Wafa Bank</option>
                                                                     <option value="CFG Bank">CFG Bank</option>
                                                                     <option value="BANK ASSAFA">BANK ASSAFA</option>
+                                                                    <option value="Banque UMB">Banque UMB</option>
                                                                 </select>
                                                             </div>
                                                         </div>
@@ -642,6 +643,7 @@ $conn->close();
                                                                     <option value="Wafa Bank">Wafa Bank</option>
                                                                     <option value="CFG Bank">CFG Bank</option>
                                                                     <option value="BANK ASSAFA">BANK ASSAFA</option>
+                                                                    <option value="Banque UMB">Banque UMB</option>
                                                                 </select>
                                                             </div>
                                                         </div>
