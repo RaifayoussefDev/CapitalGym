@@ -25,6 +25,31 @@ for ($i = 0; $i < count($start_times) - 1; $i++) {
     $time_slots[] = $start_times[$i] . " - " . $start_times[$i + 1];
 }
 
+// Get the day from the URL, or default to the current day
+$day = isset($_GET['day']) ? $_GET['day'] : strtolower(date('l'));
+
+// Convert English day names to French if needed
+$daysInFrench = [
+    'monday' => 'lundi',
+    'tuesday' => 'mardi',
+    'wednesday' => 'mercredi',
+    'thursday' => 'jeudi',
+    'friday' => 'vendredi',
+    'saturday' => 'samedi',
+    'sunday' => 'dimanche',
+];
+
+// Ensure the day is in French
+$day = $daysInFrench[$day] ?? $day;
+
+// Validate if the day is valid (lundi, mardi, mercredi...)
+$validDays = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+
+if (!in_array($day, $validDays)) {
+    // Default to today's day in French if invalid
+    $day = $daysInFrench[strtolower(date('l'))];
+}
+
 // Requête SQL pour récupérer les sessions
 $sessions_sql = "
     SELECT 
@@ -48,7 +73,7 @@ $sessions_sql = "
     JOIN 
         coaches c ON s.coach_id = c.id
     JOIN 
-        users u ON c.user_id = u.id where sp.day='lundi' and l.name not in ('Reaxing' , 'I-motion');
+        users u ON c.user_id = u.id where sp.day='$day' and l.name not in ('Reaxing' , 'I-motion');
 ";
 
 $sessions_result = $conn->query($sessions_sql);
@@ -430,6 +455,17 @@ $conn->close();
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
+    <?php
+    // Liste des jours en français
+    $jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+
+    echo "<div class='d-flex justify-content-center gap-2'>";
+    foreach ($jours as $jour) {
+        echo "<a href='index.php?day=$jour' class='btn btn-dark'>" . ucfirst($jour) . "</a>";
+    }
+    echo "</div>";
+    ?>
+
     <div class="table-responsive">
         <table class="table table-bordered text-center">
             <thead>
@@ -465,17 +501,10 @@ $conn->close();
                             foreach ($filtered_sessions as $session) {
                                 $rowspan = calculateRowspan($session, $time_slots);
 
-                                // if (!empty($session['logo'])) {
-                                //     // Si un logo existe, l'afficher comme arrière-plan
-                                //     echo "<td class='session' style='background-image: url({$session['logo']}); background-size: cover; background-position: center;' rowspan='$rowspan' data-id='{$session['id']}' data-idsp='{$session['id_sp']}' data-bs-toggle='modal' data-bs-target='#reserveModal'>";
-                                // } else {
-                                    // Si aucun logo n'existe, afficher la description et les détails
-                                    echo "<td class='session bg-dark text-white' style='text-align: center; vertical-align: middle;text-transform: uppercase;border:2px solid #fff' rowspan='$rowspan' data-id='{$session['id']}' data-idsp='{$session['id_sp']}' data-bs-toggle='modal' data-bs-target='#reserveModal'>";
-                                    echo "<strong>{$session['libelle']}</strong><br>";
-                                    // echo "Coach: {$session['nom']} {$session['prenom']}<br>";
-                                // }
 
-                                // Fermer le <td>
+                                echo "<td class='session bg-dark text-white' style='text-align: center; vertical-align: middle;text-transform: uppercase;border:2px solid #fff' rowspan='$rowspan' data-id='{$session['id']}' data-idsp='{$session['id_sp']}' data-bs-toggle='modal' data-bs-target='#reserveModal'>";
+                                echo "<strong>{$session['libelle']}</strong><br>";
+
                                 echo "</td>";
 
                                 // Mettre à jour le suivi du rowspan
