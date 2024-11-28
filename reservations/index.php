@@ -38,7 +38,7 @@ $sessions_sql = "
     JOIN 
         coaches c ON s.coach_id = c.id
     JOIN 
-        users u ON c.user_id = u.id where sp.day='lundi';
+        users u ON c.user_id = u.id where sp.day='lundi' and l.name not in ('Reaxing' , 'I-motion');;
 ";
 
 $sessions_result = $conn->query($sessions_sql);
