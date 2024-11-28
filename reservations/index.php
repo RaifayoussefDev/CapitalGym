@@ -398,7 +398,7 @@ $conn->close();
         background-color: #262a2d;
         ;
         color: white;
-        border-radius: 50px;
+        /* border-radius: 50px; */
     }
 
     /* Animation classes */
@@ -448,7 +448,7 @@ $conn->close();
                 // Parcourir les créneaux horaires
                 foreach ($time_slots as $time_slot):
                     echo "<tr>";
-                    echo "<td class='bg-secondary text-white'>$time_slot</td>";
+                    echo "<td class='bg-dark text-white'>$time_slot</td>";
 
                     foreach ($locations as $location):
                         if (isset($rowspan_tracking[$location]) && $rowspan_tracking[$location] > 0) {
@@ -465,15 +465,15 @@ $conn->close();
                             foreach ($filtered_sessions as $session) {
                                 $rowspan = calculateRowspan($session, $time_slots);
 
-                                if (!empty($session['logo'])) {
-                                    // Si un logo existe, l'afficher comme arrière-plan
-                                    echo "<td class='session' style='background-image: url({$session['logo']}); background-size: cover; background-position: center;' rowspan='$rowspan' data-id='{$session['id']}' data-idsp='{$session['id_sp']}' data-bs-toggle='modal' data-bs-target='#reserveModal'>";
-                                } else {
+                                // if (!empty($session['logo'])) {
+                                //     // Si un logo existe, l'afficher comme arrière-plan
+                                //     echo "<td class='session' style='background-image: url({$session['logo']}); background-size: cover; background-position: center;' rowspan='$rowspan' data-id='{$session['id']}' data-idsp='{$session['id_sp']}' data-bs-toggle='modal' data-bs-target='#reserveModal'>";
+                                // } else {
                                     // Si aucun logo n'existe, afficher la description et les détails
-                                    echo "<td class='bg-info text-white' style='text-align: center; vertical-align: middle; border-radius: 10px;' rowspan='$rowspan' data-id='{$session['id']}' data-idsp='{$session['id_sp']}' data-bs-toggle='modal' data-bs-target='#reserveModal'>";
+                                    echo "<td class='session bg-dark text-white' style='text-align: center; vertical-align: middle;text-transform: uppercase;border:2px solid #fff' rowspan='$rowspan' data-id='{$session['id']}' data-idsp='{$session['id_sp']}' data-bs-toggle='modal' data-bs-target='#reserveModal'>";
                                     echo "<strong>{$session['libelle']}</strong><br>";
                                     echo "Coach: {$session['nom']} {$session['prenom']}<br>";
-                                }
+                                // }
 
                                 // Fermer le <td>
                                 echo "</td>";
