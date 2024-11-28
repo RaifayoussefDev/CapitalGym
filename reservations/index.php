@@ -85,7 +85,7 @@ if ($sessions_result->num_rows > 0) {
 }
 
 // Requête SQL pour récupérer les salles
-$locations_sql = "SELECT name FROM `locations`";
+$locations_sql = "SELECT * FROM `locations` WHERE id not in (13,12,18);";
 $locations_result = $conn->query($locations_sql);
 $locations = [];
 if ($locations_result->num_rows > 0) {
