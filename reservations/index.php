@@ -269,7 +269,6 @@ $conn->close();
             });
         });
 
-        // Handle the view reserved users button click
         $('#viewReservedUsersButton').on('click', function() {
             const sessionId = $('#sessionIdSp').val();
 
@@ -285,14 +284,21 @@ $conn->close();
                     tbody.empty(); // Clear the table body
 
                     users.forEach(function(user) {
-                        const row = '<tr>' +
-                            '<td>' + user.nom + '</td>' +
-                            '<td>' + user.prenom + '</td>' +
-                            '<td>' + user.email + '</td>' +
-                            '<td>' + user.matricule + '</td>' +
-                            '</tr>';
+                        const row = `
+                    <tr data-user-id="${user.id}">
+                        <td>${user.nom}</td>
+                        <td>${user.prenom}</td>
+                        <td>${user.email}</td>
+                        <td>${user.matricule}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm delete-reservation" data-user-id="${user.id}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>`;
                         tbody.append(row);
                     });
+
                     $('#reserveModal').modal('hide');
                     $('#reservedUsersModal').modal('show');
                 },
@@ -302,6 +308,37 @@ $conn->close();
                 }
             });
         });
+
+        // Handle the delete button click
+        $('#reservedUsersTableBody').on('click', '.delete-reservation', function() {
+            const userId = $(this).data('user-id');
+            const sessionId = $('#sessionIdSp').val(); // Pass the session ID if necessary
+
+            $.ajax({
+                url: 'delete_reservation.php',
+                type: 'POST',
+                data: {
+                    user_id: userId,
+                    session_id: sessionId
+                },
+                success: function(response) {
+                    const result = JSON.parse(response);
+
+                    if (result.success) {
+                        // Remove the row without closing the modal
+                        $(`tr[data-user-id="${userId}"]`).remove();
+                        // alert('Réservation supprimée avec succès.');
+                    } else {
+                        alert('Une erreur est survenue : ' + result.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                    alert('Une erreur est survenue. Veuillez réessayer.');
+                }
+            });
+        });
+
 
         // Toggle the view reserved users button visibility based on sessionId
         $('#reserveModal').on('show.bs.modal', function() {
@@ -605,6 +642,7 @@ $conn->close();
                             <th>Prénom</th>
                             <th>Email</th>
                             <th>Matricule</th>
+                            <th>Supprimer</th>
                         </tr>
                     </thead>
                     <tbody id="reservedUsersTableBody">

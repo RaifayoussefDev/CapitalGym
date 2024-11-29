@@ -47,8 +47,8 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
             die("error: User does not exist or invalid user ID.");
         }
 
-        // Prepare SQL statement to insert into reservations
-        $stmt_reservation = $conn->prepare("INSERT INTO reservations (user_id, session_planning_id, date_reservation) VALUES (?, ?, NOW())");
+        // Prepare SQL statement to insert into reservations with 'determiner' as default state
+        $stmt_reservation = $conn->prepare("INSERT INTO reservations (user_id, session_planning_id, date_reservation, etat_reservation) VALUES (?, ?, NOW(), 'Confirmer')");
         $stmt_reservation->bind_param("ii", $user_id, $session_planning_id);
 
         if (!$stmt_reservation->execute()) {

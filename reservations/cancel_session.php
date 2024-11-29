@@ -1,66 +1,34 @@
 <?php
-session_start();
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $userId = $_POST['user_id'];
+    $sessionId = $_POST['session_id'];
 
-require "../inc/conn_db.php";
-
-if ($_SERVER["REQUEST_METHOD"] == "GET") {
-    // Validate and sanitize input
-    $session_id = isset($_GET['session_id']) ? intval($_GET['session_id']) : null;
-    
-    // Retrieve user ID from session or authentication system
-    if (isset($_SESSION['id'])) {
-        $user_id = intval($_SESSION['id']);
-    } else {
-        die("error: User session not found or invalid.");
-    }
-
-    if ($session_id === null) {
-        die("error: session_id is missing or invalid.");
-    }
-
-    // Start a transaction
-    $conn->begin_transaction();
+    // Connexion à la base de données
+    include '../inc/conn_db.php';
 
     try {
-        // Validate user existence
-        $user_check_query = "SELECT id FROM users WHERE id = ?";
-        $stmt_user = $conn->prepare($user_check_query);
-        $stmt_user->bind_param("i", $user_id);
-        $stmt_user->execute();
-        $stmt_user->store_result();
+        // Update the reservation status to 'annulé' instead of deleting
+        $stmt = $conn->prepare("UPDATE reservations SET etat_reservation = 'annulé' WHERE user_id = ? AND session_planning_id = ?");
+        $stmt->bind_param("ii", $userId, $sessionId);
 
-        if ($stmt_user->num_rows === 0) {
-            die("error: User does not exist or invalid user ID.");
-        }
-
-        // Prepare SQL statements to delete the reservation
-        $stmt_delete = $conn->prepare("DELETE FROM reservations WHERE user_id = ? AND session_id = ?");
-        $stmt_delete->bind_param("ii", $user_id, $session_id);
-
-        if (!$stmt_delete->execute()) {
-            die("error: Execute failed - " . htmlspecialchars($stmt_delete->error));
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true, 'message' => 'Reservation canceled successfully.']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Unable to cancel the reservation.']);
         }
 
         // Update remaining_slots in sessions
-        $stmt_update = $conn->prepare("UPDATE sessions SET remaining_slots = remaining_slots + 1 WHERE id = ?");
+        $stmt_update = $conn->prepare("UPDATE `session_planning` SET `remaining_slots`= remaining_slots+1 WHERE id = ?");
         $stmt_update->bind_param("i", $session_id);
 
         if (!$stmt_update->execute()) {
             die("error: Execute failed - " . htmlspecialchars($stmt_update->error));
         }
 
-        // Commit transaction if everything is successful
-        $conn->commit();
-        echo "success";
+        $stmt->close();
     } catch (Exception $e) {
-        // Rollback the transaction if something failed
-        $conn->rollback();
-        die("error: " . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
 
-    $stmt_user->close();
-    $stmt_delete->close();
-    $stmt_update->close();
     $conn->close();
 }
-?>
