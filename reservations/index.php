@@ -187,7 +187,7 @@ $conn->close();
 
                     $('#reserveModal #activityName').text(session.activity_name || 'N/A');
                     $('#reserveModal #sessionDate').text(session.day || 'N/A');
-                    $('#reserveModal #sessionTime').text((session.start_time || '') + ' - ' + (session.end_time || ''));
+                    $('#reserveModal #sessionTime').text((session.time_range || 'N/A'));
                     $('#reserveModal #sessionLocation').text(session.location || 'N/A');
                     $('#reserveModal #sessionCoach').text(session.coach_name || 'N/A');
                     $('#reserveModal #maxAttendees').text(session.max_attendees || 'N/A');
@@ -271,7 +271,7 @@ $conn->close();
 
         // Handle the view reserved users button click
         $('#viewReservedUsersButton').on('click', function() {
-            const sessionId = $('#sessionId').val();
+            const sessionId = $('#sessionIdSp').val();
 
             $.ajax({
                 url: 'fetch_reserved_users.php',
@@ -538,7 +538,7 @@ $conn->close();
                 <form id="reserveForm">
                     <?php
                     $session_profil = $_SESSION['profil'];
-                    if ($session_profil == 2) {; ?>
+                    if ($session_profil == 1) {; ?>
                         <div class="mb-3">
                             <label for="users">Adhérents</label>
                             <select name="users" id="users" class="form-control select2" style="width: 100%;"></select>
@@ -547,11 +547,11 @@ $conn->close();
                     }; ?>
                     <div class="mb-3">
                         <label for="activityName" class="form-label">Activité</label>
-                        <div id="activityName"></div>
+                        <div id="activityName" style="text-transform:capitalize"></div>
                     </div>
                     <div class="mb-3">
-                        <label for="sessionDate" class="form-label">Date</label>
-                        <div id="sessionDate"></div>
+                        <label for="sessionDate" class="form-label">Jour</label>
+                        <div id="sessionDate" style="text-transform:capitalize"></div>
                     </div>
                     <div class="mb-3">
                         <label for="sessionTime" class="form-label">Heure</label>

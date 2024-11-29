@@ -16,7 +16,8 @@ if (isset($_GET['id'])) {
     CONCAT(u.nom, ' ', u.prenom) AS coach_name, 
     sp.max_attendees,
     sp.remaining_slots,
-    sp.day
+    sp.day,
+    CONCAT(sp.start_time, ' - ', sp.end_time) AS time_range
 FROM 
     sessions s 
 JOIN 
