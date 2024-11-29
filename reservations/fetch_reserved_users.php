@@ -8,7 +8,7 @@ $session_id = $_GET['session_id'];
 $sql = "SELECT nom, prenom, email, users.id, matricule 
         FROM reservations 
         JOIN users ON reservations.user_id = users.id 
-        WHERE session_planning_id = ?";
+        WHERE session_planning_id = ? and etat_reservation not like 'annuler'";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $session_id);
 $stmt->execute();

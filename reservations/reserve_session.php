@@ -33,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
         $stmt_check->bind_result($reservation_id, $etat_reservation);
         $stmt_check->fetch();
 
-        if ($etat_reservation == 'annulé') {
+        if ($etat_reservation == 'annuler') {
             // If the reservation was previously canceled, update it to 'Confirmer'
             $update_reservation_query = "UPDATE reservations SET etat_reservation = 'Confirmer' WHERE id = ?";
             $stmt_update = $conn->prepare($update_reservation_query);
