@@ -18,8 +18,6 @@ INNER JOIN
     coaches c ON pc.coach_id = c.id
 INNER JOIN 
     users u ON c.user_id = u.id
-WHERE 
-    pc.jour = 'mardi'
 GROUP BY 
     c.id, pc.jour
 ORDER BY 
@@ -51,57 +49,7 @@ if ($activites_result->num_rows > 0) {
 }
 $conn->close();
 ?>
-<style>
-    .drop-area {
-        border: 2px dashed #ccc;
-        padding: 20px;
-        text-align: center;
-        cursor: pointer;
-        transition: border-color 0.3s ease;
-    }
 
-    .drop-area.dragover {
-        border-color: #000;
-    }
-</style>
-<script>
-    function displayPhoto(input) {
-        if (input.files && input.files[0]) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var preview = document.getElementById('preview');
-                preview.src = e.target.result;
-                preview.style.display = 'block';
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-
-    document.getElementById('drop-area').addEventListener('click', function() {
-        document.getElementById('profile-photo').click();
-    });
-
-    document.getElementById('drop-area').addEventListener('dragover', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.classList.add('dragover');
-    });
-
-    document.getElementById('drop-area').addEventListener('dragleave', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.classList.remove('dragover');
-    });
-
-    document.getElementById('drop-area').addEventListener('drop', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.classList.remove('dragover');
-        var files = e.dataTransfer.files;
-        document.getElementById('profile-photo').files = files;
-        displayPhoto(document.getElementById('profile-photo'));
-    });
-</script>
 <div class="page-inner">
     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
         <div>
@@ -142,7 +90,7 @@ $conn->close();
                                                     <select name="coach_id" id="coach_id" class="form-control">
                                                         <?php foreach ($coaches as $coach) : ?>
                                                             <option value="<?= $coach['id'] ?>">
-                                                                <?= htmlspecialchars($coach['user_nom'] . ' ' . $coach['user_prenom']) ?>
+                                                                <?= htmlspecialchars($coach['coach_nom'] . ' ' . $coach['coach_prenom']) ?>
                                                             </option>
                                                         <?php endforeach; ?>
                                                     </select>
@@ -241,52 +189,6 @@ $conn->close();
             </div>
         </div>
 
-
-    </div>
-    <!-- Consult Modal -->
-    <div class="modal fade" id="consultModal" tabindex="-1" role="dialog" aria-labelledby="consultModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="consultModalLabel">Consulter Utilisateur</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <!-- User details will be populated here -->
-                    <div id="consultDetails"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modify Modal -->
-    <div class="modal fade" id="modifyModal" tabindex="-1" role="dialog" aria-labelledby="modifyModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modifyModalLabel">Modifier Utilisateur</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <!-- Modify form will be populated here -->
-                    <form id="modifyForm">
-                        <!-- Include all fields needed to modify user details -->
-                        <!-- This form should be similar to your insertion form -->
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
-                    <button type="button" class="btn btn-primary" id="saveChanges">Enregistrer les modifications</button>
-                </div>
-            </div>
-        </div>
     </div>
 
 </div>
@@ -325,24 +227,6 @@ $conn->close();
     });
 </script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const cinInput = document.getElementById('cin');
-        const nomInput = document.getElementById('nom');
-        const matriculeInput = document.getElementById('matricule');
-
-        function generateMatricule() {
-            const cin = cinInput.value.trim();
-            const nom = nomInput.value.trim();
-            if (cin && nom) {
-                matriculeInput.value = cin + nom.charAt(0).toUpperCase();
-            }
-        }
-
-        cinInput.addEventListener('input', generateMatricule);
-        nomInput.addEventListener('input', generateMatricule);
-    });
-</script>
 <?php
 require "../inc/footer.php";
 ?>
