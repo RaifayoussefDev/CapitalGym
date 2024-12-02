@@ -208,42 +208,70 @@ $conn->close();
             });
         });
 
-        // Handle form submission for session reservation
         $('#reserveForm').on('submit', function(event) {
             event.preventDefault();
+
             const sessionId = $('#sessionId').val();
             const sessionIdSp = $('#sessionIdSp').val();
-            const userProfil = <?php echo $_SESSION['profil']; ?>;
-            let userId = $('#users').val();
-
-            // Check if userId is empty and profile is 2
-            if (userId === "" && userProfil === 2) {
-                userId = <?php echo $_SESSION['id']; ?>;
-            } else {
-                userId = $('#users').val();
-            }
+            const userId = $('#users').val() || <?php echo $_SESSION['id']; ?>;
 
             $.ajax({
                 url: 'reserve_session.php',
                 type: 'GET',
+                dataType: 'json',
                 data: {
-                    session_id: sessionId,
-                    user_ID: userId,
-                    session_IdSp: sessionIdSp
+                    session_IdSp: sessionIdSp,
+                    user_ID: userId
                 },
                 success: function(response) {
-                    if (response.trim() === 'success') {
-                        $('#reserveModal').modal('hide');
+                    if (response.status === "success") {
+                        $('#reserveButton')
+                            .text('Réservé')
+                            .prop('disabled', true);
+
+                        $('#alert-success-add')
+                            .text(response.message)
+                            .fadeIn();
+
+                        // Auto-hide success message after 3 seconds
+                        setTimeout(function() {
+                            $('#alert-success-add').fadeOut();
+                        }, 3000);
                     } else {
-                        $('#reserveModal').modal('hide');
+                        $('#alert-error-add')
+                            .text(response.message)
+                            .fadeIn();
+
+                        // Auto-hide error message after 3 seconds
+                        setTimeout(function() {
+                            $('#alert-error-add').fadeOut();
+                        }, 3000);
                     }
                 },
-                error: function(xhr, status, error) {
-                    console.error(xhr.responseText);
-                    $('#alert-error').text('Une erreur est survenue. Veuillez réessayer.').show();
+                error: function() {
+                    $('#alert-error-add')
+                        .text("Une erreur réseau est survenue.")
+                        .fadeIn();
+
+                    // Auto-hide error message after 3 seconds
+                    setTimeout(function() {
+                        $('#alert-error-add').fadeOut();
+                    }, 3000);
                 }
             });
         });
+
+        // Réinitialiser le bouton "Réserver" lorsqu'un nouvel utilisateur est sélectionné
+        $('#users').on('change', function() {
+            $('#reserveButton')
+                .text('Réserver')
+                .prop('disabled', false);
+
+            // Cacher les messages d'alerte
+            $('#alert-success-add, #alert-error-add').fadeOut();
+        });
+
+
 
         // Handle session cancellation
         $('#cancelButton').on('click', function() {
@@ -563,7 +591,6 @@ $conn->close();
 </div>
 
 
-
 <div class="modal fade" id="reserveModal" tabindex="-1" aria-labelledby="reserveModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -572,6 +599,8 @@ $conn->close();
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                <div id="alert-success-add" class="alert alert-success" style="display: none;"></div>
+                <div id="alert-error-add" class="alert alert-danger" style="display: none;"></div>
                 <form id="reserveForm">
                     <?php
                     $session_profil = $_SESSION['profil'];
@@ -619,13 +648,13 @@ $conn->close();
                 </form>
             </div>
 
-            <!-- Include jQuery and Select2 -->
-            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-            <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select" />
 
         </div>
     </div>
 </div>
+<!-- Include jQuery and Select2 -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select" />
 
 <div class=" modal fade" id="reservedUsersModal" tabindex="-1" aria-labelledby="reservedUsersModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
