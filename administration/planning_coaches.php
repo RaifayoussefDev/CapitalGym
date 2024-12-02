@@ -5,19 +5,25 @@ require "../inc/conn_db.php";
 // Query to retrieve coaches' details with associated user and activity information
 $sql = "
 SELECT 
-    coaches.id,
-    users.nom AS user_nom,
-    users.prenom AS user_prenom,
-    users.matricule,
-    users.email,
-    activites.nom AS activite_nom,
-    users.photo
+    c.id AS coach_id,
+    u.nom AS coach_nom,
+    u.prenom AS coach_prenom,
+    u.photo AS photo,
+    pc.jour,
+    MIN(pc.heure_debut) AS heure_debut,
+    MAX(pc.heure_fin) AS heure_fin
 FROM 
-    coaches
-JOIN 
-    users ON coaches.user_id = users.id
-JOIN 
-    activites ON coaches.activite_id = activites.id
+    planning_coache pc
+INNER JOIN 
+    coaches c ON pc.coach_id = c.id
+INNER JOIN 
+    users u ON c.user_id = u.id
+WHERE 
+    pc.jour = 'mardi'
+GROUP BY 
+    c.id, pc.jour
+ORDER BY 
+    heure_debut;
 ";
 
 $result = $conn->query($sql);
@@ -189,10 +195,9 @@ $conn->close();
                                 <tr>
                                     <th>Photo</th>
                                     <th>Nom</th>
-
-                                    <th>Matricule</th>
-                                    <th>Email</th>
-                                    <th>Activité</th>
+                                    <th>jour</th>
+                                    <th>Heure debut</th>
+                                    <th>heure fin</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -200,9 +205,9 @@ $conn->close();
                                 <tr>
                                     <th>Photo</th>
                                     <th>Nom</th>
-                                    <th>Matricule</th>
-                                    <th>Email</th>
-                                    <th>Activité</th>
+                                    <th>jour</th>
+                                    <th>Heure debut</th>
+                                    <th>heure fin</th>
                                     <th>Actions</th>
                                 </tr>
                             </tfoot>
@@ -212,17 +217,17 @@ $conn->close();
                                         <td style="width:50px">
                                             <img src="../assets/img/capitalsoft/profils/<?php echo !empty($coach['photo']) ? htmlspecialchars($coach['photo']) : 'admin.webp'; ?>" alt="Profile Picture" class="img-thumbnail" style="width: 50px; height: 50px; border-radius: 50%;">
                                         </td>
-                                        <td><?php echo htmlspecialchars($coach['user_nom']); ?> <?php echo htmlspecialchars($coach['user_prenom']); ?></td>
-                                        <td><?php echo htmlspecialchars($coach['matricule']); ?></td>
-                                        <td><?php echo htmlspecialchars($coach['email']); ?></td>
-                                        <td><?php echo htmlspecialchars($coach['activite_nom']); ?></td>
+                                        <td><?php echo htmlspecialchars($coach['coach_nom']); ?> <?php echo htmlspecialchars($coach['coach_prenom']); ?></td>
+                                        <td><?php echo htmlspecialchars($coach['jour']); ?></td>
+                                        <td><?php echo htmlspecialchars($coach['heure_debut']); ?></td>
+                                        <td><?php echo htmlspecialchars($coach['heure_fin']); ?></td>
                                         <td>
                                             <!-- Actions links or buttons -->
                                             <!-- Example: View and Edit links -->
-                                            <a href="consult.php?id_coach=<?php echo htmlspecialchars($coach['id']); ?>" class="btn btn-info btn-consult">
+                                            <a href="consult.php?id_coach=<?php echo htmlspecialchars($coach['coach_id']); ?>" class="btn btn-info btn-consult">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="modif.php?id_coach=<?php echo htmlspecialchars($coach['id']); ?>" class="btn btn-warning btn-modify">
+                                            <a href="modif.php?id_coach=<?php echo htmlspecialchars($coach['coach_id']); ?>" class="btn btn-warning btn-modify">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         </td>
@@ -286,7 +291,7 @@ $conn->close();
 
 </div>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         const jours = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 
         // Fonction pour générer les options horaires
@@ -306,7 +311,7 @@ $conn->close();
         }
 
         // Fonction pour activer/désactiver le select des heures
-        window.toggleHourSelect = function (index) {
+        window.toggleHourSelect = function(index) {
             const dayCheckbox = document.getElementById(`day_${index}`);
             const hourSelect = document.getElementById(`hour_${index}`);
             if (dayCheckbox.checked) {
