@@ -21,6 +21,7 @@ INNER JOIN
 GROUP BY 
     c.id, pc.jour
 ORDER BY 
+    FIELD(pc.jour, 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'),
     heure_debut;
 ";
 
