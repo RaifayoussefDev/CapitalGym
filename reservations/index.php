@@ -368,14 +368,14 @@ $conn->close();
         });
 
 
-        // Toggle the view reserved users button visibility based on sessionId
-        $('#reserveModal').on('show.bs.modal', function() {
-            if ($('#sessionId').val()) {
-                $('#viewReservedUsersButton').show();
-            } else {
-                $('#viewReservedUsersButton').hide();
-            }
-        });
+        // // Toggle the view reserved users button visibility based on sessionId
+        // $('#reserveModal').on('show.bs.modal', function() {
+        //     if ($('#sessionId').val()) {
+        //         $('#viewReservedUsersButton').show();
+        //     } else {
+        //         $('#viewReservedUsersButton').hide();
+        //     }
+        // });
 
         // Close alert messages on click
         $(document).on('click', '.alert .btn-close', function() {
@@ -644,7 +644,10 @@ $conn->close();
 
                     <button type="submit" class="btn btn-primary" id="reserveButton">Réserver</button>
                     <button type="button" id="cancelButton" class="btn btn-danger" style="display: none;">Annuler la Réservation</button>
-                    <button type="button" id="viewReservedUsersButton" class="btn btn-info" style="display: none;">Consulter les utilisateurs réservés</button>
+                    <?php if ($session_profil == 1) {; ?>
+                        <button type="button" id="viewReservedUsersButton" class="btn btn-info">Consulter les utilisateurs réservés</button>
+                    <?php
+                    }; ?>
                 </form>
             </div>
 
