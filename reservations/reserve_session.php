@@ -93,7 +93,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
                 echo json_encode(["status" => "success", "message" => "Réservation de la séance bien effectuée."]);
             } else {
                 $conn->rollback();
-                echo json_encode(["status" => "error", "message" => "Aucune place disponible ou ID de séance invalide22."]);
+                echo json_encode(["status" => "error", "message" => "Aucune place disponible ou ID de séance invalide."]);
             }
         }
     } catch (Exception $e) {
