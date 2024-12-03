@@ -835,10 +835,10 @@ $conn->close();
                                                 <a href="consult.php?id_user=<?php echo htmlspecialchars($user['id']); ?>" class="btn btn-info btn-consult">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
+                                                <a href="../services/renouvelement.php?id_user=<?php echo htmlspecialchars($user['id']); ?>" class="btn btn-warning btn-modify">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
                                                 <?php if ($profil == 1): ?>
-                                                    <a href="../services/renouvelement.php?id_user=<?php echo htmlspecialchars($user['id']); ?>" class="btn btn-warning btn-modify">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
                                                     <!-- Button to delete the user (only visible for profil 1) -->
                                                     <button class="btn btn-danger btn-delete" data-bs-toggle="modal" data-bs-target="#confirmationModal" data-user-id="<?php echo htmlspecialchars($user['id']); ?>">
                                                         <i class="fas fa-trash-alt"></i>
