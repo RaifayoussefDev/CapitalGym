@@ -90,7 +90,7 @@ $conn->close();
                                                     <label for="coach_id">Sélectionnez un coach</label>
                                                     <select name="coach_id" id="coach_id" class="form-control">
                                                         <?php foreach ($coaches as $coach) : ?>
-                                                            <option value="<?= $coach['id'] ?>">
+                                                            <option value="<?= $coach['coach_id'] ?>">
                                                                 <?= htmlspecialchars($coach['coach_nom'] . ' ' . $coach['coach_prenom']) ?>
                                                             </option>
                                                         <?php endforeach; ?>
