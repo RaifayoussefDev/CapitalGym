@@ -25,7 +25,21 @@ ORDER BY
     heure_debut;
 ";
 
+$sql_coache = "
+SELECT 
+    c.id AS coach_id,
+    u.nom AS coach_nom,
+    u.prenom AS coach_prenom,
+    u.photo AS photo
+FROM 
+    coaches c
+INNER JOIN 
+    users u ON c.user_id = u.id
+ORDER BY 
+    u.nom, u.prenom;";
+
 $result = $conn->query($sql);
+$result_coache = $conn->query($sql_coache);
 
 $coaches = [];
 
@@ -35,6 +49,16 @@ if ($result->num_rows > 0) {
     }
 } else {
     $coaches = [];
+}
+
+$les_coaches = [];
+
+if ($result_coache->num_rows > 0) {
+    while ($row_coache = $result_coache->fetch_assoc()) {
+        $les_coaches[] = $row_coache;
+    }
+} else {
+    $les_coaches = [];
 }
 
 // Récupérer les activités
@@ -89,7 +113,7 @@ $conn->close();
                                                 <div class="form-group">
                                                     <label for="coach_id">Sélectionnez un coach</label>
                                                     <select name="coach_id" id="coach_id" class="form-control">
-                                                        <?php foreach ($coaches as $coach) : ?>
+                                                        <?php foreach ($les_coaches as $coach) : ?>
                                                             <option value="<?= $coach['coach_id'] ?>">
                                                                 <?= htmlspecialchars($coach['coach_nom'] . ' ' . $coach['coach_prenom']) ?>
                                                             </option>
