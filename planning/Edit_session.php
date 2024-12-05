@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Execute the query
         if ($stmt->execute()) {
             // Update session planning
-            $deletePlanningSql = "DELETE FROM session_planning WHERE session_id = ?";
+            $deletePlanningSql = "UPDATE `session_planning` SET `etat`='desactive' WHERE session_id = ?";
             $deleteStmt = $conn->prepare($deletePlanningSql);
             $deleteStmt->bind_param("i", $sessionId);
             $deleteStmt->execute();

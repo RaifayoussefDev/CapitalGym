@@ -5,23 +5,25 @@ require "../inc/conn_db.php";
 // Query to retrieve coaches' details with associated user and activity information
 $sql = "
 SELECT 
-    c.id AS coach_id,
+    s.coach_id,
     u.nom AS coach_nom,
     u.prenom AS coach_prenom,
     u.photo AS photo,
-    pc.jour,
-    MIN(pc.heure_debut) AS heure_debut,
-    MAX(pc.heure_fin) AS heure_fin
+    sp.day AS jour,
+    MIN(sp.start_time) AS heure_debut,
+    MAX(sp.end_time) AS heure_fin
 FROM 
-    planning_coache pc
+    sessions s
 INNER JOIN 
-    coaches c ON pc.coach_id = c.id
+    session_planning sp ON s.id = sp.session_id
+INNER JOIN 
+    coaches c ON s.coach_id = c.id
 INNER JOIN 
     users u ON c.user_id = u.id
 GROUP BY 
-    c.id, pc.jour
+    s.coach_id, sp.day
 ORDER BY 
-    FIELD(pc.jour, 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'),
+    FIELD(sp.day, 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'),
     heure_debut;
 ";
 
