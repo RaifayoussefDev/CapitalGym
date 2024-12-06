@@ -87,11 +87,11 @@
                     <span class="sub-item">Planning</span>
                   </a>
                 </li>
-                <li>
+                <!-- <li>
                   <a href="../Inaccessible.html">
                     <span class="sub-item">Gestion d'Équipe</span>
                   </a>
-                </li>
+                </li> -->
               </ul>
             </div>
           </li>
@@ -239,11 +239,11 @@
                     <span class="sub-item">Local</span>
                   </a>
                 </li>
-                <li>
+                <!-- <li>
                   <a href="../administration/materiels.php">
                     <span class="sub-item">Matériels</span>
                   </a>
-                </li>
+                </li> -->
                 <li>
                   <a href="../administration/">
                     <span class="sub-item">Différente activité proposé par club</span>
