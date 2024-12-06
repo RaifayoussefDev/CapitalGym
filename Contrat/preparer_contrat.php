@@ -261,7 +261,7 @@ GROUP BY
             "Mme / Mr : " . safeField($user['nom']) . " " . safeField($user['prenom']) .
                 ", né le " . safeField($user['date_naissance']) .
                 ", Résident à " . safeField($user['adresse']) .
-                " , titulaire de la CIN :..............................." .
+                " , titulaire de la CIN :" . safeField($user['cin']) .
                 ", Profession : " . safeField($user['fonction']) .
                 ", E-mail : ......................................" .
                 ", GSM : " . safeField($user['phone']) .
