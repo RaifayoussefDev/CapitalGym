@@ -62,7 +62,7 @@
           <li class="nav-item">
             <a href="../adherents/">
               <i class="fas fa-users"></i>
-              <p>Liste des adherents</p>
+              <p>Gestion des adherents</p>
             </a>
           </li>
         <?php } ?>
@@ -79,12 +79,12 @@
               <ul class="nav nav-collapse">
                 <li>
                   <a href="../planning/">
-                    <span class="sub-item">Planning par activité</span>
+                    <span class="sub-item">Gestion des Séance</span>
                   </a>
                 </li>
                 <li>
                   <a href="../reservations/">
-                    <span class="sub-item">Réservation</span>
+                    <span class="sub-item">Planning</span>
                   </a>
                 </li>
                 <li>
@@ -98,7 +98,7 @@
         <?php } ?>
 
         <!-- Restauration (menu item id: 3) -->
-        <?php if (hasAccess('Restauration', $menu_permissions)) { ?>
+        <!-- <?php if (hasAccess('Restauration', $menu_permissions)) { ?>
           <li class="nav-item">
             <a data-bs-toggle="collapse" href="#sidebarLayouts2" aria-controls="sidebarLayouts2">
               <i class="fas fa-utensils"></i>
@@ -120,10 +120,10 @@
               </ul>
             </div>
           </li>
-        <?php } ?>
+        <?php } ?> -->
 
         <!-- Services Spa et Massage (menu item id: 4) -->
-        <?php if (hasAccess('Services Spa et Massage', $menu_permissions)) { ?>
+        <!-- <?php if (hasAccess('Services Spa et Massage', $menu_permissions)) { ?>
           <li class="nav-item">
             <a data-bs-toggle="collapse" href="#sidebarLayouts3">
               <i class="fas fa-spa"></i>
@@ -145,7 +145,7 @@
               </ul>
             </div>
           </li>
-        <?php } ?>
+        <?php } ?> -->
 
         <!-- Wallet (menu item id: 5) -->
         <?php if (hasAccess('Wallet', $menu_permissions)) { ?>
@@ -161,51 +161,13 @@
           <li class="nav-item">
             <a href="../cheques/">
               <i class="fas fa-money-check-alt"></i> <!-- Changement d'icône -->
-              <p>Chèques</p> <!-- Correction orthographique : Chèques -->
+              <p>Suivi des chèques</p> <!-- Correction orthographique : Chèques -->
             </a>
           </li>
 
         <?php } ?>
 
-        <!-- Paramétrages (menu item id: 6) -->
-        <?php if (hasAccess('Paramétrages', $menu_permissions)) { ?>
-          <li class="nav-item">
-            <a data-bs-toggle="collapse" href="#sidebarLayouts4" aria-controls="sidebarLayouts4">
-              <i class="fas fa-cogs"></i>
-              <p>Paramétrages</p>
-              <span class="caret"></span>
-            </a>
-            <div class="collapse" id="sidebarLayouts4">
-              <ul class="nav nav-collapse">
-                <li>
-                  <a href="../administration/coaches.php">
-                    <span class="sub-item">Coaches</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="../administration/local.php">
-                    <span class="sub-item">Local</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="../administration/materiels.php">
-                    <span class="sub-item">Matériels</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="../administration/">
-                    <span class="sub-item">Différente activité proposé par club</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="../habilitations/">
-                    <span class="sub-item">Habilitations</span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </li>
-        <?php } ?>
+
 
         <!-- Gestion des rapports (menu item id: 7) -->
         <?php if (hasAccess('Gestion des rapports', $menu_permissions)) { ?>
@@ -257,6 +219,45 @@
           </li>
         <?php } ?>
 
+        <!-- Paramétrages (menu item id: 6) -->
+        <?php if (hasAccess('Paramétrages', $menu_permissions)) { ?>
+          <li class="nav-item">
+            <a data-bs-toggle="collapse" href="#sidebarLayouts4" aria-controls="sidebarLayouts4">
+              <i class="fas fa-cogs"></i>
+              <p>Paramétrages</p>
+              <span class="caret"></span>
+            </a>
+            <div class="collapse" id="sidebarLayouts4">
+              <ul class="nav nav-collapse">
+                <li>
+                  <a href="../administration/coaches.php">
+                    <span class="sub-item">Coaches</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="../administration/local.php">
+                    <span class="sub-item">Local</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="../administration/materiels.php">
+                    <span class="sub-item">Matériels</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="../administration/">
+                    <span class="sub-item">Différente activité proposé par club</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="../habilitations/">
+                    <span class="sub-item">Habilitations</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </li>
+        <?php } ?>
       </ul>
     </div>
   </div>
