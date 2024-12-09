@@ -9,6 +9,8 @@ use PhpOffice\PhpWord\Style\Paragraph;
 use PhpOffice\PhpWord\TemplateProcessor;
 use PhpOffice\PhpWord\Shared\Converter;
 use PhpOffice\PhpWord\Style\Table;
+use PhpOffice\PhpWord\SimpleType\Jc;
+
 // Helper function to check if a field exists and is not empty, otherwise return "---"
 function safeField($field)
 {
@@ -119,10 +121,10 @@ GROUP BY
         // $matricule = $user['matricule'];
 
         // Extraire la partie numérique du matricule (tout sauf la première lettre)
-        $numericPart = substr($matricule, 1); // Enlève la première lettre
+        // $numericPart = substr($matricule, 1); // Enlève la première lettre
 
         // Créer le numéro de contrat en utilisant uniquement la partie numérique du matricule
-        $numeroContrat = $numericPart;
+        // $numeroContrat = $numericPart;
 
         $code_pack = '';
         $pack_name = $user['pack_name'];
@@ -170,6 +172,32 @@ GROUP BY
         $societe = isset($user['employeur']) ? safeField($user['employeur']) : 'Société inconnue';
         $ICE = "78898"; // Valeur par défaut ou dynamique
 
+
+        // Add text for "FACTURE N"
+        $section->addText(
+            "FACTURE N : 00012024",
+            [
+                'name' => 'Arial',
+                'size' => 12,
+                'bold' => true,
+            ],
+            [
+                'alignment' => Jc::LEFT // Align the text to the left
+            ]
+        );
+
+        // Add text for "DATE"
+        $section->addText(
+            "DATE : " . date('d/m/Y'), // Use current system date
+            [
+                'name' => 'Arial',
+                'size' => 12,
+                'bold' => true,
+            ],
+            [
+                'alignment' => Jc::LEFT // Align the text to the left
+            ]
+        );
         // Ajouter une table avec deux colonnes
         $table = $section->addTable();
         $table->addRow();
@@ -223,40 +251,169 @@ GROUP BY
 
         // Colonne droite : Informations de l'adhérent
         $CENTERtCell = $table->addCell(3000, $cellCENTERStyle);
-        $rightCell = $table->addCell(4000, $cellStyle);
-        // $rightCell->addText(
-        //     "NOM & PRENOM ADHERENT : $NOM $PRENOM",
-        //     [
-        //         'name' => 'Arial',
-        //         'size' => 10,
+        $rightCell = $table->addCell(4000, $cellCENTERStyle);
+        // Colonne gauche : Informations du Club
 
-        //     ],
-        //     [
-        //         'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT, // Aligné à gauche
-        //     ]
-        // );
-        // $rightCell->addText(
-        //     "Nom de la société : $societe",
-        //     [
-        //         'name' => 'Arial',
-        //         'size' => 10,
+        $rightCell->addText(
+            "NOM ET PRENOM ADHERENT : $NOM $PRENOM",
+            [
+                'name' => 'Arial',
+                'size' => 10,
+                'bold' => true,
+                'allCaps' => true // Met le texte en majuscules
 
-        //     ],
-        //     [
-        //         'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT, // Aligné à gauche
-        //     ]
-        // );
-        // $rightCell->addText(
-        //     "ICE : $ICE",
-        //     [
-        //         'name' => 'Arial',
-        //         'size' => 10,
+            ],
+            [
+                'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT, // Aligné à gauche
+            ]
+        );
+        $rightCell->addText(
+            "Nom de la société : $societe",
+            [
+                'name' => 'Arial',
+                'size' => 10,
+                'allCaps' => true // Met le texte en majuscules
 
-        //     ],
-        //     [
-        //         'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT, // Aligné à gauche
-        //     ]
-        // );
+            ],
+            [
+                'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT, // Aligné à gauche
+            ]
+        );
+        $rightCell->addText(
+            "ICE : $ICE",
+            [
+                'name' => 'Arial',
+                'size' => 10,
+                'allCaps' => true // Met le texte en majuscules
+
+
+            ],
+            [
+                'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT, // Aligné à gauche
+            ]
+        );
+
+        // Add some space
+        $section->addTextBreak(1);
+
+        // Créer le tableau de facture
+        $table = $section->addTable([
+            'alignment' => Jc::CENTER, // Alignement au centre
+            'cellMargin' => 50, // Marge interne des cellules
+        ]);
+
+        // Propriétés pour les cellules avec bordures horizontales (titre et boutons)
+        $headerStyle = [
+            'borderTopSize' => 6,
+            'borderBottomSize' => 6,
+            'borderLeftSize' => 6,
+            'borderRightSize' => 6,
+            'borderColor' => '000000',
+        ];
+
+        // Propriétés pour les cellules avec uniquement des bordures verticales (données)
+        $dataCellStyle = [
+            'borderLeftSize' => 6,
+            'borderRightSize' => 6,
+            'borderLeftColor' => '000000',
+            'borderRightColor' => '000000',
+        ];
+
+        // Ajouter la ligne d'en-tête avec bordures horizontales
+        $table->addRow();
+        $table->addCell(2000, $headerStyle)->addText("REFERENCE", ['bold' => true]);
+        $table->addCell(6000, $headerStyle)->addText("DESCRIPTION", ['bold' => true]);
+        $table->addCell(1000, $headerStyle)->addText("QTE", ['bold' => true]);
+        $table->addCell(1000, $headerStyle)->addText("PU HT", ['bold' => true]);
+        $table->addCell(1500, $headerStyle)->addText("Montant", ['bold' => true]);
+
+        // Ajouter des données avec bordures verticales uniquement
+        $table->addRow();
+        $table->addCell(2000, $dataCellStyle)->addText("XXXXXXXX");
+        $table->addCell(6000, $dataCellStyle)->addText("Abonnement Famille GOLD\ndu 01/12/2024 Au 31/12/2025");
+        $table->addCell(1000, $dataCellStyle)->addText("1");
+        $table->addCell(1000, $dataCellStyle)->addText("#####");
+        $table->addCell(1500, $dataCellStyle)->addText("10,833.33");
+
+        // Ajouter 10 lignes vides avec bordures verticales uniquement
+        for ($i = 0; $i < 10; $i++) {
+            $table->addRow();
+            $table->addCell(2000, $dataCellStyle)->addText(""); // Cellule vide
+            $table->addCell(6000, $dataCellStyle)->addText("");
+            $table->addCell(1000, $dataCellStyle)->addText("");
+            $table->addCell(1000, $dataCellStyle)->addText("");
+            $table->addCell(1500, $dataCellStyle)->addText("");
+        }
+
+        // Ajouter la ligne de boutons avec bordures horizontales
+        $table->addRow();
+        $table->addCell(2000, $headerStyle)->addText(""); // Ligne pour boutons ou autres données
+        $table->addCell(6000, $headerStyle)->addText("");
+        $table->addCell(1000, $headerStyle)->addText("");
+        $table->addCell(1000, $headerStyle)->addText("");
+        $table->addCell(1500, $headerStyle)->addText("");
+
+        // Ajouter une table pour le pied de page
+        $tablefooter = $section->addTable([
+            'alignment' => Jc::CENTER, // Alignement au centre
+            'cellMargin' => 50, // Marge interne des cellules
+        ]);
+
+        // Ajouter un espace
+        $section->addTextBreak(1);
+
+        // Ajouter le résumé
+        $section->addText(
+            "La présente facture est arrêtée à la somme de :",
+            ['name' => 'Arial', 'size' => 8]
+        );
+        $section->addText(
+            "Treize mille Dhs",
+            ['name' => 'Arial', 'size' => 8, 'bold' => true]
+        );
+
+        // Ajouter la table des totaux
+        $totalsTable = $section->addTable([
+            'alignment' => Jc::RIGHT,
+            'borderSize' => 6,
+            'borderColor' => '000000',
+            'cellMargin' => 0
+        ]);
+
+        // Ajouter les lignes des totaux
+        $totalsTable->addRow();
+        $totalsTable->addCell(4000)->addText("Total HT", ['bold' => true,'name' => 'Arial', 'size' => 8]);
+        $totalsTable->addCell(2000)->addText("10,833.33 MAD", ['bold' => true,'name' => 'Arial', 'size' => 8]);
+
+        $totalsTable->addRow();
+        $totalsTable->addCell(4000)->addText("TVA 20%", ['bold' => true,'name' => 'Arial', 'size' => 8]);
+        $totalsTable->addCell(2000)->addText("2,166.67 MAD", ['bold' => true,'name' => 'Arial', 'size' => 8]);
+
+        $totalsTable->addRow();
+        $totalsTable->addCell(4000)->addText("TOTAL TTC", ['bold' => true,'name' => 'Arial', 'size' => 8]);
+        $totalsTable->addCell(2000)->addText("13,000.00 MAD", ['bold' => true,'name' => 'Arial', 'size' => 8]);
+
+        // Ajouter un pied de page
+        $footer = $section->addFooter();
+
+        // Ajouter les textes au pied de page
+        $footer->addText(
+            "S.A.R.L au Capital de 1.000.000,00 DHS",
+            ['name' => 'Arial', 'size' => 10]
+        );
+        $footer->addText(
+            "RC : 512897 - Patente : 33301331 - IF : 50496468 - ICE : 002895498000062",
+            ['name' => 'Arial', 'size' => 10]
+        );
+        $footer->addText(
+            "711, Angle Boulevard Modibo Keita et rue de la Saone - CASABLANCA",
+            ['name' => 'Arial', 'size' => 10]
+        );
+        $footer->addText(
+            "Tél : 0522 83 18 18 - E-mail : privilegeLuxuryfitnessc@gmail.com",
+            ['name' => 'Arial', 'size' => 10]
+        );
+
 
         // Définir le chemin de sortie
         $outputDir = './adherents/factures/';
@@ -286,5 +443,5 @@ GROUP BY
     // Return only the contract name to the client (no success message)
     return $contractName;
 
-    header('location:../Adherents/');
+    // header('location:../Adherents/');
 }

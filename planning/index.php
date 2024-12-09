@@ -78,7 +78,10 @@ $sessions_sql = "
     JOIN 
         users u ON c.user_id = u.id 
     WHERE 
-        sp.day = ?";
+        sp.day = ?
+    AND 
+        s.activite_id not in (54 , 55,56)
+        ";
 
 $stmt = $conn->prepare($sessions_sql);
 $stmt->bind_param("s", $date); // Bind the selected date
