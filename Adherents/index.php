@@ -1516,6 +1516,7 @@ if ($profil == 4) {; ?>
             if (!resteInput || !paymentModesContainer) return;
 
             const remainingAmount = parseFloat(resteInput.value.replace(' MAD', '')) || 0;
+            const totalAmount = parseFloat(totalInput.value.replace(' MAD', '')) || 0;
 
             console.log(totalInput)
             if (remainingAmount <= 0 && totalInput !== 0) {
