@@ -6,6 +6,12 @@ $_SESSION['current_page'] = 'adherent';
 $_SESSION['user_insert'] = 0;
 
 $package_sql = "SELECT * FROM `packages` ORDER BY packages.annual_price DESC";
+
+if($profil==1){
+    $package_sql = "SELECT * FROM `packages` ORDER BY packages.annual_price DESC";
+}else{
+    $package_sql = "SELECT * FROM `packages` where package_type_id not like 9 ORDER BY packages.annual_price DESC";
+}
 $package_result = $conn->query($package_sql);
 
 // Récupérer les types de paiement
