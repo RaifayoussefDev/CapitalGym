@@ -27,23 +27,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!in_array($imageFileType, $allowed_file_types)) {
         $_SESSION['message'] = "Invalid file type. Only JPG, JPEG, PNG, and GIF files are allowed.";
         $_SESSION['message_type'] = "danger";
-        header("Location: index.php");
-        exit();
+        // header("Location: index.php");
+        // exit();
     }
 
     if ($logo['size'] > $max_file_size) {
         $_SESSION['message'] = "File size exceeds the maximum limit of 2 MB.";
         $_SESSION['message_type'] = "danger";
-        header("Location: index.php");
-        exit();
+        // header("Location: index.php");
+        // exit();
     }
 
     // Move uploaded file
     if (!move_uploaded_file($logo['tmp_name'], $target_file)) {
         $_SESSION['message'] = "Error uploading logo.";
         $_SESSION['message_type'] = "danger";
-        header("Location: index.php");
-        exit();
+        // header("Location: index.php");
+        // exit();
     }
 
     // Insert session into sessions table (without max_attendees and remaining_slots)
@@ -113,6 +113,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $conn->close();
 
     // Redirect based on request outcome
-    header("Location: index.php");
+    // header("Location: index.php");
     exit();
 }

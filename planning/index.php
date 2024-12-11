@@ -78,10 +78,12 @@ $sessions_sql = "
     JOIN 
         users u ON c.user_id = u.id 
     WHERE 
-        sp.day = ?
+        sp.day = ? 
     AND 
         s.activite_id not in (54 , 55,56)
-        ";
+    AND
+        sp.etat = 'active'
+    ";
 
 $stmt = $conn->prepare($sessions_sql);
 $stmt->bind_param("s", $date); // Bind the selected date
@@ -1019,7 +1021,7 @@ $conn->close();
                     $('#EditActivityModal').modal('hide'); // Close the modal
 
                     // Refresh the page after a successful update
-                    location.reload();
+                    // location.reload();
                 },
                 error: function(error) {
                     // Handle error (e.g., display error message)

@@ -1,7 +1,6 @@
 <?php
 require '../vendor/autoload.php'; // Include the PHPWord library
 
-
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\Style\Image;
@@ -19,6 +18,7 @@ function safeField($field)
 function GenerateFacture($id_user)
 {
     require '../inc/conn_db.php';
+
     // $id_user = $_GET['id_user'];
     $sql = "SELECT 
     u.id, 
@@ -98,10 +98,10 @@ GROUP BY
     $section = $phpWord->addSection([
         'pageSizeW' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(21),  // A4 width (21 cm)
         'pageSizeH' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(29.7), // A4 height (29.7 cm)
-        'marginTop' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.5),  // Top margin
-        'marginBottom' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.5), // Bottom margin
-        'marginLeft' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.5),  // Left margin
-        'marginRight' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(0.5), // Right margin
+        'marginTop' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1),  // Top margin
+        'marginBottom' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1), // Bottom margin
+        'marginLeft' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1),  // Left margin
+        'marginRight' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(1), // Right margin
     ]);
 
 
@@ -126,6 +126,17 @@ GROUP BY
         // Créer le numéro de contrat en utilisant uniquement la partie numérique du matricule
         // $numeroContrat = $numericPart;
 
+
+
+        $matricule = $user['matricule'];
+
+        // Extraire la partie numérique du matricule (tout sauf la première lettre)
+        $numericPart = substr($matricule, 1); // Enlève la première lettre
+
+        // Créer le numéro de contrat en utilisant uniquement la partie numérique du matricule
+        $numeroContrat = $numericPart;
+
+
         $code_pack = '';
         $pack_name = $user['pack_name'];
         $activites_list = $user['activites_list'];
@@ -148,6 +159,51 @@ GROUP BY
         } elseif (strpos($pack_name, 'Groupe') === 0) {  // Checks if pack_name starts with "Groupe"
             $code_pack = 'GP';
         }
+
+        $pack_name = $user['pack_name'];
+
+        // Assign the pack name based on code_pack
+        if ($code_pack == 'FS') {
+            $pack_name = 'Famille Silver';
+        } elseif ($code_pack == 'FG') {
+            $pack_name = 'Famille Gold';
+        } elseif ($code_pack == 'FP') {
+            $pack_name = 'Famille Platinum';
+        } elseif ($code_pack == 'G') {
+            $pack_name = 'Gold';
+        } elseif ($code_pack == 'P') {
+            $pack_name = 'Platinum';
+        } elseif ($code_pack == 'S') {
+            $pack_name = 'Silver';
+        }
+
+
+        function calculateFromTotalTTC($totalTTC)
+        {
+            // Calcul du PU HT (prix unitaire hors taxes)
+            $puHT = $totalTTC / 1.20; // Diviser le TTC par 1.20 (car 20% de TVA)
+
+            // Calcul de la TVA
+            $tva = $totalTTC - $puHT;
+
+            // Formater les montants avec des milliers séparateurs
+            return [
+                'puHT' => number_format($puHT, 2, '.', ' '),
+                'tva' => number_format($tva, 2, '.', ' ')
+            ];
+        }
+
+
+        // Get the total paid amount from user
+        $totalAmountPaid = $user['total']; // Assuming this is the total amount paid
+
+        $totals = calculateFromTotalTTC($totalAmountPaid);
+
+        // Format the total amount with a space as thousands separator
+        $totalAmountPaid2 = number_format($totalAmountPaid, 2, '.', ' ');
+
+        $tva = $totals['tva'];
+
 
 
         // Définir les styles de cellule et de texte
@@ -249,9 +305,103 @@ GROUP BY
             ]
         );
 
+        function convertirNombreEnLettres($nombre)
+        {
+            $unites = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
+            $dizaines = ['', 'dix', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante', 'quatre-vingt', 'quatre-vingt'];
+            $exceptions = [
+                11 => 'onze',
+                12 => 'douze',
+                13 => 'treize',
+                14 => 'quatorze',
+                15 => 'quinze',
+                16 => 'seize',
+                71 => 'soixante-et-onze',
+                72 => 'soixante-douze',
+                73 => 'soixante-treize',
+                74 => 'soixante-quatorze',
+                91 => 'quatre-vingt-onze',
+                92 => 'quatre-vingt-douze',
+                93 => 'quatre-vingt-treize'
+            ];
+
+            $grands_nombres = ['', 'mille', 'million', 'milliard', 'billion'];
+
+            if ($nombre == 0) {
+                return 'zéro';
+            }
+
+            $texte = '';
+            $parties = [];
+            $i = 0;
+
+            while ($nombre > 0) {
+                $reste = $nombre % 1000; // Prendre les 3 derniers chiffres
+                if ($reste > 0) {
+                    $parties[] = ($reste == 1 && $i == 1 ? '' : convertirCentaines($reste)) . ' ' . $grands_nombres[$i];
+                }
+                $nombre = intdiv($nombre, 1000); // Supprimer les 3 derniers chiffres
+                $i++;
+            }
+
+            return implode(' ', array_reverse($parties));
+        }
+
+        // Fonction pour convertir les centaines et dizaines
+        function convertirCentaines($nombre)
+        {
+            $unites = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
+            $dizaines = ['', 'dix', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante', 'quatre-vingt', 'quatre-vingt'];
+            $exceptions = [
+                11 => 'onze',
+                12 => 'douze',
+                13 => 'treize',
+                14 => 'quatorze',
+                15 => 'quinze',
+                16 => 'seize',
+                71 => 'soixante-et-onze',
+                72 => 'soixante-douze',
+                73 => 'soixante-treize',
+                74 => 'soixante-quatorze',
+                91 => 'quatre-vingt-onze',
+                92 => 'quatre-vingt-douze',
+                93 => 'quatre-vingt-treize'
+            ];
+
+            $texte = '';
+
+            if ($nombre >= 100) {
+                $centaines = intdiv($nombre, 100);
+                $reste = $nombre % 100;
+                $texte .= $centaines > 1 ? $unites[$centaines] . ' cent' : 'cent';
+                if ($reste > 0) {
+                    $texte .= ' ';
+                }
+                $nombre = $reste;
+            }
+
+            if ($nombre >= 10) {
+                if (isset($exceptions[$nombre])) {
+                    $texte .= $exceptions[$nombre];
+                } else {
+                    $dizaine = intdiv($nombre, 10);
+                    $unite = $nombre % 10;
+                    $texte .= $dizaines[$dizaine];
+                    if ($unite == 1 && $dizaine != 8) {
+                        $texte .= '-et-';
+                    }
+                    $texte .= $unites[$unite];
+                }
+            } else {
+                $texte .= $unites[$nombre];
+            }
+
+            return trim($texte);
+        }
+
         // Colonne droite : Informations de l'adhérent
-        $CENTERtCell = $table->addCell(3000, $cellCENTERStyle);
-        $rightCell = $table->addCell(4000, $cellCENTERStyle);
+        $CENTERtCell = $table->addCell(2000, $cellCENTERStyle);
+        $rightCell = $table->addCell(5000, $cellCENTERStyle);
         // Colonne gauche : Informations du Club
 
         $rightCell->addText(
@@ -322,36 +472,45 @@ GROUP BY
         // Ajouter la ligne d'en-tête avec bordures horizontales
         $table->addRow();
         $table->addCell(2000, $headerStyle)->addText("REFERENCE", ['bold' => true]);
-        $table->addCell(6000, $headerStyle)->addText("DESCRIPTION", ['bold' => true]);
+        $table->addCell(4500, $headerStyle)->addText("DESCRIPTION", ['bold' => true]);
         $table->addCell(1000, $headerStyle)->addText("QTE", ['bold' => true]);
-        $table->addCell(1000, $headerStyle)->addText("PU HT", ['bold' => true]);
-        $table->addCell(1500, $headerStyle)->addText("Montant", ['bold' => true]);
+        $table->addCell(2000, $headerStyle)->addText("PU HT", ['bold' => true]);
+        $table->addCell(2000, $headerStyle)->addText("Montant", ['bold' => true]);
 
+        $date_debut = $user['date_debut'];
+        $date_fin = $user['date_fin'];
         // Ajouter des données avec bordures verticales uniquement
         $table->addRow();
-        $table->addCell(2000, $dataCellStyle)->addText("XXXXXXXX");
-        $table->addCell(6000, $dataCellStyle)->addText("Abonnement Famille GOLD\ndu 01/12/2024 Au 31/12/2025");
+        $table->addCell(2000, $dataCellStyle)->addText("$code_pack$numeroContrat");
+        $table->addCell(4500, $dataCellStyle)->addText("Abonnement $pack_name du $date_debut Au $date_fin");
         $table->addCell(1000, $dataCellStyle)->addText("1");
-        $table->addCell(1000, $dataCellStyle)->addText("#####");
-        $table->addCell(1500, $dataCellStyle)->addText("10,833.33");
+        $table->addCell(2000, $dataCellStyle)->addText($totals['puHT']);
+        $table->addCell(2000, $dataCellStyle)->addText($totals['puHT']);
 
         // Ajouter 10 lignes vides avec bordures verticales uniquement
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 18 ; $i++) {
             $table->addRow();
             $table->addCell(2000, $dataCellStyle)->addText(""); // Cellule vide
-            $table->addCell(6000, $dataCellStyle)->addText("");
+            $table->addCell(4500, $dataCellStyle)->addText("");
             $table->addCell(1000, $dataCellStyle)->addText("");
-            $table->addCell(1000, $dataCellStyle)->addText("");
-            $table->addCell(1500, $dataCellStyle)->addText("");
+            $table->addCell(2000, $dataCellStyle)->addText("");
+            $table->addCell(2000, $dataCellStyle)->addText("");
         }
 
-        // Ajouter la ligne de boutons avec bordures horizontales
+        $lastRowCellStyle = [
+            'borderLeftSize' => 6,
+            'borderRightSize' => 6,
+            'borderBottomSize' => 6,
+            'borderLeftColor' => '000000',
+            'borderRightColor' => '000000',
+            'borderBottomColor' => '000000',
+        ];
         $table->addRow();
-        $table->addCell(2000, $headerStyle)->addText(""); // Ligne pour boutons ou autres données
-        $table->addCell(6000, $headerStyle)->addText("");
-        $table->addCell(1000, $headerStyle)->addText("");
-        $table->addCell(1000, $headerStyle)->addText("");
-        $table->addCell(1500, $headerStyle)->addText("");
+        $table->addCell(2000, $lastRowCellStyle)->addText(""); // Cellule vide
+        $table->addCell(4500, $lastRowCellStyle)->addText("");
+        $table->addCell(1000, $lastRowCellStyle)->addText("");
+        $table->addCell(2000, $lastRowCellStyle)->addText("");
+        $table->addCell(2000, $lastRowCellStyle)->addText("");
 
         // Ajouter une table pour le pied de page
         $tablefooter = $section->addTable([
@@ -365,11 +524,16 @@ GROUP BY
         // Ajouter le résumé
         $section->addText(
             "La présente facture est arrêtée à la somme de :",
-            ['name' => 'Arial', 'size' => 8]
+            ['name' => 'Arial', 'size' => 10]
         );
+        $montant_lettre = convertirNombreEnLettres($totalAmountPaid);
+
+        // Convertir en majuscules
+        $montant_lettre_maj = strtoupper($montant_lettre);
+
         $section->addText(
-            "Treize mille Dhs",
-            ['name' => 'Arial', 'size' => 8, 'bold' => true]
+            "$montant_lettre_maj Dirhams",
+            ['name' => 'Arial', 'size' => 10, 'bold' => true]
         );
 
         // Ajouter la table des totaux
@@ -382,16 +546,17 @@ GROUP BY
 
         // Ajouter les lignes des totaux
         $totalsTable->addRow();
-        $totalsTable->addCell(4000)->addText("Total HT", ['bold' => true,'name' => 'Arial', 'size' => 8]);
-        $totalsTable->addCell(2000)->addText("10,833.33 MAD", ['bold' => true,'name' => 'Arial', 'size' => 8]);
+        $totalPUHT = $totals['puHT'];
+        $totalsTable->addCell(4000)->addText("Total HT", ['bold' => true, 'name' => 'Arial', 'size' => 10]);
+        $totalsTable->addCell(2000)->addText("$totalPUHT MAD", ['bold' => true, 'name' => 'Arial', 'size' => 10]);
 
         $totalsTable->addRow();
-        $totalsTable->addCell(4000)->addText("TVA 20%", ['bold' => true,'name' => 'Arial', 'size' => 8]);
-        $totalsTable->addCell(2000)->addText("2,166.67 MAD", ['bold' => true,'name' => 'Arial', 'size' => 8]);
+        $totalsTable->addCell(4000)->addText("TVA 20%", ['bold' => true, 'name' => 'Arial', 'size' => 10]);
+        $totalsTable->addCell(2000)->addText("$tva MAD", ['bold' => true, 'name' => 'Arial', 'size' => 10]);
 
         $totalsTable->addRow();
-        $totalsTable->addCell(4000)->addText("TOTAL TTC", ['bold' => true,'name' => 'Arial', 'size' => 8]);
-        $totalsTable->addCell(2000)->addText("13,000.00 MAD", ['bold' => true,'name' => 'Arial', 'size' => 8]);
+        $totalsTable->addCell(4000)->addText("TOTAL TTC", ['bold' => true, 'name' => 'Arial', 'size' => 10]);
+        $totalsTable->addCell(2000)->addText("$totalAmountPaid2 MAD", ['bold' => true, 'name' => 'Arial', 'size' => 10]);
 
         // Ajouter un pied de page
         $footer = $section->addFooter();
