@@ -13,7 +13,7 @@ if (isset($_GET['id'])) {
         $session = $result->fetch_assoc();
 
         // Fetch session planning data
-        $planningSql = "SELECT * FROM session_planning WHERE session_id = ?";
+        $planningSql = "SELECT * FROM session_planning WHERE session_id = ? WHERE etat='active'";
         $planningStmt = $conn->prepare($planningSql);
         $planningStmt->bind_param("i", $sessionId);
         $planningStmt->execute();

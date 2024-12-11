@@ -229,16 +229,45 @@ GROUP BY
         $ICE = "78898"; // Valeur par défaut ou dynamique
 
 
-        // Add text for "FACTURE N"
+        // Récupérer le plus grand numéro de facture existant
+        $query = "SELECT MAX(numero_de_facture) AS max_facture FROM users";
+        $result = $conn->query($query);
+
+        if ($result && $row = $result->fetch_assoc()) {
+            // Extraire le numéro de facture maximum
+            $maxFacture = $row['max_facture'];
+
+            if ($maxFacture) {
+                // Extraire la partie numérique
+                preg_match('/(\d+)$/', $maxFacture, $matches);
+                $lastNumber = isset($matches[1]) ? intval($matches[1]) : 0;
+            } else {
+                // Si aucun numéro n'existe encore
+                $lastNumber = 0;
+            }
+        } else {
+            die("Erreur lors de la récupération du numéro de facture : " . $conn->error);
+        }
+
+        // Incrémenter de 1
+        $newNumber = $lastNumber + 1;
+
+        // Obtenir l'année actuelle
+        $currentYear = date("Y");
+
+        // Générer le nouveau numéro de facture
+        $newFactureNumber = sprintf("%04d%s", $newNumber, $currentYear);
+
+        // Ajouter le nouveau numéro de facture dans votre document
         $section->addText(
-            "FACTURE N : 00012024",
+            "FACTURE N : " . $newFactureNumber,
             [
                 'name' => 'Arial',
                 'size' => 12,
                 'bold' => true,
             ],
             [
-                'alignment' => Jc::LEFT // Align the text to the left
+                'alignment' => Jc::LEFT // Alignement à gauche
             ]
         );
 
@@ -307,31 +336,12 @@ GROUP BY
 
         function convertirNombreEnLettres($nombre)
         {
-            $unites = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
-            $dizaines = ['', 'dix', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante', 'quatre-vingt', 'quatre-vingt'];
-            $exceptions = [
-                11 => 'onze',
-                12 => 'douze',
-                13 => 'treize',
-                14 => 'quatorze',
-                15 => 'quinze',
-                16 => 'seize',
-                71 => 'soixante-et-onze',
-                72 => 'soixante-douze',
-                73 => 'soixante-treize',
-                74 => 'soixante-quatorze',
-                91 => 'quatre-vingt-onze',
-                92 => 'quatre-vingt-douze',
-                93 => 'quatre-vingt-treize'
-            ];
-
             $grands_nombres = ['', 'mille', 'million', 'milliard', 'billion'];
 
             if ($nombre == 0) {
-                return 'zéro';
+                return 'ZÉRO';
             }
 
-            $texte = '';
             $parties = [];
             $i = 0;
 
@@ -344,7 +354,7 @@ GROUP BY
                 $i++;
             }
 
-            return implode(' ', array_reverse($parties));
+            return mb_strtoupper(trim(implode(' ', array_reverse($parties))));
         }
 
         // Fonction pour convertir les centaines et dizaines
@@ -359,13 +369,13 @@ GROUP BY
                 14 => 'quatorze',
                 15 => 'quinze',
                 16 => 'seize',
-                71 => 'soixante-et-onze',
-                72 => 'soixante-douze',
-                73 => 'soixante-treize',
-                74 => 'soixante-quatorze',
-                91 => 'quatre-vingt-onze',
-                92 => 'quatre-vingt-douze',
-                93 => 'quatre-vingt-treize'
+                71 => 'soixante et onze',
+                72 => 'soixante douze',
+                73 => 'soixante treize',
+                74 => 'soixante quatorze',
+                91 => 'quatre-vingt onze',
+                92 => 'quatre-vingt douze',
+                93 => 'quatre-vingt treize'
             ];
 
             $texte = '';
@@ -388,9 +398,11 @@ GROUP BY
                     $unite = $nombre % 10;
                     $texte .= $dizaines[$dizaine];
                     if ($unite == 1 && $dizaine != 8) {
-                        $texte .= '-et-';
+                        $texte .= ' et';
                     }
-                    $texte .= $unites[$unite];
+                    if ($unite > 0) {
+                        $texte .= ' ' . $unites[$unite];
+                    }
                 }
             } else {
                 $texte .= $unites[$nombre];
@@ -398,6 +410,7 @@ GROUP BY
 
             return trim($texte);
         }
+
 
         // Colonne droite : Informations de l'adhérent
         $CENTERtCell = $table->addCell(2000, $cellCENTERStyle);
@@ -488,7 +501,7 @@ GROUP BY
         $table->addCell(2000, $dataCellStyle)->addText($totals['puHT']);
 
         // Ajouter 10 lignes vides avec bordures verticales uniquement
-        for ($i = 0; $i < 18 ; $i++) {
+        for ($i = 0; $i < 18; $i++) {
             $table->addRow();
             $table->addCell(2000, $dataCellStyle)->addText(""); // Cellule vide
             $table->addCell(4500, $dataCellStyle)->addText("");
@@ -600,8 +613,11 @@ GROUP BY
         // Générer le nom du fichier pour la base de données
         $contractName = "adherents/factures/{$nom}_{$prenom}_facture.docx";
         // // Mettre à jour le nom du contrat dans la table "users"
-        // $updateQuery = "UPDATE users SET contract_name = '$contractName' WHERE id = $id_user";
-        // mysqli_query($conn, $updateQuery);
+        $updateQuery = "UPDATE users SET numero_de_facture  = '$newNumber' WHERE id = $id_user";
+        mysqli_query($conn, $updateQuery);
+        // Mettre à jour le nom du contrat dans la table "users"
+        $updateQuery = "UPDATE users SET facture_name = '$contractName' WHERE id = $id_user";
+        mysqli_query($conn, $updateQuery);
     }
 
 
