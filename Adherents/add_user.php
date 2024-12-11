@@ -1,7 +1,7 @@
 <?php
 ob_start(); // Start output buffering
 
-// require "../inc/app.php";
+require "../inc/app.php";
 require "../inc/conn_db.php";
 
 // Function to generate a secure random password

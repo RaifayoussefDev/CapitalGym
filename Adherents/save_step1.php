@@ -153,7 +153,7 @@ if ($already_insert == 0) {
             // Get the user ID from the insert operation
             $user_id = $stmt->insert_id;
             $_SESSION['last_user'] = $user_id;
-            echo "User details added successfully. User ID: " . $user_id . "<br>";
+            echo "User details added successfully. User ID: " . $_SESSION['last_user'] . "<br>";
             $stmt->close();
 
             // Update matricule
