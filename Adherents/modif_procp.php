@@ -1089,8 +1089,9 @@ if ($profil == 4) {; ?>
             if (!resteInput || !paymentModesContainer) return;
 
             const remainingAmount = parseFloat(resteInput.value.replace(' MAD', '')) || 0;
+            const totalAmount = parseFloat(totalInput.value.replace(' MAD', '')) || 0;
 
-            if (remainingAmount <= 0) {
+            if (remainingAmount <= 0 && totalAmount !== 0) {
                 alert("Le montant total a été atteint. Vous ne pouvez pas ajouter un autre mode de paiement.");
                 return;
             }
