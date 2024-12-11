@@ -115,6 +115,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (isset($_POST[$post])) {
                     $startTime = $_POST[$post];  // Retrieve the selected time slot for the day
 
+                    // Si le startTime est vide, passer au jour suivant
+                    if (empty($startTime)) {
+                        continue; // Aller au prochain jour
+                    }
+
                     // Convert start time to DateTime object and add 1 hour
                     $startDateTime = DateTime::createFromFormat('H:i', $startTime); // Assuming the format is HH:MM (24-hour format)
                     if ($startDateTime) {
@@ -125,28 +130,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $endTime = $startDateTime->format('H:i');
                     } else {
                         // Handle invalid time format
-                        die('Invalid start time format :'.$startDateTime.'');
+                        die('Invalid start time format for day: ' . $day);
                     }
 
-                    if (!empty($startTime)) {
-                        // Ensure maxAttendees is defined
-                        $maxAttendees = isset($_POST['maxAttendees']) ? intval($_POST['maxAttendees']) : 0;
-                        $remainingSlots = $maxAttendees; // Assuming remaining slots equals max attendees initially
+                    // Ensure maxAttendees is defined
+                    $maxAttendees = isset($_POST['maxAttendees']) ? intval($_POST['maxAttendees']) : 0;
+                    $remainingSlots = $maxAttendees; // Assuming remaining slots equals max attendees initially
 
-                        // Bind parameters and execute the statement
-                        if (!$planningStmt->bind_param("isssii", $sessionId, $day, $startTime, $endTime, $maxAttendees, $maxAttendees)) {
-                            // Error binding parameters
-                            die('Binding Error: ' . $planningStmt->error);
-                        }
+                    // Bind parameters and execute the statement
+                    if (!$planningStmt->bind_param("isssii", $sessionId, $day, $startTime, $endTime, $maxAttendees, $maxAttendees)) {
+                        // Error binding parameters
+                        die('Binding Error: ' . $planningStmt->error);
+                    }
 
-                        if (!$planningStmt->execute()) {
-                            // If the execution fails, set insertSuccess to false and break the loop
-                            $insertSuccess = false;
-                            die('Execution Error: ' . $planningStmt->error); // Show error and terminate execution
-                        }
+                    if (!$planningStmt->execute()) {
+                        // If the execution fails, set insertSuccess to false and break the loop
+                        $insertSuccess = false;
+                        die('Execution Error: ' . $planningStmt->error); // Show error and terminate execution
                     }
                 }
             }
+
 
             $planningStmt->close();
 
