@@ -272,22 +272,6 @@ foreach ($_POST['type_paiement'] as $index => $type_paiement_id) {
         continue; // Skip this iteration if validation fails
     }
 
-    // Insert a default payment if total is 0
-    if ($total == 0) {
-        $type_paiement_id = 1; // Default type of payment
-        $montant_paye = 0;
-
-        $payment_sql = "INSERT INTO payments (user_id, abonnement_id, montant_paye, type_paiement_id, reste, total)
-                        VALUES (?, ?, ?, ?, ?, ?)";
-        $stmt = $conn->prepare($payment_sql);
-        if ($stmt) {
-            $stmt->bind_param("iidddd", $user_id, $abonnement_id, $montant_paye, $type_paiement_id, $reste, $total);
-            $stmt->execute();
-            $stmt->close();
-        }
-        continue; // Skip further processing for this iteration
-    }
-
     // Insert payment details
     $payment_sql = "INSERT INTO payments (user_id, abonnement_id, montant_paye, type_paiement_id, reste, total)
                     VALUES (?, ?, ?, ?, ?, ?)";

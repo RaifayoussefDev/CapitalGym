@@ -1035,7 +1035,7 @@ $conn->close();
 <script>
     // When the modal is shown, set the delete button URL to the appropriate delete user URL
     const confirmationModal = document.getElementById('confirmationModal');
-    confirmationModal.addEventListener('show.bs.modal', function (event) {
+    confirmationModal.addEventListener('show.bs.modal', function(event) {
         const button = event.relatedTarget; // Button that triggered the modal
         const userId = button.getAttribute('data-user-id'); // Extract the user ID from the button data attribute
 
@@ -1517,10 +1517,11 @@ if ($profil == 4) {; ?>
 
             const remainingAmount = parseFloat(resteInput.value.replace(' MAD', '')) || 0;
 
-            if (remainingAmount <= 0) {
+            if (remainingAmount <= 0 && totalInput !== 0) {
                 alert("Le montant total a été atteint. Vous ne pouvez pas ajouter un autre mode de paiement.");
                 return;
             }
+
 
             const newPaymentMode = document.importNode(paymentModeTemplate, true);
 
