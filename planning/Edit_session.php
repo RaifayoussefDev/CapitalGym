@@ -125,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $endTime = $startDateTime->format('H:i');
                     } else {
                         // Handle invalid time format
-                        die('Invalid start time format');
+                        die('Invalid start time format :'.$startDateTime.'');
                     }
 
                     if (!empty($startTime)) {
