@@ -2,7 +2,7 @@
 require "../inc/app.php";
 require "../inc/conn_db.php";
 ob_start(); // Start output buffering (this prevents any output being sent prematurely)
-
+$profil = $_SESSION['profil'];
 // Retrieve user ID from URL and user details
 if (isset($_GET['id_user'])) {
     $user_id = intval($_GET['id_user']);
@@ -309,18 +309,20 @@ $conn->close();
                         <?php
                         // Vérification si l'utilisateur a un contrat
                         $has_contract = !empty($user['contract_name']); // Vérifie si un nom de contrat existe
+                        $has_facture = !empty($user['facture_name']); // Vérifie si un nom de facture existe
 
                         // Exemple d'ID utilisateur (assurez-vous que $user['id'] est défini dans votre code)
                         $contract_name = $user['contract_name']; // Nom du contrat
-                        
+                        $facture_name = $user['facture_name']; // Nom du facture
+
                         ?>
 
                         <?php if ($has_contract): ?>
                             <!-- Si un contrat existe, afficher le bouton de téléchargement -->
                             <form action="../contrat/<?php echo htmlspecialchars($contract_name); ?>" target="_blank" method="GET">
-                                <button type="submit" class="btn btn-secondary mt-3">Télécharger le Contrat</button>
+                                <button type="submit" class="btn btn-dark mt-3">Télécharger le Contrat</button>
                             </form>
-                            <form action="../Contrat/generate_contrats.php" method="GET">
+                            <form action="../Contrat/generate_contrats.php" method="GET" target="_blank">
                                 <input type="hidden" name="id_user" value="<?php echo $user_id; ?>">
                                 <button type="submit" class="btn btn-success mt-3">
                                     Préparer Un Autre Contrat
@@ -328,7 +330,7 @@ $conn->close();
                             </form>
                         <?php else: ?>
                             <!-- Si aucun contrat n'existe, afficher le bouton pour préparer le contrat -->
-                            <form action="../Contrat/generate_contrats.php" method="GET">
+                            <form action="../Contrat/generate_contrats.php" method="GET" target="_blank">
                                 <input type="hidden" name="id_user" value="<?php echo $user_id; ?>">
                                 <button type="submit" class="btn btn-success mt-3">
                                     Préparer le Contrat
@@ -336,9 +338,33 @@ $conn->close();
                             </form>
                         <?php endif; ?>
                     </section>
-
-
-
+                    <?php
+                    if ($profil == 1) {; ?>
+                        <h5>Facture</h5>
+                        <section id="contract-section" class="mt-3"></section>
+                        <?php if ($has_facture): ?>
+                            <!-- Si un contrat existe, afficher le bouton de téléchargement -->
+                            <form action="../contrat/<?php echo htmlspecialchars($facture_name); ?>" target="_blank" method="GET">
+                                <button type="submit" class="btn btn-dark mt-3">Télécharger la Facture </button>
+                            </form>
+                            <form action="../Contrat/generate_facture.php" method="GET" target="_blank">
+                                <input type="hidden" name="id_user" value="<?php echo $user_id; ?>">
+                                <button type="submit" class="btn btn-success mt-3">
+                                    Préparer Une Autre Facture
+                                </button>
+                            </form>
+                        <?php else: ?>
+                            <!-- Si aucun contrat n'existe, afficher le bouton pour préparer le contrat -->
+                            <form action="../Contrat/generate_facture.php" method="GET" target="_blank">
+                                <input type="hidden" name="id_user" value="<?php echo $user_id; ?>">
+                                <button type="submit" class="btn btn-success mt-3">
+                                    Préparer la Facture
+                                </button>
+                            </form>
+                        <?php endif; ?>
+                        </section>
+                                            <?php
+                    }; ?>
 
                 </div>
             </div>
@@ -346,7 +372,16 @@ $conn->close();
     </div>
 </div>
 
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const loader = document.getElementById("custom-loader");
 
+        // Hide the loader after 2 seconds
+        setTimeout(() => {
+            loader.style.display = "none";
+        }, 2000);
+    });
+</script>
 
 
 <style>

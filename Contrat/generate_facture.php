@@ -4,8 +4,8 @@ require '../inc/conn_db.php'; // Include the database connection
 require "./preparer_facture.php"; // Include the preparer_contrat.php file once
 
 // Check if 'id_user' is passed via GET
-// if (isset($_GET['id_user'])) {
-    $id_user = 346; // Sanitize the user ID (ensure it's an integer)
+if (isset($_GET['id_user'])) {
+    $id_user = (int) $_GET['id_user']; // Sanitize the user ID (ensure it's an integer)
 
     // Prepare SQL query to fetch the user by specific id_user
     $sql = "SELECT id, contract_name FROM users WHERE id = ? AND role_id = 3 AND etat = 'actif'";
@@ -34,26 +34,26 @@ require "./preparer_facture.php"; // Include the preparer_contrat.php file once
     } else {
         echo "Erreur de préparation de la requête SQL.";
     }
-// } else {
+}  {
 //     // If no 'id_user' is provided in the URL, get all users with role_id = 3
-//     $sql = "SELECT id FROM users WHERE role_id = 3 AND etat = 'actif'";
+    $sql = "SELECT id FROM users WHERE role_id = 3 AND etat = 'actif'";
 
-//     // Execute the query
-//     if ($result = $conn->query($sql)) {
-//         // Check if any rows are returned
-//         if ($result->num_rows > 0) {
-//             // Loop through the results and generate contract for each user
-//             while ($user = $result->fetch_assoc()) {
-//                 echo "Utilisateur ID: " . $user['id'] . "<br>";
-//                 // Generate contract for each active user
-//                 $contract_name = GenerateFacture($user['id']);
-//                 // You can redirect to the contract download page after generation if needed.
-//             }
-//         } else {
-//             echo "Aucun utilisateur trouvé avec role_id = 3.";
-//         }
-//     } else {
-//         echo "Erreur de requête SQL.";
-//     }
-// }
+    // Execute the query
+    if ($result = $conn->query($sql)) {
+        // Check if any rows are returned
+        if ($result->num_rows > 0) {
+            // Loop through the results and generate contract for each user
+            while ($user = $result->fetch_assoc()) {
+                echo "Utilisateur ID: " . $user['id'] . "<br>";
+                // Generate contract for each active user
+                $contract_name = GenerateFacture($user['id']);
+                // You can redirect to the contract download page after generation if needed.
+            }
+        } else {
+            echo "Aucun utilisateur trouvé avec role_id = 3.";
+        }
+    } else {
+        echo "Erreur de requête SQL.";
+    }
+}
 ?>
