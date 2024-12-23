@@ -236,7 +236,7 @@
                 </li>
                 <li>
                   <a href="../administration/local.php">
-                    <span class="sub-item">Local</span>
+                    <span class="sub-item">Salles</span>
                   </a>
                 </li>
                 <!-- <li>
