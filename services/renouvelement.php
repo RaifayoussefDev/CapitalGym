@@ -576,7 +576,7 @@ $conn->close();
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Date Début d'abonnement</label>
-                                            <input type="date" name="date_debut_paiement" readonly class="form-control" value="<?php echo $user['date_debut']; ?>" required />
+                                            <input type="date" name="date_debut_paiement" id="date_debut_paiement" class="form-control" value="<?php echo $user['date_debut']; ?>" required />
                                         </div>
                                     </div>
                                     <div class="col-md-6">
