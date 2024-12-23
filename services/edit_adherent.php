@@ -83,7 +83,7 @@ $abonnement_type = $_POST['categorie_adherence'];
 $date_debut = $_POST['date_debut_paiement'];
 $offres_promotionnelles = $_POST['offre_promo'];
 $description = $_POST['description'];
-
+echo $date_debut;
 $abonnement_sql = "UPDATE `abonnements` SET `date_fin` = ?, `type_abonnement` = ?, 
     `date_debut` = ?, `offres_promotionnelles` = ?, `description` = ? 
     WHERE  `user_id` = ?";
@@ -98,7 +98,7 @@ if (!$stmt->execute()) {
     throw new Exception("Abonnement update failed: " . $stmt->error);
 }
 $stmt->close();
-
+echo $abonnement_sql;
 // Retrieve the abonnement_id
 $abonnement_id_sql = "SELECT id FROM `abonnements` WHERE `user_id` = ?";
 $stmt = $conn->prepare($abonnement_id_sql);
@@ -286,6 +286,6 @@ if (isset($_POST['type_paiement'], $_POST['montant_paye'], $_POST['reste'], $_PO
 
 
 $conn->commit();
-// header('location:../adherents/');
+header('location:../adherents/');
 $conn->close();
 ob_end_flush();
