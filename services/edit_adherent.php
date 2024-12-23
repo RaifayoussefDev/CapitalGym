@@ -286,6 +286,6 @@ if (isset($_POST['type_paiement'], $_POST['montant_paye'], $_POST['reste'], $_PO
 
 
 $conn->commit();
-header('location:../adherents/');
+// header('location:../adherents/');
 $conn->close();
 ob_end_flush();
