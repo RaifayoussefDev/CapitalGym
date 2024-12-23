@@ -3,12 +3,13 @@
 require "../../inc/conn_db.php";
 
 // Function to handle file upload for profile photo
-function uploadProfilePhoto($file) {
+function uploadProfilePhoto($file)
+{
     $target_dir = "../../assets/img/capitalsoft/profils/";
     $file_name = basename($file["name"]);
     $imageFileType = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
     $base_name = pathinfo($file_name, PATHINFO_FILENAME);
-    
+
     // Check if image file is a actual image or fake image
     $check = getimagesize($file["tmp_name"]);
     if ($check === false) {
@@ -53,30 +54,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     try {
         // Handle profile photo upload if provided
-        $photo_name = "";
+        $photo_name = null; // Set default value as null
         if (isset($_FILES["profile_photo"]) && $_FILES["profile_photo"]["error"] == 0) {
             $photo_name = uploadProfilePhoto($_FILES["profile_photo"]);
         }
 
         // Prepare SQL statement to update user and coach details
         $update_user_sql = "UPDATE users u
-                            INNER JOIN coaches c ON u.id = c.user_id
-                            SET u.cin = ?, u.nom = ?, u.prenom = ?, u.email = ?, u.phone = ?, 
-                                u.date_naissance = ?, u.genre = ?, u.photo = ?
-                            WHERE c.id = ?";
+                    INNER JOIN coaches c ON u.id = c.user_id
+                    SET u.cin = ?, u.nom = ?, u.prenom = ?, u.email = ?, u.phone = ?, 
+                        u.date_naissance = ?, u.genre = ?";
+
+        // Check if a new photo was uploaded
+        if (!empty($photo_name)) {
+            $update_user_sql .= ", u.photo = ?";
+        }
+
+        // Finalize SQL query
+        $update_user_sql .= " WHERE c.id = ?";
+
         $stmt = $conn->prepare($update_user_sql);
-        $stmt->bind_param(
-            "ssssssssi",
-            $_POST['cin'],
-            $_POST['nom'],
-            $_POST['prenom'],
-            $_POST['email'],
-            $_POST['phone'],
-            $_POST['date_naissance'],
-            $_POST['genre'],
-            $photo_name,
-            $coach_id
-        );
+
+        if (!empty($photo_name)) {
+            // Include photo in binding if a new photo was uploaded
+            $stmt->bind_param(
+                "ssssssssi",
+                $_POST['cin'],
+                $_POST['nom'],
+                $_POST['prenom'],
+                $_POST['email'],
+                $_POST['phone'],
+                $_POST['date_naissance'],
+                $_POST['genre'],
+                $photo_name,
+                $coach_id
+            );
+        } else {
+            // Exclude photo from binding if no new photo was uploaded
+            $stmt->bind_param(
+                "sssssssi",
+                $_POST['cin'],
+                $_POST['nom'],
+                $_POST['prenom'],
+                $_POST['email'],
+                $_POST['phone'],
+                $_POST['date_naissance'],
+                $_POST['genre'],
+                $coach_id
+            );
+        }
+
+        // Execute the statement
         $stmt->execute();
         $stmt->close();
 
@@ -90,7 +118,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Redirect to a success page or dashboard
         header("Location: ../coaches.php");
         exit();
-
     } catch (Exception $e) {
         // Handle any exceptions or errors
         echo "Error: " . $e->getMessage();
@@ -99,4 +126,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 // Close database connection
 $conn->close();
-?>
