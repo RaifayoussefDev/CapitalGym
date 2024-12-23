@@ -62,11 +62,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $update_user_sql = "UPDATE users u
                             INNER JOIN coaches c ON u.id = c.user_id
                             SET u.cin = ?, u.nom = ?, u.prenom = ?, u.email = ?, u.phone = ?, 
-                                u.date_naissance = ?, u.genre = ?
+                                u.date_naissance = ?, u.genre = ?, u.photo = ?
                             WHERE c.id = ?";
         $stmt = $conn->prepare($update_user_sql);
         $stmt->bind_param(
-            "sssssssi",
+            "ssssssssi",
             $_POST['cin'],
             $_POST['nom'],
             $_POST['prenom'],
@@ -74,7 +74,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_POST['phone'],
             $_POST['date_naissance'],
             $_POST['genre'],
-            
+            $photo_name,
             $coach_id
         );
         $stmt->execute();
