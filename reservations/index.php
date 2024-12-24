@@ -17,15 +17,17 @@ $start_times = [
     "18:00",
     "19:00",
     "19:30",
-    "20:00"
+    "20:00",
+    "21:00"
 ];
 
 
 // Générer les plages horaires
 $time_slots = [];
-for ($i = 0; $i < count($start_times) - 1; $i++) {
-    $time_slots[] = $start_times[$i] . " - " . $start_times[$i + 1];
+for ($i = 0; $i < count($start_times) - 1; $i++) { // Parcours jusqu'à l'avant-dernier élément
+    $time_slots[] = $start_times[$i] . " - " . $start_times[$i + 1]; // Pas de dépassement d'indice
 }
+
 
 // Get the day from the URL, or default to the current day
 $day = isset($_GET['day']) ? $_GET['day'] : strtolower(date('l'));
@@ -551,14 +553,10 @@ $conn->close();
                 // Parcourir les créneaux horaires
                 foreach ($time_slots as $time_slot):
                     echo "<tr>";
-                    echo "<td class='bg-dark text-white'>$time_slot</td>";
+                    $time_slot_parts = explode(' - ', $time_slot); // Séparer avec le séparateur '|'
+                    echo "<td class='bg-dark text-white'>" . $time_slot_parts[0] . "</td>";
 
                     foreach ($locations as $location):
-                        if (isset($rowspan_tracking[$location]) && $rowspan_tracking[$location] > 0) {
-                            $rowspan_tracking[$location]--;
-                            continue;
-                        }
-
                         // Filtrer les sessions pour la salle et le créneau horaire
                         $filtered_sessions = array_filter($sessions, function ($session) use ($location, $time_slot) {
                             return $session['location_name'] === $location && sessionStartsInTimeSlot($session, $time_slot);
@@ -566,16 +564,9 @@ $conn->close();
 
                         if (!empty($filtered_sessions)) {
                             foreach ($filtered_sessions as $session) {
-                                $rowspan = calculateRowspan($session, $time_slots);
-
-
-                                echo "<td class='session bg-dark text-white' style='text-align: center; vertical-align: middle;text-transform: uppercase;border:2px solid #fff' rowspan='$rowspan' data-id='{$session['id']}' data-idsp='{$session['id_sp']}' data-bs-toggle='modal' data-bs-target='#reserveModal'>";
+                                echo "<td class='session bg-dark text-white' style='text-align: center; vertical-align: middle; text-transform: uppercase; border: 2px solid #fff' data-id='{$session['id']}' data-idsp='{$session['id_sp']}' data-bs-toggle='modal' data-bs-target='#reserveModal'>";
                                 echo "<strong>{$session['libelle']}</strong><br>";
-
                                 echo "</td>";
-
-                                // Mettre à jour le suivi du rowspan
-                                $rowspan_tracking[$location] = $rowspan - 1;
                             }
                         } else {
                             echo "<td></td>";
@@ -585,6 +576,7 @@ $conn->close();
 
                     echo "</tr>";
                 endforeach;
+
                 ?>
             </tbody>
         </table>
