@@ -5,19 +5,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'];
 
 
-    // Database connection details
-    $servername = "localhost"; // Replace with your server name
-    $username = "root"; // Replace with your database username
-    $dbpassword = ""; // Replace with your database password
-    $dbname = "privilage"; // Replace with your database name
+    // // Database connection details
+    // $servername = "localhost"; // Replace with your server name
+    // $username = "root"; // Replace with your database username
+    // $dbpassword = ""; // Replace with your database password
+    // $dbname = "privilage"; // Replace with your database name
 
-    // Create a new MySQLi connection
-    $conn = new mysqli($servername, $username, $dbpassword, $dbname);
+    // // Create a new MySQLi connection
+    // $conn = new mysqli($servername, $username, $dbpassword, $dbname);
 
-    // Check connection
-    if ($conn->connect_error) {
-        die(json_encode(['success' => false, 'message' => 'Database connection failed: ' . $conn->connect_error]));
-    }
+    // // Check connection
+    // if ($conn->connect_error) {
+    //     die(json_encode(['success' => false, 'message' => 'Database connection failed: ' . $conn->connect_error]));
+    // }
+
+    require_once('../inc/conn_db.php');
 
     // Sanitize inputs
     $email = $conn->real_escape_string($email);

@@ -220,11 +220,11 @@
         <?php } ?>
 
         <!-- Paramétrages (menu item id: 6) -->
-        <?php if (hasAccess('Paramétrages', $menu_permissions)) { ?>
+        <?php if (hasAccess('Administration', $menu_permissions)) { ?>
           <li class="nav-item">
             <a data-bs-toggle="collapse" href="#sidebarLayouts4" aria-controls="sidebarLayouts4">
               <i class="fas fa-cogs"></i>
-              <p>Paramétrages</p>
+              <p>Administration</p>
               <span class="caret"></span>
             </a>
             <div class="collapse" id="sidebarLayouts4">
@@ -249,6 +249,20 @@
                     <span class="sub-item">Différente activité proposé par club</span>
                   </a>
                 </li>
+                
+              </ul>
+            </div>
+          </li>
+        <?php } ?>
+        <?php if (hasAccess('Paramétrages', $menu_permissions)) { ?>
+          <li class="nav-item">
+            <a data-bs-toggle="collapse" href="#sidebarLayouts5" aria-controls="sidebarLayouts5">
+              <i class="fas fa-cogs"></i>
+              <p>Paramétrage</p>
+              <span class="caret"></span>
+            </a>
+            <div class="collapse" id="sidebarLayouts5">
+              <ul class="nav nav-collapse">
                 <li>
                   <a href="../habilitations/">
                     <span class="sub-item">Habilitations</span>

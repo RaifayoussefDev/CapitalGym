@@ -12,7 +12,7 @@ function generateRandomPassword($length = 8)
 }
 
 // Hashing Part
-$password = 'Raifa98@@'; // Example password
+$password = 'sahabsalah'; // Example password
 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 echo "Hashed Password: " . $hashed_password . "<br>";
 echo "Hashed no Password: " . $password . "<br>";

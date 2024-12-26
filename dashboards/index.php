@@ -1,7 +1,13 @@
 <?php
 ob_start();
 require "../inc/app.php";
-header('location:../adherents/');
+$profil = $_SESSION['profil'];
+if($profil == 6){
+    header('location:../planning/');
+}else{
+    header('location:../adherents/');
+    // echo $profil;
+}
 ob_end_flush(); ?>
 <div class="page-inner">
     <?php
