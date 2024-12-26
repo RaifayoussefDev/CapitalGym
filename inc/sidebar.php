@@ -78,12 +78,12 @@
             <div class="collapse" id="sidebarLayouts1">
               <ul class="nav nav-collapse">
                 <li>
-                  <a href="../planning/">
+                  <a href="../Gestion_seance/">
                     <span class="sub-item">Gestion des Séance</span>
                   </a>
                 </li>
                 <li>
-                  <a href="../reservations/">
+                  <a href="../planning/">
                     <span class="sub-item">Planning</span>
                   </a>
                 </li>
@@ -246,7 +246,7 @@
                 </li> -->
                 <li>
                   <a href="../administration/">
-                    <span class="sub-item">Différente activité proposé par club</span>
+                    <span class="sub-item">Cours</span>
                   </a>
                 </li>
                 

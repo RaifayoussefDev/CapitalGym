@@ -2,94 +2,85 @@
 require "../inc/app.php";
 require "../inc/conn_db.php";
 
-// Fetch activities
-$activites_sql = "SELECT id, nom, prix FROM activites";
-$activites_result = $conn->query($activites_sql);
-
-$activites = [];
-if ($activites_result->num_rows > 0) {
-    while ($row = $activites_result->fetch_assoc()) {
-        $activites[] = $row;
-    }
-}
-
-// Fetch coaches
-$coaches_sql = "SELECT c.id, CONCAT(u.nom, ' ', u.prenom) AS name FROM coaches c JOIN users u ON c.user_id = u.id";
-$coaches_result = $conn->query($coaches_sql);
-
-$coaches = [];
-if ($coaches_result->num_rows > 0) {
-    while ($row = $coaches_result->fetch_assoc()) {
-        $coaches[] = $row;
-    }
-}
-
-// Fetch locations
-$locations_sql = "SELECT id, name, nomber_place FROM locations";
-$locations_result = $conn->query($locations_sql);
-
-$locations = [];
-if ($locations_result->num_rows > 0) {
-    while ($row = $locations_result->fetch_assoc()) {
-        $locations[] = $row;
-    }
-}
-
-$days_of_week = [
-    'Monday' => 'Lundi',
-    'Tuesday' => 'Mardi',
-    'Wednesday' => 'Mercredi',
-    'Thursday' => 'Jeudi',
-    'Friday' => 'Vendredi',
-    'Saturday' => 'Samedi',
-    'Sunday' => 'Dimanche'
+// Définir les créneaux horaires
+$start_times = [
+    "07:00",
+    "08:00",
+    "09:00",
+    "10:00",
+    "11:00",
+    "12:30",
+    "13:30",
+    "15:00",
+    "16:00",
+    "17:00",
+    "18:00",
+    "19:00",
+    "19:30",
+    "20:00",
+    "21:00"
 ];
 
-// Get the day from the query parameter, defaulting to today if not provided or invalid
-$selected_day = isset($_GET['day']) && array_key_exists($_GET['day'], $days_of_week) ? $_GET['day'] : date('l');
 
-// Convert the selected day to French
-$selected_day_french = $days_of_week[$selected_day];
+// Générer les plages horaires
+$time_slots = [];
+for ($i = 0; $i < count($start_times) - 1; $i++) { // Parcours jusqu'à l'avant-dernier élément
+    $time_slots[] = $start_times[$i] . " - " . $start_times[$i + 1]; // Pas de dépassement d'indice
+}
 
 
-// Fetch sessions based on selected date
-$date = $selected_day_french;
+// Get the day from the URL, or default to the current day
+$day = isset($_GET['day']) ? $_GET['day'] : strtolower(date('l'));
+
+// Convert English day names to French if needed
+$daysInFrench = [
+    'monday' => 'lundi',
+    'tuesday' => 'mardi',
+    'wednesday' => 'mercredi',
+    'thursday' => 'jeudi',
+    'friday' => 'vendredi',
+    'saturday' => 'samedi',
+    'sunday' => 'dimanche',
+];
+
+// Ensure the day is in French
+$day = $daysInFrench[$day] ?? $day;
+
+// Validate if the day is valid (lundi, mardi, mercredi...)
+$validDays = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+
+if (!in_array($day, $validDays)) {
+    // Default to today's day in French if invalid
+    $day = $daysInFrench[strtolower(date('l'))];
+}
+
+// Requête SQL pour récupérer les sessions
 $sessions_sql = "
     SELECT 
-        s.id AS session_id, 
-        a.nom AS activity_name, 
-        l.name AS location, 
-        CONCAT(u.nom, ' ', u.prenom) AS coach_name,
-        sp.max_attendees,
-        sp.remaining_slots,
-        sp.start_time,
-        sp.end_time,
-        sp.day
+        sp.id AS id_sp,
+        s.id,
+        u.nom, 
+        u.prenom, 
+        s.libelle, 
+        sp.day, 
+        sp.start_time, 
+        sp.end_time, 
+        s.genre, 
+        s.logo, 
+        l.name AS location_name
     FROM 
-        sessions s 
+        sessions s
     JOIN 
         session_planning sp ON s.id = sp.session_id
     JOIN 
-        coaches c ON s.coach_id = c.id 
+        locations l ON s.location_id = l.id
     JOIN 
-        activites a ON s.activite_id = a.id 
+        coaches c ON s.coach_id = c.id
     JOIN 
-        locations l ON s.location_id = l.id 
-    JOIN 
-        users u ON c.user_id = u.id 
-    WHERE 
-        sp.day = ? 
-    AND 
-        s.activite_id not in (54 , 55,56)
-    AND
-        sp.etat = 'active'
-    ";
+        users u ON c.user_id = u.id where sp.day='$day' and l.name not in ('Reaxing' , 'I-motion' , 'Coaching Privé') AND sp.etat='active';
+";
 
-$stmt = $conn->prepare($sessions_sql);
-$stmt->bind_param("s", $date); // Bind the selected date
-$stmt->execute();
-$sessions_result = $stmt->get_result();
-
+$sessions_result = $conn->query($sessions_sql);
 $sessions = [];
 if ($sessions_result->num_rows > 0) {
     while ($row = $sessions_result->fetch_assoc()) {
@@ -97,69 +88,302 @@ if ($sessions_result->num_rows > 0) {
     }
 }
 
+// Requête SQL pour récupérer les salles
+$locations_sql = "SELECT * FROM `locations` WHERE id not in (13,12,18);";
+$locations_result = $conn->query($locations_sql);
+$locations = [];
+if ($locations_result->num_rows > 0) {
+    while ($row = $locations_result->fetch_assoc()) {
+        $locations[] = $row['name'];
+    }
+}
+
+// Fonction pour vérifier si une session commence dans un créneau horaire
+function sessionStartsInTimeSlot($session, $time_slot)
+{
+    $start_time = strtotime($session['start_time']);
+    $time_slot_parts = explode(' - ', $time_slot);
+    $slot_start_time = strtotime($time_slot_parts[0]);
+    $slot_end_time = strtotime($time_slot_parts[1]);
+    return $start_time >= $slot_start_time && $start_time < $slot_end_time;
+}
+
+// Fonction pour calculer le rowspan
+function calculateRowspan($session, $time_slots)
+{
+    $start_time = strtotime($session['start_time']);
+    $end_time = strtotime($session['end_time']);
+    $rowspan = 0;
+
+    foreach ($time_slots as $time_slot) {
+        $time_slot_parts = explode(' - ', $time_slot);
+        $slot_start_time = strtotime($time_slot_parts[0]);
+        $slot_end_time = strtotime($time_slot_parts[1]);
+
+        if ($start_time < $slot_end_time && $end_time > $slot_start_time) {
+            $rowspan++;
+        }
+    }
+
+    return $rowspan;
+}
+
+// Fermer la connexion
 $conn->close();
-
-
 ?>
 
 
+<!-- Include jQuery library -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/js/select2.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/css/select2.min.css" rel="stylesheet" />
+
+<!-- Include Select2 CSS and JS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
     $(document).ready(function() {
-        // Initialize select2 for dropdowns
-        $('.select2').select2();
-
-        // Function to handle the fade-in and fade-out animations
-        function animateAlert(alertId) {
-            var alert = $('#' + alertId);
-            alert.addClass('fade-in-right');
-            setTimeout(function() {
-                alert.addClass('fade-out-left');
-                setTimeout(function() {
-                    alert.alert('close');
-                }, 1000); // Time for fade-out animation
-            }, 5000); // Display time before starting fade-out
+        // Ensure select2 is loaded and initialized properly
+        if ($.fn.select2) {
+            $('.select2').select2();
         }
 
-        // Apply the animations to the alerts
-        if ($('#alert-success').length) {
-            animateAlert('alert-success');
-        } else if ($('#alert-error').length) {
-            animateAlert('alert-error');
+        // Fetch users and populate the select element
+        function populateUsers() {
+            $.ajax({
+                url: 'get_users.php', // Ensure this URL is correct
+                type: 'GET',
+                success: function(response) {
+                    const $select = $('#users');
+                    $select.empty(); // Clear existing options
+
+                    // Add the default placeholder option
+                    $select.append(new Option('Sélectionner l\'utilisateur', ''));
+
+                    // Populate the dropdown with user options
+                    $.each(response, function(index, user) {
+                        $select.append(new Option(user.name, user.id));
+                    });
+
+                    $select.select2(); // Reinitialize Select2
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
+            });
         }
 
-        // Handle the edit button click event
-        $(document).on('click', '.btn-edit', function() {
+        populateUsers(); // Populate users on page load
+
+        // Handle the session click event
+        $(document).on('click', '.session', function() {
             const id = $(this).data('id');
+            const id_sp = $(this).data('idsp');
             $.ajax({
                 url: 'get_session.php',
                 type: 'GET',
                 data: {
-                    id: id
+                    id: id,
+                    id_sp
                 },
                 success: function(response) {
                     const session = JSON.parse(response);
-                    $('#editActivityModal #activity').val(session.activite_id).trigger('change');
-                    $('#editActivityModal #coach').val(session.coach_id).trigger('change');
-                    $('#editActivityModal #location').val(session.location_id).trigger('change');
-                    $('#editActivityModal #date').val(session.date);
-                    $('#editActivityModal #startTime').val(session.start_time);
-                    $('#editActivityModal #endTime').val(session.end_time);
-                    $('#editActivityModal #maxAttendees').val(session.max_attendees);
-                    $('#editActivityModal form').attr('action', 'update_session.php'); // Ensure the form submits to update_session.php
-                    $('#editActivityModal #sessionId').val(session.id); // Add the ID for editing
+
+                    $('#reserveModal #activityName').text(session.activity_name || 'N/A');
+                    $('#reserveModal #sessionDate').text(session.day || 'N/A');
+                    $('#reserveModal #sessionTime').text((session.time_range || 'N/A'));
+                    $('#reserveModal #sessionLocation').text(session.location || 'N/A');
+                    $('#reserveModal #sessionCoach').text(session.coach_name || 'N/A');
+                    $('#reserveModal #maxAttendees').text(session.max_attendees || 'N/A');
+                    $('#reserveModal #remainingSlots').text(session.remaining_slots || 'N/A');
+                    $('#reserveModal #sessionId').val(session.id || '');
+                    $('#reserveModal #sessionIdSp').val(session.id_sp || '');
+
+                    if (session.is_reserved) {
+                        $('#reserveButton').hide();
+                        $('#cancelButton').show();
+                    } else {
+                        $('#reserveButton').show();
+                        $('#cancelButton').hide();
+                    }
+
+                    $('#reserveModal').modal('show');
                 }
             });
         });
 
-        // Handle the delete button click event
-        // $(document).on('click', '.btn-delete', function() {
-        //     const id = $(this).data('id');
-        //     $('#deleteActivityModal #deleteSessionId').val(id);
+        $('#reserveForm').on('submit', function(event) {
+            event.preventDefault();
+
+            const sessionId = $('#sessionId').val();
+            const sessionIdSp = $('#sessionIdSp').val();
+            const userId = $('#users').val() || <?php echo $_SESSION['id']; ?>;
+
+            $.ajax({
+                url: 'reserve_session.php',
+                type: 'GET',
+                dataType: 'json',
+                data: {
+                    session_IdSp: sessionIdSp,
+                    user_ID: userId
+                },
+                success: function(response) {
+                    if (response.status === "success") {
+                        $('#reserveButton')
+                            .text('Réservé')
+                            .prop('disabled', true);
+
+                        $('#alert-success-add')
+                            .text(response.message)
+                            .fadeIn();
+
+                        // Auto-hide success message after 3 seconds
+                        setTimeout(function() {
+                            $('#alert-success-add').fadeOut();
+                        }, 3000);
+                    } else {
+                        $('#alert-error-add')
+                            .text(response.message)
+                            .fadeIn();
+
+                        // Auto-hide error message after 3 seconds
+                        setTimeout(function() {
+                            $('#alert-error-add').fadeOut();
+                        }, 3000);
+                    }
+                },
+                error: function() {
+                    $('#alert-error-add')
+                        .text("Une erreur réseau est survenue.")
+                        .fadeIn();
+
+                    // Auto-hide error message after 3 seconds
+                    setTimeout(function() {
+                        $('#alert-error-add').fadeOut();
+                    }, 3000);
+                }
+            });
+        });
+
+        // Réinitialiser le bouton "Réserver" lorsqu'un nouvel utilisateur est sélectionné
+        $('#users').on('change', function() {
+            $('#reserveButton')
+                .text('Réserver')
+                .prop('disabled', false);
+
+            // Cacher les messages d'alerte
+            $('#alert-success-add, #alert-error-add').fadeOut();
+        });
+
+
+
+        // Handle session cancellation
+        $('#cancelButton').on('click', function() {
+            const sessionId = $('#sessionId').val();
+
+            $.ajax({
+                url: 'cancel_session.php',
+                type: 'GET',
+                data: {
+                    session_id: sessionId
+                },
+                success: function(response) {
+                    if (response.trim() === 'success') {
+                        $('#reserveModal').modal('hide');
+                    } else {
+                        $('#reserveModal').modal('hide');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                    $('#alert-error').text('Une erreur est survenue. Veuillez réessayer.').show();
+                }
+            });
+        });
+
+        $('#viewReservedUsersButton').on('click', function() {
+            const sessionId = $('#sessionIdSp').val();
+
+            $.ajax({
+                url: 'fetch_reserved_users.php',
+                type: 'GET',
+                data: {
+                    session_id: sessionId
+                },
+                success: function(response) {
+                    const users = JSON.parse(response);
+                    const tbody = $('#reservedUsersTableBody');
+                    tbody.empty(); // Clear the table body
+
+                    users.forEach(function(user) {
+                        const row = `
+                    <tr data-user-id="${user.id}">
+                        <td>${user.nom}</td>
+                        <td>${user.prenom}</td>
+                        <td>${user.email}</td>
+                        <td>${user.matricule}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm delete-reservation" data-user-id="${user.id}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+                        tbody.append(row);
+                    });
+
+                    $('#reserveModal').modal('hide');
+                    $('#reservedUsersModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                    alert('Une erreur est survenue. Veuillez réessayer.');
+                }
+            });
+        });
+
+        // Handle the delete button click
+        $('#reservedUsersTableBody').on('click', '.delete-reservation', function() {
+            const userId = $(this).data('user-id');
+            const sessionId = $('#sessionIdSp').val(); // Pass the session ID if necessary
+
+            $.ajax({
+                url: 'delete_reservation.php',
+                type: 'POST',
+                data: {
+                    user_id: userId,
+                    session_id: sessionId
+                },
+                success: function(response) {
+                    const result = JSON.parse(response);
+
+                    if (result.success) {
+                        // Remove the row without closing the modal
+                        $(`tr[data-user-id="${userId}"]`).remove();
+                        // alert('Réservation supprimée avec succès.');
+                    } else {
+                        alert('Une erreur est survenue : ' + result.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                    alert('Une erreur est survenue. Veuillez réessayer.');
+                }
+            });
+        });
+
+
+        // // Toggle the view reserved users button visibility based on sessionId
+        // $('#reserveModal').on('show.bs.modal', function() {
+        //     if ($('#sessionId').val()) {
+        //         $('#viewReservedUsersButton').show();
+        //     } else {
+        //         $('#viewReservedUsersButton').hide();
+        //     }
         // });
+
+        // Close alert messages on click
+        $(document).on('click', '.alert .btn-close', function() {
+            $(this).closest('.alert').fadeOut('slow');
+        });
     });
 </script>
 
@@ -195,900 +419,265 @@ $conn->close();
     .fade-out-left {
         animation: fadeOutLeft 1s ease-in-out;
     }
+
+    /* Table styles */
+    .table-responsive {
+        margin-top: 20px;
+    }
+
+    /* Table background with dark overlay */
+    .table {
+        position: relative;
+        /* background-image: url('../assets/img/capitalsoft/logo_light.png'); */
+        background-repeat: no-repeat;
+        background-size: cover;
+        /* Ensures the image covers the entire table */
+        background-position: center;
+        width: 100%;
+        /* Ensure the table takes up 100% width */
+        height: auto;
+        /* Adjust height as per content */
+        color: white;
+        /* Set text color to white */
+    }
+
+    /* Dark overlay with opacity */
+    .table::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        /* Dark overlay with 50% opacity */
+        z-index: 1;
+    }
+
+    /* Table content should be above the overlay */
+    .table td,
+    .table th {
+        position: relative;
+        z-index: 2;
+    }
+
+    .table th,
+    .table td {
+        text-align: center;
+        vertical-align: middle;
+        padding: 15px;
+        height: 70px;
+        border: none;
+        background-color: none;
+        font-weight: 200;
+    }
+
+
+    /* Event cell styles */
+    .session {
+        background-color: #f0f0f0;
+        /* Default gray color */
+        color: #333;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.3s;
+    }
+
+    .session:hover {
+        background-color: #f0cf6e;
+        transform: scale(1.02);
+    }
+
+    /* Header styles */
+    .table thead th {
+        background-color: #262a2d;
+        ;
+        color: white;
+        /* border-radius: 50px; */
+    }
+
+    /* Animation classes */
+    .session.fade-in-right {
+        animation: fadeInRight 1s ease-in-out;
+    }
+
+    .session.fade-out-left {
+        animation: fadeOutLeft 1s ease-in-out;
+    }
 </style>
+
 
 <div class="page-inner">
     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
         <div>
-            <h3 class="fw-bold mb-3">Séance</h3>
+            <h3 class="fw-bold mb-3">Réserver une Séance</h3>
         </div>
-        <button class="btn btn-dark btn-round ms-auto" data-bs-toggle="modal" data-bs-target="#addActivityModal">
-            <i class="fa fa-plus"></i> Ajouter Séance
+    </div>
+    <div id="alert-success" class="alert alert-success alert-dismissible fade mt-3" role="alert" style="display: none;">
+        Opération réussie !
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
         </button>
     </div>
-
-    <!-- Day Navigation -->
-    <div class="mb-3 d-flex justify-content-center">
-        <?php foreach ($days_of_week as $english_day => $french_day): ?>
-            <a href="?day=<?php echo urlencode($english_day); ?>" class="btn btn-dark mx-2 <?php echo ($selected_day == $english_day) ? 'active' : ''; ?>">
-                <?php echo htmlspecialchars($french_day); ?>
-            </a>
-        <?php endforeach; ?>
+    <div id="alert-error" class="alert alert-danger alert-dismissible fade mt-3" role="alert" style="display: none;">
+        Une erreur est survenue. Veuillez réessayer.
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
     </div>
+    <?php
+    // Liste des jours en français
+    $jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
 
-    <?php if (isset($_GET['msg']) && $_GET['msg'] == 'success') : ?>
-        <div id="alert-success" class="alert alert-success alert-dismissible fade show" role="alert">
-            Operation was successful!
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    <?php elseif (isset($_GET['msg']) && $_GET['msg'] == 'error') : ?>
-        <div id="alert-error" class="alert alert-danger alert-dismissible fade show" role="alert">
-            An error occurred. Please try again.
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    <?php endif; ?>
+    echo "<div class='d-flex justify-content-center gap-2'>";
+    foreach ($jours as $jour) {
+        echo "<a href='index.php?day=$jour' class='btn btn-dark'>" . ucfirst($jour) . "</a>";
+    }
+    echo "</div>";
+    ?>
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card card-stats card-round">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table id="sessionTable" class="display table table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Nom de l'activité</th>
-                                    <th>Date</th>
-                                    <th>Heure de début</th>
-                                    <th>Heure de fin</th>
-                                    <th>Lieu</th>
-                                    <th>Nom du coach</th>
-                                    <th>Nombre de places</th>
-                                    <th>Disponibles</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php if (count($sessions) > 0) : ?>
-                                    <?php foreach ($sessions as $session) : ?>
-                                        <tr>
-                                            <td><?php echo htmlspecialchars($session['activity_name']); ?></td>
-                                            <td><?php echo htmlspecialchars($session['day']); ?></td>
-                                            <td><?php echo htmlspecialchars($session['start_time']); ?></td>
-                                            <td><?php echo htmlspecialchars($session['end_time']); ?></td>
-                                            <td><?php echo htmlspecialchars($session['location']); ?></td>
-                                            <td><?php echo htmlspecialchars($session['coach_name']); ?></td>
-                                            <td><?php echo htmlspecialchars($session['max_attendees']); ?></td>
-                                            <td><?php echo htmlspecialchars($session['remaining_slots']); ?></td>
-                                            <td>
-                                                <button class="btn btn-primary btn-edit" data-id="<?php echo htmlspecialchars($session['session_id']); ?>" data-bs-toggle="modal" data-bs-target="#EditActivityModal">
-                                                    <i class="fa fa-edit"></i>
-                                                </button>
-                                                <button class="btn btn-danger btn-delete" data-id="<?php echo htmlspecialchars($session['session_id']); ?>" data-bs-toggle="modal" data-bs-target="#deleteActivityModalM">
-                                                    <i class="fa fa-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php else : ?>
-                                    <tr>
-                                        <td colspan="9">No sessions available for the selected day.</td>
-                                    </tr>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="table-responsive">
+        <table class="table table-bordered text-center">
+            <thead>
+                <tr>
+                    <th>Horaire</th>
+                    <?php foreach ($locations as $location): ?>
+                        <th><?= htmlspecialchars($location) ?></th>
+                    <?php endforeach; ?>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                // Suivi des rowspan pour chaque salle
+                $rowspan_tracking = [];
 
-        <!-- Delete Session Modal -->
-        <div class="modal fade" id="deleteActivityModalM" tabindex="-1" role="dialog" aria-labelledby="deleteActivityModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="deleteActivityModalLabel">Supprimer Séance</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <form action="delete_session.php" method="POST">
-                        <div class="modal-body">
-                            <p>Êtes-vous sûr de vouloir supprimer cette séance ?</p>
-                            <!-- Hidden input to store session ID -->
-                            <input type="hidden" id="deleteSessionId" name="sessionId">
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Non</button>
-                            <button type="submit" class="btn btn-danger">Oui</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+                // Parcourir les créneaux horaires
+                foreach ($time_slots as $time_slot):
+                    echo "<tr>";
+                    $time_slot_parts = explode(' - ', $time_slot); // Séparer avec le séparateur '|'
+                    echo "<td class='bg-dark text-white'>" . $time_slot_parts[0] . "</td>";
 
-        <!-- Day's Schedule Table -->
-        <div class="col-md-12">
-            <div class="card card-stats card-round">
-                <div class="card-body">
-                    <h5>Horaire de la journée (8:00 - 21:00)</h5>
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Heure</th>
-                                    <th>Activité</th>
-                                    <th>Lieu</th>
-                                    <th>Coach</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                // Define the time slots
-                                $time_slots = [
-                                    '08:00',
-                                    '09:00',
-                                    '10:00',
-                                    '11:00',
-                                    '12:00',
-                                    '13:00',
-                                    '14:00',
-                                    '15:00',
-                                    '16:00',
-                                    '17:00',
-                                    '18:00',
-                                    '19:00',
-                                    '20:00',
-                                    '21:00',
-                                ];
+                    foreach ($locations as $location):
+                        // Filtrer les sessions pour la salle et le créneau horaire
+                        $filtered_sessions = array_filter($sessions, function ($session) use ($location, $time_slot) {
+                            return $session['location_name'] === $location && sessionStartsInTimeSlot($session, $time_slot);
+                        });
 
-                                // Loop through each time slot, pairing each start time with its next as the end time
-                                for ($i = 0; $i < count($time_slots) - 1; $i++) {
-                                    $slot_start = $time_slots[$i];      // Start time of the slot
-                                    $slot_end = $time_slots[$i + 1];    // End time of the slot (next time in the array)
-                                    $found = false;
-                                    $activity_name = '';
-                                    $location = '';
-                                    $coach_name = '';
+                        if (!empty($filtered_sessions)) {
+                            foreach ($filtered_sessions as $session) {
+                                echo "<td class='session bg-dark text-white' style='text-align: center; vertical-align: middle; text-transform: uppercase; border: 2px solid #fff' data-id='{$session['id']}' data-idsp='{$session['id_sp']}' data-bs-toggle='modal' data-bs-target='#reserveModal'>";
+                                echo "<strong>{$session['libelle']}</strong><br>";
+                                echo "</td>";
+                            }
+                        } else {
+                            echo "<td></td>";
+                        }
 
-                                    // Loop through sessions to check if any session falls exactly within this slot
-                                    foreach ($sessions as $session) {
-                                        // Convert session times to 'H:i' format
-                                        $session_start = date('H:i', strtotime($session['start_time']));
-                                        $session_end = date('H:i', strtotime($session['end_time']));
+                    endforeach;
 
-                                        // Check if session falls within the current slot (inclusive of start time and exclusive of end time)
-                                        if ($session_start == $slot_start && $session_end == $slot_end) {
-                                            $found = true;
-                                            $activity_name = htmlspecialchars($session['activity_name']);
-                                            $location = htmlspecialchars($session['location']);
-                                            $coach_name = htmlspecialchars($session['coach_name']);
-                                            break; // Stop the loop once a session is found for the current slot
-                                        }
-                                    }
+                    echo "</tr>";
+                endforeach;
 
-                                    // Display the time slot and session information
-                                    echo
-                                    "<tr>
-                                        <td>$slot_start - $slot_end</td>
-                                        <td>" . ($found ? $activity_name : '') . "</td>
-                                        <td>" . ($found ? $location : '') . "</td>
-                                        <td>" . ($found ? $coach_name : '') . "</td>
-                                    </tr>";
-                                }
-                                ?>
-                            </tbody>
-
-
-
-
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+                ?>
+            </tbody>
+        </table>
     </div>
-    <!-- Delete Session Modal -->
-    <div class="modal fade" id="deleteActivityModal" tabindex="-1" role="dialog" aria-labelledby="deleteActivityModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteActivityModalLabel">Supprimer Séance</h5>
-                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <form action="delete_session.php" method="POST">
-                    <div class="modal-body">
-                        <p>Êtes-vous sûr de vouloir supprimer cette séance ?</p>
-                        <!-- Hidden input to store session ID -->
-                        <input type="hidden" id="deleteSessionId" name="sessionId">
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Non</button>
-                        <button type="submit" class="btn btn-danger">Oui</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="EditActivityModal" tabindex="-1" role="dialog" aria-labelledby="EditActivityModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="EditActivityModalLabel">Modifier la Séance</h5>
-                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <form id="EditSessionForm" enctype="multipart/form-data">
-                    <div class="modal-body">
-                        <div class="row">
-                            <!-- Libellé -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="edit-libelle">Libellé de la Séance</label>
-                                    <input type="text" id="edit-libelle" name="libelle" class="form-control" placeholder="Nom de la séance" required>
-                                    <input type="text" id="Edit_session_id" name="session_id" class="form-control d-none" required>
-                                </div>
-                            </div>
-
-                            <!-- Activité -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="edit-activity">Activité</label>
-                                    <select id="edit-activity" name="activity" class="form-control select2" required>
-                                        <option value="">Sélectionner une activité</option>
-                                        <?php foreach ($activites as $activite): ?>
-                                            <option value="<?php echo htmlspecialchars($activite['id']); ?>">
-                                                <?php echo htmlspecialchars($activite['nom']); ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Logo -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <img id="edit-logoPreview" src="" alt="Logo actuel" style="max-width: 100px; display: none;">
-                                </div>
-                                <div class="form-group">
-                                    <label for="edit-logo">Logo de la Séance</label>
-                                    <input type="file" id="edit-logo" name="logo" class="form-control" accept="image/*">
-                                </div>
-                            </div>
-
-                            <!-- Coach -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="edit-coach">Coach</label>
-                                    <select id="edit-coach" name="coach" class="form-control select2" required>
-                                        <option value="">Sélectionner un coach</option>
-                                        <?php foreach ($coaches as $coach): ?>
-                                            <option value="<?php echo htmlspecialchars($coach['id']); ?>">
-                                                <?php echo htmlspecialchars($coach['name']); ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Lieu -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="Edit-location">Lieu</label>
-                                    <select id="Edit-location" name="location" class="form-control select2" required>
-                                        <option value="">Sélectionner un lieu</option>
-                                        <?php foreach ($locations as $location): ?>
-                                            <option value="<?php echo htmlspecialchars($location['id']); ?>" data-max-Edit-attendees="<?php echo htmlspecialchars($location['nomber_place']); ?>">
-                                                <?php echo htmlspecialchars($location['name']); ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Genre -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="edit-gender">Genre</label>
-                                    <select id="edit-gender" name="gender" class="form-control select2" required>
-                                        <option value="Mix" selected>Mixte</option>
-                                        <option value="Homme">Homme</option>
-                                        <option value="Femme">Femme</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <!-- Nombre de places (Max Attendees) -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="maxAttendees">Nombre de places</label>
-                                    <input type="number" id="Edit-maxAttendees" name="maxAttendees" class="form-control" readonly required>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="Edit-lundi">Lundi</label>
-                                        <select name="edit-lundi-hours" id="Edit-lundi" class="form-control">
-                                            <option value=""></option>
-                                            <option value="07:00">07:00</option>
-                                            <option value="08:00">08:00</option>
-                                            <option value="09:00">09:00</option>
-                                            <option value="10:00">10:00</option>
-                                            <option value="11:00">11:00</option>
-                                            <option value="12:30">12:30</option>
-                                            <option value="13:30">13:30</option>
-                                            <option value="15:00">15:00</option>
-                                            <option value="16:00">16:00</option>
-                                            <option value="17:00">17:00</option>
-                                            <option value="18:00">18:00</option>
-                                            <option value="19:00">19:00</option>
-                                            <option value="19:30">19:30</option>
-                                            <option value="20:00">20:00</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="Edit-mardi">Mardi</label>
-                                        <select name="edit-mardi-hours" id="Edit-mardi" class="form-control">
-                                            <option value=""></option>
-                                            <option value="07:00">07:00</option>
-                                            <option value="08:00">08:00</option>
-                                            <option value="09:00">09:00</option>
-                                            <option value="10:00">10:00</option>
-                                            <option value="11:00">11:00</option>
-                                            <option value="12:30">12:30</option>
-                                            <option value="13:30">13:30</option>
-                                            <option value="15:00">15:00</option>
-                                            <option value="16:00">16:00</option>
-                                            <option value="17:00">17:00</option>
-                                            <option value="18:00">18:00</option>
-                                            <option value="19:00">19:00</option>
-                                            <option value="19:30">19:30</option>
-                                            <option value="20:00">20:00</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <!-- Mercredi -->
-
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="Edit-mercredi">Mercredi</label>
-                                        <select name="edit-mercredi-hours" id="Edit-mercredi" class="form-control">
-                                            <option value=""></option>
-                                            <option value="07:00">07:00</option>
-                                            <option value="08:00">08:00</option>
-                                            <option value="09:00">09:00</option>
-                                            <option value="10:00">10:00</option>
-                                            <option value="11:00">11:00</option>
-                                            <option value="12:30">12:30</option>
-                                            <option value="13:30">13:30</option>
-                                            <option value="15:00">15:00</option>
-                                            <option value="16:00">16:00</option>
-                                            <option value="17:00">17:00</option>
-                                            <option value="18:00">18:00</option>
-                                            <option value="19:00">19:00</option>
-                                            <option value="19:30">19:30</option>
-                                            <option value="20:00">20:00</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <!-- Jeudi -->
-
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="Edit-jeudi">Jeudi</label>
-                                        <select name="edit-jeudi-hours" id="Edit-jeudi" class="form-control">
-                                            <option value=""></option>
-                                            <option value="07:00">07:00</option>
-                                            <option value="08:00">08:00</option>
-                                            <option value="09:00">09:00</option>
-                                            <option value="10:00">10:00</option>
-                                            <option value="11:00">11:00</option>
-                                            <option value="12:30">12:30</option>
-                                            <option value="13:30">13:30</option>
-                                            <option value="15:00">15:00</option>
-                                            <option value="16:00">16:00</option>
-                                            <option value="17:00">17:00</option>
-                                            <option value="18:00">18:00</option>
-                                            <option value="19:00">19:00</option>
-                                            <option value="19:30">19:30</option>
-                                            <option value="20:00">20:00</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <!-- Vendredi -->
-
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="Edit-vendredi">Vendredi</label>
-                                        <select name="edit-vendredi-hours" id="Edit-vendredi" class="form-control">
-                                            <option value=""></option>
-                                            <option value="07:00">07:00</option>
-                                            <option value="08:00">08:00</option>
-                                            <option value="09:00">09:00</option>
-                                            <option value="10:00">10:00</option>
-                                            <option value="11:00">11:00</option>
-                                            <option value="12:30">12:30</option>
-                                            <option value="13:30">13:30</option>
-                                            <option value="15:00">15:00</option>
-                                            <option value="16:00">16:00</option>
-                                            <option value="17:00">17:00</option>
-                                            <option value="18:00">18:00</option>
-                                            <option value="19:00">19:00</option>
-                                            <option value="19:30">19:30</option>
-                                            <option value="20:00">20:00</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-
-
-                                <!-- Samedi -->
-
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="Edit-samedi">Samedi</label>
-                                        <select name="edit-samedi-hours" id="Edit-samedi" class="form-control">
-                                            <option value=""></option>
-                                            <option value="07:00">07:00</option>
-                                            <option value="08:00">08:00</option>
-                                            <option value="09:00">09:00</option>
-                                            <option value="10:00">10:00</option>
-                                            <option value="11:00">11:00</option>
-                                            <option value="12:30">12:30</option>
-                                            <option value="13:30">13:30</option>
-                                            <option value="15:00">15:00</option>
-                                            <option value="16:00">16:00</option>
-                                            <option value="17:00">17:00</option>
-                                            <option value="18:00">18:00</option>
-                                            <option value="19:00">19:00</option>
-                                            <option value="19:30">19:30</option>
-                                            <option value="20:00">20:00</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-
-
-                                <!-- Dimanche -->
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="Edit-dimanche">Dimanche</label>
-                                        <select name="edit-dimanche-hours" id="Edit-dimanche" class="form-control">
-                                            <option value=""></option>
-                                            <option value="07:00">07:00</option>
-                                            <option value="08:00">08:00</option>
-                                            <option value="09:00">09:00</option>
-                                            <option value="10:00">10:00</option>
-                                            <option value="11:00">11:00</option>
-                                            <option value="12:30">12:30</option>
-                                            <option value="13:30">13:30</option>
-                                            <option value="15:00">15:00</option>
-                                            <option value="16:00">16:00</option>
-                                            <option value="17:00">17:00</option>
-                                            <option value="18:00">18:00</option>
-                                            <option value="19:00">19:00</option>
-                                            <option value="19:30">19:30</option>
-                                            <option value="20:00">20:00</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                            <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
-                        </div>
-
-                </form>
-            </div>
-        </div>
-    </div>
-
 </div>
 
 
-<!-- Add Session Modal -->
-<div class="modal fade" id="addActivityModal" tabindex="-1" role="dialog" aria-labelledby="addActivityModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+<div class="modal fade" id="reserveModal" tabindex="-1" aria-labelledby="reserveModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addActivityModalLabel">Ajouter Séance</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <h5 class="modal-title" id="reserveModalLabel">Réserver une Séance</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="addSessionForm" enctype="multipart/form-data">
-                <div class="modal-body">
-                    <div class="row">
-                        <!-- Libelle Field (Session Name) -->
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="libelle">Libellé de la Séance</label>
-                                <input type="text" id="libelle" name="libelle" class="form-control" placeholder="Nom de la séance" required>
-                            </div>
+            <div class="modal-body">
+                <div id="alert-success-add" class="alert alert-success" style="display: none;"></div>
+                <div id="alert-error-add" class="alert alert-danger" style="display: none;"></div>
+                <form id="reserveForm">
+                    <?php
+                    $session_profil = $_SESSION['profil'];
+                    if ($session_profil == 1) {; ?>
+                        <div class="mb-3">
+                            <label for="users">Adhérents</label>
+                            <select name="users" id="users" class="form-control select2" style="width: 100%;"></select>
                         </div>
-
-                        <!-- Activité Field -->
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="activity">Activité</label>
-                                <select id="activity" name="activity" class="form-control select2" required>
-                                    <option value="">Sélectionner une activité</option>
-                                    <?php foreach ($activites as $activite) : ?>
-                                        <option value="<?php echo htmlspecialchars($activite['id']); ?>">
-                                            <?php echo htmlspecialchars($activite['nom']); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Logo Field -->
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="logo">Logo de la Séance</label>
-                                <input type="file" id="logo" name="logo" class="form-control" accept="image/*" required>
-                            </div>
-                        </div>
-
-                        <!-- Coach Field -->
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="coach">Coach</label>
-                                <select id="coach" name="coach" class="form-control select2" required>
-                                    <option value="">Sélectionner un coach</option>
-                                    <?php foreach ($coaches as $coach) : ?>
-                                        <option value="<?php echo htmlspecialchars($coach['id']); ?>">
-                                            <?php echo htmlspecialchars($coach['name']); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Lieu (Location) Field -->
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="location">Lieu</label>
-                                <select id="location" name="location" class="form-control select2" required>
-                                    <option value="">Sélectionner un lieu</option>
-                                    <?php foreach ($locations as $location) : ?>
-                                        <option value="<?php echo htmlspecialchars($location['id']); ?>" data-max-attendees="<?php echo htmlspecialchars($location['nomber_place']); ?>">
-                                            <?php echo htmlspecialchars($location['name']); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="repetitive">Planification</label>
-                                <select id="repetitive" name="repetitive" class="form-control select2" required>
-                                    <option value="Non-repetitive">Non répétitif</option>
-                                    <option value="Repetitive" selected>Répétitif</option>
-                                </select>
-                            </div>
-                        </div>
-                        <!-- Genre Field -->
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="gender">Genre</label>
-                                <select id="gender" name="gender" class="form-control select2" required>
-                                    <option value="Mix" selected>Mixte</option>
-                                    <option value="Homme">Homme</option>
-                                    <option value="Femme">Femme</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Nombre de places (Max Attendees) -->
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="maxAttendees">Nombre de places</label>
-                                <input type="number" id="maxAttendees" name="maxAttendees" class="form-control" readonly required>
-                            </div>
-                        </div>
-                        <!-- Days and Hours Selection -->
-                        <div class="row">
-                            <div class="form-group">
-                                <label for="days">Sélectionnez les jours et les horaires :</label>
-                                <?php
-                                $days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
-                                foreach ($days as $index => $day): ?>
-                                    <?php if ($index % 2 === 0): ?> <!-- Start a new row every two days -->
-                                        <div class="row">
-                                        <?php endif; ?>
-                                        <div class="col-md-6">
-                                            <div class="form-check">
-                                                <input class="form-check-input day-checkbox" type="checkbox" id="<?php echo $day; ?>" name="days[]" value="<?php echo $day; ?>">
-                                                <label class="form-check-label" for="<?php echo $day; ?>"><?php echo ucfirst($day); ?></label>
-                                                <select id="<?php echo $day; ?>Hours" name="<?php echo $day; ?>Hours" class="form-control time-select" disabled>
-                                                    <!-- Time options will be generated here -->
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <?php if ($index % 2 === 1): ?> <!-- Close the row after two days -->
-                                        </div>
-                                    <?php endif; ?>
-                                <?php endforeach; ?>
-                                <?php if (count($days) % 2 !== 0): ?> <!-- Close the last row if there is an odd number of days -->
-                            </div>
-                        <?php endif; ?>
-
-                        </div>
+                    <?php
+                    }; ?>
+                    <div class="mb-3">
+                        <label for="activityName" class="form-label">Activité</label>
+                        <div id="activityName" style="text-transform:capitalize"></div>
                     </div>
+                    <div class="mb-3">
+                        <label for="sessionDate" class="form-label">Jour</label>
+                        <div id="sessionDate" style="text-transform:capitalize"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sessionTime" class="form-label">Heure</label>
+                        <div id="sessionTime"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sessionLocation" class="form-label">Lieu</label>
+                        <div id="sessionLocation"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sessionCoach" class="form-label">Coach</label>
+                        <div id="sessionCoach"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="maxAttendees" class="form-label">Nombre de places</label>
+                        <div id="maxAttendees"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="remainingSlots" class="form-label">Disponibles</label>
+                        <div id="remainingSlots"></div>
+                    </div>
+                    <input type="hidden" id="sessionId" name="session_id">
+                    <input type="hidden" id="sessionIdSp" name="session_id_Sp">
+
+                    <button type="submit" class="btn btn-primary" id="reserveButton">Réserver</button>
+                    <button type="button" id="cancelButton" class="btn btn-danger" style="display: none;">Annuler la Réservation</button>
+                    <?php if ($session_profil == 1) {; ?>
+                        <button type="button" id="viewReservedUsersButton" class="btn btn-info">Consulter les utilisateurs réservés</button>
+                    <?php
+                    }; ?>
+                </form>
+            </div>
 
 
-
-                </div>
-
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                    <button type="submit" class="btn btn-primary">Ajouter</button>
-                </div>
-            </form>
         </div>
     </div>
 </div>
+<!-- Include jQuery and Select2 -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select" />
 
-
-<script>
-    $(document).on('click', '.btn-edit', function() {
-        var sessionId = $(this).data('id'); // ID de la séance à éditer
-
-        // Récupération des données de la séance via AJAX
-        $.ajax({
-            url: 'fetch_session_data.php', // Endpoint pour récupérer les données de la séance
-            method: 'GET',
-            data: {
-                id: sessionId
-            },
-            success: function(response) {
-                try {
-                    var session = JSON.parse(response); // Parser la réponse JSON
-
-                    // Vérifier si les données nécessaires sont présentes
-                    if (!session) {
-                        alert('Données de session introuvables.');
-                        return;
-                    }
-
-                    // Remplir les champs du formulaire
-                    $('#edit-libelle').val(session.libelle); // Nom de la séance
-                    $('#Edit-maxAttendees').val(session.max_attendees); // Nom de la séance
-                    $('#Edit_session_id').val(session.id); // Nom de la séance
-                    $('#edit-activity').val(session.activite_id).trigger('change'); // Activité
-                    $('#edit-coach').val(session.coach_id).trigger('change'); // Coach
-                    $('#Edit-location').val(session.location_id).trigger('change'); // Lieu
-                    $('#edit-gender').val(session.genre).trigger('change'); // Genre
-
-
-
-
-                    // Gestion de l'aperçu du logo
-                    if (session.logo) {
-                        $('#edit-logoPreview').attr('src', session.logo).show();
-                    } else {
-                        $('#edit-logoPreview').hide();
-                    }
-
-
-                    // Tableau des jours de la semaine
-                    const jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
-
-                    // Vérifier et définir la valeur pour chaque jour
-                    jours.forEach(jour => {
-                        if (session.times[jour]) {
-                            const time = session.times[jour].split(':')[0] + ':' + session.times[jour].split(':')[1]; // Extraire l'heure et les minutes
-                            $(`#Edit-${jour}`).val(time); // Définir la valeur de la liste déroulante
-                        }
-                    });
-
-
-                    // Populate the days (check if the day exists in session.days)
-                    var days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
-                    days.forEach(function(day) {
-                        var daySelect = $('#edit-' + day); // Identifying the select input for the day
-                        if (session.days.includes(day)) {
-                            daySelect.val(session.times[day]).prop('disabled', false); // Set time and enable
-                        } else {
-                            daySelect.val('').prop('disabled', true); // Clear value and disable
-                        }
-                    });
-
-                    // Afficher le modal d'édition
-                    $('#EditActivityModal').modal('show');
-                } catch (error) {
-                    console.error('Erreur lors du traitement des données:', error);
-                    alert('Erreur lors du chargement des données.');
-                }
-            },
-            error: function() {
-                alert('Erreur lors de la récupération des données de la séance.');
-            }
-        });
-    });
-
-    // Gestion du changement des sélecteurs des jours
-    $(document).on('change', '.edit-day-select', function() {
-        var day = $(this).attr('id').replace('edit-', ''); // Identifier le jour
-        var timeSelect = $('#edit-' + day); // Identifier le sélecteur de temps correspondant
-
-        if ($(this).val()) {
-            // If the day is selected, enable the time select field
-            timeSelect.prop('disabled', false);
-        } else {
-            // If no day is selected, disable the time select field
-            timeSelect.prop('disabled', true).val('');
-        }
-    });
-</script>
-
-
-
-
-<!-- JavaScript -->
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Days in French
-        const days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
-
-        // Specific times for all days
-        const times = [
-            "07:00", "08:00", "09:00", "10:00", "11:00",
-            "12:30", "13:30", "16:30", "17:30", "18:30",
-            "19:30", "20:00", "20:30"
-        ];
-
-        // Function to generate time options for each select
-        function generateTimeOptions() {
-            return times.map(time => `<option value="${time}">${time}</option>`).join('');
-        }
-
-        // Apply the time options to each day's select element
-        days.forEach(day => {
-            const checkbox = document.getElementById(day);
-            const select = document.getElementById(day + 'Hours');
-
-            // Insert time options in the select element
-            select.innerHTML = generateTimeOptions();
-
-            // Enable/disable time select based on the checkbox state
-            checkbox.addEventListener('change', function() {
-                select.disabled = !this.checked;
-                if (this.checked) {
-                    select.value = '07:00'; // Set default to the first option (07:00)
-                } else {
-                    select.value = ''; // Reset the selection when unchecked
-                }
-            });
-        });
-    });
-</script>
-
-
-
-<script>
-    // Script to set the session ID in the delete modal
-    $(document).ready(function() {
-        $('.btn-delete').click(function() {
-            var sessionId = $(this).data('id');
-            $('#deleteSessionId').val(sessionId); // Set session ID in the hidden input
-        });
-    });
-</script>
-
-<script>
-    $('#Edit-location').on('change', function() {
-        // Get the max-attendees data attribute of the selected location
-        var maxAttendees = $(this).find('option:selected').data('max-edit-attendees');
-
-        // Log the maxAttendees value to the console for debugging
-        console.log("Max Attendees: " + maxAttendees);
-
-        // Set the value of the maxAttendees input field to the retrieved value
-        $('#Edit-maxAttendees').val(maxAttendees);
-    });
-
-    $(document).ready(function() {
-        // Update maxAttendees when location is selected
-        $('#EditSessionForm').on('submit', function(e) {
-            e.preventDefault(); // Prevent the form from submitting the traditional way
-
-            // Collect form data
-            var formData = new FormData(this);
-
-            // Optional: Log the formData to debug
-            console.log([...formData]);
-
-            // Send the data via AJAX
-            $.ajax({
-                url: 'Edit_session.php', // Replace with your endpoint URL
-                type: 'POST', // Or PUT if applicable
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    // Handle success (e.g., display a success message or reload part of the page)
-                    console.log('Session updated successfully:', response);
-                    $('#EditActivityModal').modal('hide'); // Close the modal
-
-                    // Refresh the page after a successful update
-                    // location.reload();
-                },
-                error: function(error) {
-                    // Handle error (e.g., display error message)
-                    console.error('Error updating session:', error);
-                }
-            });
-        });
-    });
-</script>
-<script>
-    // Update maxAttendees when location is selected
-    $('#location').on('change', function() {
-        var maxAttendees = $(this).find('option:selected').data('max-attendees');
-
-        $('#maxAttendees').val(maxAttendees); // Set the maxAttendees field
-    });
-
-    // Handle form submission via AJAX
-    $('#addSessionForm').on('submit', function(e) {
-        e.preventDefault(); // Prevent default form submission
-
-        var formData = new FormData(this); // Collect form data including file uploads
-
-        $.ajax({
-            url: 'add_session.php', // Replace with the URL to your PHP handler
-            type: 'POST',
-            data: formData,
-            contentType: false, // Important for file upload
-            processData: false, // Important for file upload
-            success: function(response) {
-                // Handle success (e.g., close the modal, display a success message)
-                $('#addActivityModal').modal('hide');
-                alert('Séance ajoutée avec succès!');
-            },
-            error: function() {
-                // Handle error
-                alert('Une erreur est survenue. Veuillez réessayer.');
-            }
-        });
-    });
-</script>
-
-
-<script>
-    document.getElementById('location').addEventListener('change', function() {
-        var selectedOption = this.options[this.selectedIndex];
-        var maxAttendees = selectedOption.getAttribute('data-max-attendees');
-        document.getElementById('maxAttendees').value = maxAttendees ? maxAttendees : '';
-    });
-</script>
-
-
-<script>
-    // Automatically set maxAttendees based on selected location
-    document.getElementById('location').addEventListener('change', function() {
-        var selectedOption = this.options[this.selectedIndex];
-        var maxAttendees = selectedOption.getAttribute('data-max-attendees');
-        document.getElementById('maxAttendees').value = maxAttendees || '';
-    });
-</script>
+<div class=" modal fade" id="reservedUsersModal" tabindex="-1" aria-labelledby="reservedUsersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reservedUsersModalLabel">Utilisateurs réservés</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                            <th>Email</th>
+                            <th>Matricule</th>
+                            <th>Supprimer</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reservedUsersTableBody">
+                        <!-- User data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 <?php
