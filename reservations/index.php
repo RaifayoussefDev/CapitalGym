@@ -77,7 +77,7 @@ $conn->close();
                                     <th>DATE DE RESERVATION</th>
                                     <th>JOUR</th>
                                     <th>HEURE</th>
-                                    <th>COACH</th>
+                                    <th>COURS</th>
                                     <th>SALLE</th>
                                     <th>Type d'abonnement</th>
                                 </tr>
@@ -113,7 +113,7 @@ $conn->close();
                                     <th>DATE DE RESERVATION</th>
                                     <th>JOUR</th>
                                     <th>HEURE</th>
-                                    <th>COACH</th>
+                                    <th>COURS</th>
                                     <th>SALLE</th>
                                     <th>Type d'abonnement</th>
                                 </tr>
