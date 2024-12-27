@@ -84,7 +84,12 @@
                 </li>
                 <li>
                   <a href="../planning/">
-                    <span class="sub-item">Planning</span>
+                    <span class="sub-item">Programme</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="../reservations/">
+                    <span class="sub-item">Reservation</span>
                   </a>
                 </li>
                 <!-- <li>

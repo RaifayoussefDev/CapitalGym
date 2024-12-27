@@ -4,29 +4,32 @@ require "../inc/conn_db.php";
 
 // Fetch users using your SQL query
 $users_sql = "SELECT 
-    u.id, 
-    u.nom, 
-    u.prenom, 
-    u.phone, 
-    u.cin, 
-    u.email,
-    DATE_FORMAT(u.date_naissance, '%d/%m/%Y') AS date_naissance,
-    u.genre, 
-    p.pack_name, 
-    u.etat, 
+    r.date_reservation, 
     u.matricule, 
-    GROUP_CONCAT(ua.activite_id ORDER BY ua.activite_id ASC) AS activites_list,
-GROUP_CONCAT(ua.periode_activites ORDER BY ua.activite_id ASC) AS activites_periode
+    u.nom, 
+    u.prenom,
+    l.name AS local, 
+    a.nom AS activite_nom,
+    sp.day,
+    sp.start_time,
+    p.pack_name AS package_name
 FROM 
-    users u
+    reservations r
 JOIN 
-    abonnements a ON u.id = a.user_id
+    users u ON u.id = r.user_id
 JOIN 
-    packages p ON a.type_abonnement = p.id
-LEFT JOIN 
-    user_activites ua ON ua.user_id = u.id
-GROUP BY 
-    u.id;";
+    abonnements ab ON ab.user_id = u.id
+JOIN 
+    packages p ON p.id = ab.type_abonnement
+JOIN 
+    session_planning sp ON sp.id = r.session_planning_id
+JOIN 
+    sessions s ON s.id = sp.session_id
+JOIN 
+    locations l ON l.id = s.location_id
+JOIN 
+    activites a ON a.id = s.activite_id;
+";
 $users_result = $conn->query($users_sql);
 
 $users = [];
@@ -59,7 +62,7 @@ $conn->close();
 </style>
 <div class="page-inner">
     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
-        <h3 class="fw-bold mb-3">Liste des adhérents</h3>
+        <h3 class="fw-bold mb-3">Liste des Reservations</h3>
     </div>
     <div class="row">
         <div class="col-sm-12 col-md-12">
@@ -71,7 +74,8 @@ $conn->close();
                                 <tr>
                                     <th>Matricule</th>
                                     <th>Nom et Prénom</th>
-                                    <th>DATE</th>
+                                    <th>DATE DE RESERVATION</th>
+                                    <th>JOUR</th>
                                     <th>HEURE</th>
                                     <th>COACH</th>
                                     <th>SALLE</th>
@@ -81,51 +85,19 @@ $conn->close();
                             <tbody>
                                 <?php if (count($users) > 0) : ?>
                                     <?php foreach ($users as $user) : ?>
-                                        <tr data-user-id="<?php echo $user['id']; ?>">
+                                        <tr>
                                             <td class="text-capitalize"><?php echo htmlspecialchars($user['matricule']); ?> </td>
                                             <td class="text-capitalize"><?php echo htmlspecialchars($user['nom']); ?> <?php echo htmlspecialchars($user['prenom']); ?></td>
-                                            <td class="text-capitalize"><?php echo htmlspecialchars($user['cin']); ?> </td>
-                                            <td class="text-capitalize"><?php echo htmlspecialchars($user['phone']); ?></td>
                                             <td class="text-capitalize">
                                                 <?php
-                                                if ($user['genre'] === 'M') {
-                                                    echo 'Homme';
-                                                } elseif ($user['genre'] === 'F') {
-                                                    echo 'Femme';
-                                                } else {
-                                                    echo 'Non spécifié'; // If genre is not M or F
-                                                }
+                                                echo htmlspecialchars(date("d/m/Y", strtotime($user['date_reservation'])));
                                                 ?>
                                             </td>
-                                            <td class="text-capitalize"><?php echo htmlspecialchars($user['date_naissance']); ?></td>
-                                            <td class="text-capitalize"><?php echo htmlspecialchars($user['email']); ?></td>
-                                            <td class="text-capitalize">
-                                                <?php
-                                                if ($user['pack_name'] === 'Familial') {
-                                                    // Convert `activites_list` and `activites_periode` to arrays
-                                                    $activites_list = $user['activites_list'];
-                                                    $activites_periode = $user['activites_periode'];
-
-                                                    // Check specific conditions for Familial Gold and Familial Platinum
-                                                    if (empty($activites_list)) {
-                                                        echo "Familial Silver";
-                                                    } elseif ($activites_list === '53' && $activites_periode = '12') {
-                                                        echo "Familial Gold";
-                                                    } elseif ($activites_list === '53,54,55,56' && $activites_periode = '12,10,10,10') {
-                                                        echo "Familial Platinum";
-                                                    } else {
-                                                        // Default display for other cases with "Familial" pack name
-                                                        echo "Familial";
-                                                    }
-                                                } else {
-                                                    // For non-familial packs, simply display the pack name
-                                                    echo htmlspecialchars(ucfirst($user['pack_name']));
-                                                }
-                                                ?>
-                                            </td>
-
-
-                                            <td class="text-capitalize"><?php echo htmlspecialchars($user['etat']); ?></td>
+                                            <td class="text-capitalize"><?php echo htmlspecialchars($user['day']); ?> </td>
+                                            <td class="text-capitalize"><?php echo htmlspecialchars($user['start_time']); ?></td>
+                                            <td class="text-capitalize"><?php echo htmlspecialchars($user['local']); ?></td>
+                                            <td class="text-capitalize"><?php echo htmlspecialchars($user['activite_nom']); ?></td>
+                                            <td class="text-capitalize"><?php echo htmlspecialchars($user['package_name']); ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php else : ?>
@@ -138,7 +110,8 @@ $conn->close();
                                 <tr>
                                     <th>Matricule</th>
                                     <th>Nom et Prénom</th>
-                                    <th>DATE</th>
+                                    <th>DATE DE RESERVATION</th>
+                                    <th>JOUR</th>
                                     <th>HEURE</th>
                                     <th>COACH</th>
                                     <th>SALLE</th>
