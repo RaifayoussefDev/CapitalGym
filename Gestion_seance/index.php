@@ -698,6 +698,7 @@ $conn->close();
     </div>
 
 </div>
+</div>
 
 
 <!-- Add Session Modal -->
@@ -740,7 +741,7 @@ $conn->close();
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="logo">Logo de la Séance</label>
-                                <input type="file" id="logo" name="logo" class="form-control" accept="image/*" required>
+                                <input type="file" id="logo" name="logo" class="form-control" accept="image/*">
                             </div>
                         </div>
 
