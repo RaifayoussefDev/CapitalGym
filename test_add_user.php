@@ -214,4 +214,55 @@ function addPersonnel($qrcode, $id_card, $nom, $prenom, $email, $phone, $departe
     sqlsrv_close($connsrv);
 }
 
+// function DeletePersonnel($id)
+// {
+//     global $serverName, $connectionOptions;
+
+//     // Establish connection to SQL Server
+//     $connsrv = sqlsrv_connect($serverName, $connectionOptions);
+//     if ($connsrv === false) {
+//         die("Connection failed: " . print_r(sqlsrv_errors(), true));
+//     }
+
+//     // Prepare the DELETE statement for Personnel
+//     $deletePersonnelSql = "DELETE FROM [dbo].[Personnel] WHERE [PersonnelID] = ?";
+//     $params = [$id];
+
+//     $stmt = sqlsrv_query($connsrv, $deletePersonnelSql, $params);
+//     if ($stmt === false) {
+//         die("Error in Personnel deletion: " . print_r(sqlsrv_errors(), true));
+//     } else {
+//         echo "Personnel record deleted successfully!<br>";
+//     }
+
+//     // Prepare the DELETE statement for PersonnelExtend2
+//     $deletePersonnelExtendSql = "DELETE FROM [dbo].[PersonnelExtend2] WHERE [PersonnelID] = ?";
+//     $stmtPersonnelExtend = sqlsrv_query($connsrv, $deletePersonnelExtendSql, $params);
+
+//     if ($stmtPersonnelExtend === false) {
+//         die("Error in PersonnelExtend2 deletion: " . print_r(sqlsrv_errors(), true));
+//     } else {
+//         echo "PersonnelExtend2 record deleted successfully!<br>";
+//     }
+
+//     // Prepare the DELETE statement for CardList
+//     $deleteCardListSql = "DELETE FROM [dbo].[CardList] WHERE [PersonnelID] = ?";
+//     $stmtCardList = sqlsrv_query($connsrv, $deleteCardListSql, $params);
+
+//     if ($stmtCardList === false) {
+//         die("Error in CardList deletion: " . print_r(sqlsrv_errors(), true));
+//     } else {
+//         echo "CardList record deleted successfully!<br>";
+//     }
+
+//     // Prepare the DELETE statement for EmplOfEqupt
+//     $deleteEmplOfEquptSql = "DELETE FROM [dbo].[EmplOfEqupt] WHERE [PersonnelID] = ?";
+//     $stmtEmplOfEqupt = sqlsrv_query($connsrv, $deleteEmplOfEquptSql, $params);
+
+//     if ($stmtEmplOfEqupt === false) {
+//         die("Error in EmplOfEqupt deletion: " . print_r(sqlsrv_errors(), true));
+//     } else {
+//         echo "EmplOfEqupt record deleted successfully!<br>";
+//     }
+// }
 // Example usage of the function

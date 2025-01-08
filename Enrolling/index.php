@@ -41,6 +41,7 @@
                     <th>Type d'Abonnement</th>
                     <th>Activites</th>
                     <th>ID Card</th>
+                    <th>Actions</th>
                     <th>New ID Card</th>
                 </tr>
             </thead>
@@ -92,7 +93,14 @@
                         "render": function(data, type, row) {
                             return `<input type="text" class="form-control id-card-input" data-id="${row.id}" placeholder="Enter ID Card" maxlength="10">`;
                         }
+                    },
+                    {
+                        "data": "id",
+                        "render": function(data, type, row) {
+                            return `<button class="btn btn-danger btn-sm remove-badge-btn" data-id="${data}">Enlever le Badge</button>`;
+                        }
                     }
+
                 ]
             });
 
@@ -185,6 +193,37 @@
                         showAlert("Error transferring data.", "danger");
                     }
                 });
+            });
+
+            // Handle badge removal
+            $('#userTable tbody').on('click', '.remove-badge-btn', function() {
+                const userId = $(this).data('id');
+                const idCardInput = $(this).closest('tr').find('.id-card-input'); // Get the ID Card input of the same row
+
+                if (confirm('Voulez-vous vraiment enlever le badge de cet utilisateur ?')) {
+                    $.ajax({
+                        url: 'remove_badge.php',
+                        method: 'POST',
+                        data: {
+                            id: userId
+                        },
+                        success: function(response) {
+                            if (response === "Badge removed successfully") {
+                                showAlert("Badge retiré avec succès.", "success");
+
+                                // Empty the ID Card input field after removing the badge
+                                idCardInput.val('');
+
+                                table.ajax.reload(); // Reload the table
+                            } else {
+                                showAlert(response, "danger");
+                            }
+                        },
+                        error: function() {
+                            showAlert("Erreur lors de la suppression du badge.", "danger");
+                        }
+                    });
+                }
             });
         });
     </script>
