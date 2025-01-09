@@ -1476,12 +1476,12 @@ $conn->close();
         }
     }
 
-    function setTodayAsDefaultDate() {
-        var dateDebutPaiement = document.getElementById('date_debut_paiement');
-        var today = new Date().toISOString().split('T')[0]; // Get today's date in 'YYYY-MM-DD' format
-        dateDebutPaiement.value = today;
-        calculateDateFin(); // Automatically calculate the end date
-    }
+    // function setTodayAsDefaultDate() {
+    //     var dateDebutPaiement = document.getElementById('date_debut_paiement');
+    //     var today = new Date().toISOString().split('T')[0]; // Get today's date in 'YYYY-MM-DD' format
+    //     dateDebutPaiement.value = today;
+    //     calculateDateFin(); // Automatically calculate the end date
+    // }
 
     // Function to adjust the end date by a number of months
     // Global variable to keep track of the number of months added
