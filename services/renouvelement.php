@@ -1221,7 +1221,7 @@ $conn->close();
 
         calculateTotal();
         generateMatricule();
-        calculateDateFin();
+        // calculateDateFin();
     }
 
     function calculateDurationAndSelectAbonnement() {
@@ -1709,7 +1709,7 @@ if ($profil == 4) {; ?>
         }
 
         calculateTotal();
-        calculateDateFin();
+        // calculateDateFin();
         calculateReste();
     });
 </script>
