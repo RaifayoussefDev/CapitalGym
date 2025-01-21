@@ -8,12 +8,19 @@ if (isset($_GET['id_user'])) {
     $user_id = intval($_GET['id_user']);
 
     // Requête pour récupérer les informations de l'utilisateur, abonnement, paiement et type de paiement
-    $sql = "SELECT * FROM users u
-            JOIN abonnements a ON u.id = a.user_id
-            JOIN packages p ON p.id = a.type_abonnement
-            JOIN payments py ON a.id = py.abonnement_id
-            JOIN type_paiements tp ON py.type_paiement_id = tp.id
-            WHERE u.id = ?";
+    $sql = "SELECT 
+    u.*, a.*, p.*, py.*, tp.*
+FROM users u
+JOIN abonnements a ON u.id = a.user_id
+JOIN packages p ON p.id = a.type_abonnement
+JOIN payments py ON a.id = py.abonnement_id
+JOIN type_paiements tp ON py.type_paiement_id = tp.id
+WHERE u.id = ? AND a.id = (
+    SELECT MAX(a2.id)
+    FROM abonnements a2
+    WHERE a2.user_id = u.id
+);
+";
 
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('i', $user_id);
@@ -26,29 +33,44 @@ if (isset($_GET['id_user'])) {
         exit;
     }
 
-    // Requête pour récupérer les paiements associés à l'utilisateur
-    $sql_payments = "SELECT * FROM payments,type_paiements WHERE payments.type_paiement_id = type_paiements.id AND user_id = ?";
-    $stmt_payments = $conn->prepare($sql_payments);
-    $stmt_payments->bind_param('i', $user_id);
-    $stmt_payments->execute();
-    $payments_result = $stmt_payments->get_result();
-    $payments = $payments_result->fetch_all(MYSQLI_ASSOC);
+    // Requête pour récupérer l'ID du dernier abonnement de l'utilisateur
+    $sql_last_abonnement = "SELECT MAX(id) AS last_abonnement_id FROM abonnements WHERE user_id = ?";
+    $stmt_last_abonnement = $conn->prepare($sql_last_abonnement);
+    $stmt_last_abonnement->bind_param('i', $user_id);
+    $stmt_last_abonnement->execute();
+    $last_abonnement_result = $stmt_last_abonnement->get_result();
+    $last_abonnement = $last_abonnement_result->fetch_assoc();
+    $last_abonnement_id = $last_abonnement['last_abonnement_id'];
 
-    // Requête pour récupérer les chèques associés à l'utilisateur
-    $sql_cheques = "SELECT * FROM cheque WHERE id_utilisateur = ?";
-    $stmt_cheques = $conn->prepare($sql_cheques);
-    $stmt_cheques->bind_param('i', $user_id);
-    $stmt_cheques->execute();
-    $cheques_result = $stmt_cheques->get_result();
-    $cheques = $cheques_result->fetch_all(MYSQLI_ASSOC);
+    if ($last_abonnement_id) {
+        // Requête pour récupérer les paiements associés au dernier abonnement
+        $sql_payments = "SELECT payments.*, type_paiements.* 
+                     FROM payments 
+                     JOIN type_paiements ON payments.type_paiement_id = type_paiements.id 
+                     WHERE payments.abonnement_id = ?";
+        $stmt_payments = $conn->prepare($sql_payments);
+        $stmt_payments->bind_param('i', $last_abonnement_id);
+        $stmt_payments->execute();
+        $payments_result = $stmt_payments->get_result();
+        $payments = $payments_result->fetch_all(MYSQLI_ASSOC);
 
-    // Requête pour récupérer les virements associés à l'utilisateur
-    $sql_virements = "SELECT * FROM virement WHERE id_utilisateur = ?";
-    $stmt_virements = $conn->prepare($sql_virements);
-    $stmt_virements->bind_param('i', $user_id);
-    $stmt_virements->execute();
-    $virements_result = $stmt_virements->get_result();
-    $virements = $virements_result->fetch_all(MYSQLI_ASSOC);
+        // Requête pour récupérer les chèques associés au dernier abonnement
+        $sql_cheques = "SELECT * FROM cheque WHERE abonnement_id = ?";
+        $stmt_cheques = $conn->prepare($sql_cheques);
+        $stmt_cheques->bind_param('i', $last_abonnement_id);
+        $stmt_cheques->execute();
+        $cheques_result = $stmt_cheques->get_result();
+        $cheques = $cheques_result->fetch_all(MYSQLI_ASSOC);
+
+        // Requête pour récupérer les virements associés au dernier abonnement
+        $sql_virements = "SELECT * FROM virement WHERE abonnement_id = ?";
+        $stmt_virements = $conn->prepare($sql_virements);
+        $stmt_virements->bind_param('i', $last_abonnement_id);
+        $stmt_virements->execute();
+        $virements_result = $stmt_virements->get_result();
+        $virements = $virements_result->fetch_all(MYSQLI_ASSOC);
+    }
+
 
 
 
@@ -363,7 +385,7 @@ $conn->close();
                             </form>
                         <?php endif; ?>
                         </section>
-                                            <?php
+                    <?php
                     }; ?>
 
                 </div>

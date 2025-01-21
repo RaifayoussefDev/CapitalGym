@@ -41,48 +41,45 @@ function GenerateContrat($id_user)
     a.offres_promotionnelles, 
     a.description, 
     p.id AS id_pack, 
-
-    -- Utilisation de la sous-requête pour obtenir le montant payé total, agrégé par abonnement
-    COALESCE(py.montant_paye_total, 0) AS montant_paye_total, -- Default to 0 if no payments found
-
+    COALESCE(py.montant_paye_total, 0) AS montant_paye_total, 
     p.pack_name AS pack_name, 
-    COALESCE(py.reste, 0) AS reste,  -- Handle NULL values for 'reste'
-    COALESCE(py.total, 0) AS total,  -- Handle NULL values for 'total'
-    
-    -- Formatage des dates
+    COALESCE(py.reste, 0) AS reste,  
+    COALESCE(py.total, 0) AS total,  
     DATE_FORMAT(a.date_debut, '%d/%m/%Y') AS date_debut, 
     DATE_FORMAT(a.date_fin, '%d/%m/%Y') AS date_fin,
     DATE_FORMAT(a.date_abonnement, '%d/%m/%Y') AS date_abonnement,
-
-    -- Suppression des doublons dans les activités et périodes
     GROUP_CONCAT(DISTINCT ua.activite_id ORDER BY ua.activite_id ASC) AS activites_list,
     GROUP_CONCAT(DISTINCT ua.periode_activites ORDER BY ua.activite_id ASC) AS activites_periode
-
 FROM 
     users u
 JOIN 
-    abonnements a ON u.id = a.user_id 
+    (SELECT a1.* 
+     FROM abonnements a1
+     JOIN (SELECT user_id, MAX(date_fin) AS last_date_fin 
+           FROM abonnements 
+           GROUP BY user_id) last_abonnement 
+     ON a1.user_id = last_abonnement.user_id AND a1.date_fin = last_abonnement.last_date_fin
+    ) a ON u.id = a.user_id
 JOIN 
     packages p ON p.id = a.type_abonnement 
 LEFT JOIN 
     (SELECT 
         abonnement_id, 
         SUM(montant_paye) AS montant_paye_total,
-        MAX(reste) AS reste, -- Prendre le reste maximum
-        MAX(total) AS total  -- Prendre le total maximum
+        MAX(reste) AS reste, 
+        MAX(total) AS total  
      FROM 
         payments 
      GROUP BY 
-        abonnement_id) py ON py.abonnement_id = a.id  -- Sous-requête pour agrégat des paiements
+        abonnement_id) py ON py.abonnement_id = a.id  
 LEFT JOIN 
-    user_activites ua ON ua.user_id = u.id  -- Joindre les activités de l'utilisateur
-
+    user_activites ua ON ua.user_id = u.id  
 WHERE 
     u.role_id = 3 
     AND u.id = '$id_user'
-
 GROUP BY 
-    u.id, a.id, p.id;";
+    u.id, a.id, p.id;
+";
 
 
 
@@ -1294,7 +1291,7 @@ GROUP BY
         $updateQuery = "UPDATE users SET contract_name = '$contractName' WHERE id = $id_user";
         mysqli_query($conn, $updateQuery);
     }
-    
+
 
     // Return only the contract name to the client (no success message)
     return $contractName;

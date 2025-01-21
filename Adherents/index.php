@@ -36,7 +36,18 @@ if ($type_paiements_result->num_rows > 0) {
 
 // Récupérer les utilisateurs avec les détails de l'abonnement et les activités
 $sql = "
-SELECT u.id , etat , nom , prenom , matricule , email , phone , cin , photo , pack_name , date_fin from users u, abonnements a , packages p WHERE u.id=a.user_id and p.id=a.type_abonnement and role_id = 3;
+SELECT 
+    u.id, u.etat, u.nom, u.prenom, u.matricule, u.email, u.phone, u.cin, u.photo, 
+    p.pack_name, a.date_fin
+FROM users u
+JOIN (
+    SELECT a1.user_id, MAX(a1.id) AS last_abonnement_id
+    FROM abonnements a1
+    GROUP BY a1.user_id
+) latest_abonnement ON u.id = latest_abonnement.user_id
+JOIN abonnements a ON a.id = latest_abonnement.last_abonnement_id
+JOIN packages p ON p.id = a.type_abonnement
+WHERE u.role_id = 3 AND u.etat = 'actif';
 ";
 
 $result = $conn->query($sql);
@@ -53,7 +64,7 @@ if ($result->num_rows > 0) {
 $sqlp = "SELECT u.id , u.nom, u.prenom, u.cin, u.email, u.phone, s.nom AS saisie_par_nom, s.prenom AS saisie_par_prenom
 FROM users u
 LEFT JOIN users s ON u.saisie_par = s.id
-WHERE u.etat = 'proceP';";
+WHERE u.etat in ( 'proceP','non actif') ;";
 
 $resultp = $conn->query($sqlp);
 
