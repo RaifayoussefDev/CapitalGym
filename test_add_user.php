@@ -29,7 +29,7 @@ function addPersonnel($qrcode, $id_card, $nom, $prenom, $email, $phone, $departe
 
     $row = sqlsrv_fetch_array($checkStmt, SQLSRV_FETCH_ASSOC);
     if ($row['count'] > 0) {
-        echo "CardCode already exists in CardList. No insertion performed.<br>";
+        echo "CardCode $qrcode already exists in CardList. No insertion performed.<br>";
         return;
     }
 
