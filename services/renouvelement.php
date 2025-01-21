@@ -1683,7 +1683,7 @@ if ($profil == 4) {; ?>
         // Event Listeners
         if (typeAbonnement) typeAbonnement.addEventListener('change', () => {
             calculateTotal();
-            calculateDateFin();
+            // calculateDateFin();
         });
 
         activities.forEach(activity => {

@@ -20,21 +20,25 @@ function updateBlacklistForExpiredSubscriptions($code_id)
         die("Connection failed: " . print_r(sqlsrv_errors(), true));
     }
 
-
-    $userId = $row['id'];
+    // Prepare the update query with parameter placeholder
     $updateBlacklistSql = "
-            UPDATE [dbo].[Personnel]
-            SET IsBlacklist = 1
-            WHERE CardData = ?;
-        ";
+        UPDATE [dbo].[Personnel]
+        SET IsBlacklist = 1
+        WHERE CardData = ?;
+    ";
 
-    $stmtUpdate = sqlsrv_query($connsrv, $updateBlacklistSql, $code_id);
+    // Bind the parameter and execute the query
+    $stmtUpdate = sqlsrv_query($connsrv, $updateBlacklistSql, array(&$code_id));
     if ($stmtUpdate === false) {
-        die("Error updating blacklist for user ID $userId: " . print_r(sqlsrv_errors(), true));
+        die("Error updating blacklist for code ID $code_id: " . print_r(sqlsrv_errors(), true));
     } else {
-        echo "User with ID $userId has been added to the blacklist.<br>";
+        echo "User with code ID $code_id has been added to the blacklist.<br>";
     }
+
+    // Close the connection
+    sqlsrv_close($connsrv);
 }
 
 // Call the function to update the blacklist
-updateBlacklistForExpiredSubscriptions();
+updateBlacklistForExpiredSubscriptions(11306167);
+?>
