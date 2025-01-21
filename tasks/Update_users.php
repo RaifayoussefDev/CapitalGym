@@ -15,7 +15,8 @@ WHERE
         SELECT MAX(a2.date_fin)
         FROM abonnements a2
         WHERE a2.user_id = u.id
-    );";
+    )
+    and u.id_card not like '';";
 
 $result = $conn->query($sql);
 
