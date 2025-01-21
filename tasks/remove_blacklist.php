@@ -32,7 +32,7 @@ function removeBlacklistForExpiredSubscriptions($code_id)
     if ($stmtUpdate === false) {
         die("Error updating blacklist for code ID $code_id: " . print_r(sqlsrv_errors(), true));
     } else {
-        echo "**User with code ID $code_id has been removed from the blacklist.<br>";
+        // echo "**User with code ID $code_id has been removed from the blacklist.<br>";
     }
 
     // Close the connection
