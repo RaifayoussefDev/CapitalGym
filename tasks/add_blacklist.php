@@ -38,7 +38,4 @@ function updateBlacklistForExpiredSubscriptions($code_id)
     // Close the connection
     sqlsrv_close($connsrv);
 }
-
-// Call the function to update the blacklist
-updateBlacklistForExpiredSubscriptions(11306167);
 ?>

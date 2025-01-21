@@ -1,4 +1,6 @@
 <?php
+require "./add_blacklist.php";
+require "./remove_blacklist.php";
 require "../inc/conn_db.php";
 
 $sql = "SELECT 
@@ -19,7 +21,9 @@ $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        echo "ID Card: " . $row["id_card"] . " - Date Fin: " . $row["date_fin"] . "<br>";
+        // echo "ID Card: " . $row["id_card"] . " - Date Fin: " . $row["date_fin"] . "<br>";
+        $id_card = $row["id_card"];
+        updateBlacklistForExpiredSubscriptions($id_card);
     }
 } else {
     echo "0 results found";
