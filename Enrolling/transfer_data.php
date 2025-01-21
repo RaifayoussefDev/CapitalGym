@@ -6,14 +6,6 @@ $username = "admin";
 $password = "C@p1t@l$0ft2022"; // Replace with your password
 $dbname = "privilage";
 
-
-// $servername = "localhost";
-// $username = "root";
-// $password = ""; // Replace with your password
-// $dbname = "privilage";
-
-
-
 // Create a database connection
 $conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -42,29 +34,28 @@ LEFT JOIN
 LEFT JOIN 
     activites ON activites.id = user_activites.activite_id
 WHERE 
-    users.role_id = 3 AND id_card not LIKE ''";
+    users.role_id = 3 AND id_card NOT LIKE ''";
 
 $result = mysqli_query($conn, $sql);
 
 if ($result) {
     while ($row = mysqli_fetch_assoc($result)) {
         $id = $row["id"];
-        $nom = $row['nom'];
-        $nom = str_replace("'", "\'", $nom);
-
-        $prenom = $row['prenom'];
+        
+        // Truncate to 30 characters
+        $nom = substr($row['nom'], 0, 30); 
+        $prenom = substr($row['prenom'], 0, 30); // Take only the first word, ensure it's within 30 characters
         $prenom = str_replace("'", "\'", $prenom); // Escape any single quotes
         $prenom = explode(" ", $prenom)[0]; // Take only the first word
 
+        $email = substr($row['email'], 0, 30); // Limit email to 30 characters
+        $email = str_replace("'", "\'", $email); // Escape any single quotes
 
-        $email = $row['email'];
-        $email = str_replace("'", "\'", $email);
-
-        $phone = $row['phone'];
-        $id_card = $row['id_card'];
+        $phone = substr($row['phone'], 0, 30); // Limit phone number to 30 characters
+        $id_card = substr($row['id_card'], 0, 30); // Limit id_card to 30 characters
         $qrcode = $row['id_card'];
         $type_abonnement = $row['type_abonnement'];
-        $activite_nom = $row['activite_nom']; // Assume this column is fetched in your query
+        $activite_nom = substr($row['activite_nom'], 0, 30); // Ensure activity name is within 30 characters
 
         // Determine department based on type_abonnement and CrossFit activity
         if ($type_abonnement == 2 || $type_abonnement == 3) {
@@ -75,7 +66,6 @@ if ($result) {
             $departement = 20;
         }
         echo $departement;
-
 
         // Check if $qrcode is not empty
         if (!empty($qrcode)) {
@@ -89,7 +79,6 @@ if ($result) {
 } else {
     die("Error fetching users from MySQL: " . mysqli_error($conn));
 }
-
 
 // Close the connections
 mysqli_close($conn);
