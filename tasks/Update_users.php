@@ -1,7 +1,7 @@
 <?php
-require "./add_blacklist.php";
-require "./remove_blacklist.php";
-require "../inc/conn_db.php";
+require "C:/xampp/htdocs/privilage/tasks/add_blacklist.php";
+require "C:/xampp/htdocs/privilage/tasks/remove_blacklist.php";
+require "C:/xampp/htdocs/privilage/inc/conn_db.php";
 
 $sql = "SELECT 
     u.id_card, 
