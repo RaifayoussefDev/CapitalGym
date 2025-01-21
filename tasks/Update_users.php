@@ -15,19 +15,27 @@ WHERE
         SELECT MAX(a2.date_fin)
         FROM abonnements a2
         WHERE a2.user_id = u.id
-    )
-    AND a.date_fin < CURDATE();";
+    );";
+
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
+    $currentDate = date('Y-m-d'); // Date actuelle pour comparaison
     while ($row = $result->fetch_assoc()) {
-        // echo "ID Card: " . $row["id_card"] . " - Date Fin: " . $row["date_fin"] . "<br>";
         $id_card = $row["id_card"];
-        updateBlacklistForExpiredSubscriptions($id_card);
+        $date_fin = $row["date_fin"];
+        
+        if ($date_fin < $currentDate) {
+            // Ajouter à la liste noire
+            updateBlacklistForExpiredSubscriptions($id_card);
+        } else {
+            // Retirer de la liste noire
+            removeBlacklistForExpiredSubscriptions($id_card);
+        }
     }
 } else {
-    echo "0 results found";
+    echo "Aucun résultat trouvé.";
 }
 
 $conn->close();
-;?>
+?>
