@@ -60,21 +60,34 @@ SELECT
     a.offres_promotionnelles, 
     a.description, 
     p.id AS id_pack, 
-    SUM(py.montant_paye) AS montant_paye_total, -- Total montant_paye for the user
-    py.id AS payement_id, 
+    COALESCE(py.montant_paye_total, 0) AS montant_paye_total, 
     py.total AS total, 
     p.pack_name AS pack_name, 
     py.reste AS reste, 
-    a.date_debut AS date_debut, 
-    a.date_fin AS date_fin
+    a.date_debut, 
+    a.date_fin
 FROM 
     users u 
 JOIN 
-    abonnements a ON u.id = a.user_id 
+    (SELECT a1.* 
+     FROM abonnements a1
+     JOIN (SELECT user_id, MAX(date_fin) AS last_date_fin 
+           FROM abonnements 
+           GROUP BY user_id) last_abonnement 
+     ON a1.user_id = last_abonnement.user_id AND a1.date_fin = last_abonnement.last_date_fin
+    ) a ON u.id = a.user_id 
 JOIN 
     packages p ON p.id = a.type_abonnement 
-JOIN 
-    payments py ON py.abonnement_id = a.id 
+LEFT JOIN 
+    (SELECT 
+        abonnement_id, 
+        SUM(montant_paye) AS montant_paye_total, 
+        MAX(total) AS total, 
+        MAX(reste) AS reste 
+     FROM 
+        payments 
+     GROUP BY 
+        abonnement_id) py ON py.abonnement_id = a.id 
 WHERE 
     u.role_id = 3 
     AND u.id = '$id_user'

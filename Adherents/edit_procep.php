@@ -309,6 +309,31 @@ foreach ($_POST['type_paiement'] as $index => $type_paiement_id) {
             // Handle missing cheque details (e.g., set an error message)
         }
     }
+    
+    if ($type_paiement_id == 4) {
+        // Ensure virement details are set
+        $nomEmetteur = $_POST['nomEmetteur'][$index] ?? null; // Nom de l'émetteur
+        $dateImitation = $_POST['dateImitation'][$index] ?? null; // Date d'imitation
+        $reference = $_POST['reference'][$index] ?? null; // Référence
+        $banqueEmettrice = $_POST['banqueEmettrice'][$index] ?? null; // Banque émettrice
+
+        // Validate virement details
+        if (!empty($nomEmetteur) && !empty($dateImitation) && !empty($reference) && !empty($banqueEmettrice)) {
+            $virement_sql = "INSERT INTO virement (nomEmetteur, dateImitation, reference, banqueEmettrice, id_utilisateur, abonnement_id, payment_id)
+                             VALUES (?, ?, ?, ?, ?, ?, ?)";
+            $stmt = $conn->prepare($virement_sql);
+            if ($stmt) {
+                $stmt->bind_param("sssssii", $nomEmetteur, $dateImitation, $reference, $banqueEmettrice, $user_id, $abonnement_id, $payment_id);
+                $stmt->execute();
+                $stmt->close();
+            } else {
+                // Handle SQL prepare error
+                continue; // Skip this iteration if the statement preparation fails
+            }
+        } else {
+            // Handle missing virement details (e.g., set an error message)
+        }
+    }
 }
 $clear_sql = "DELETE FROM envoi_app";
 if ($conn->query($clear_sql) === TRUE) {
