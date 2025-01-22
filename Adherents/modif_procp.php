@@ -319,8 +319,13 @@ $conn->close();
                                             <input type="text" class="form-control" id="fonction" name="fonction" placeholder="Fonction" value="<?php echo $user['fonction']; ?>" />
                                         </div>
                                     </div>
-
-                                    <div class="col-md-6">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>N° Dossier</label>
+                                            <input type="text" class="form-control" placeholder="Numéro de Dossier" id="n_dossier" name="n_dossier"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Numéro de GSM en cas d’urgence</label>
                                             <input type="tel" class="form-control" id="num_urgence" name="num_urgence" placeholder="Numéro d'urgence" value="<?php echo $user['num_urgence']; ?>" />
