@@ -10,6 +10,7 @@ $users_sql = "SELECT
     u.phone, 
     u.cin, 
     u.email,
+    u.n_dossier,
     DATE_FORMAT(u.date_naissance, '%d/%m/%Y') AS date_naissance,
     u.genre, 
     p.pack_name, 
@@ -73,6 +74,7 @@ $conn->close();
                                     <th>Nom et Prénom</th>
                                     <th>CIN</th>
                                     <th>Numéro GSM</th>
+                                    <th>N° Dossier</th>
                                     <th>Genre</th>
                                     <th>Date de Naissance</th>
                                     <th>Email</th>
@@ -88,6 +90,7 @@ $conn->close();
                                             <td class="text-capitalize"><?php echo htmlspecialchars($user['nom']); ?> <?php echo htmlspecialchars($user['prenom']); ?></td>
                                             <td class="text-capitalize"><?php echo htmlspecialchars($user['cin']); ?> </td>
                                             <td class="text-capitalize"><?php echo htmlspecialchars($user['phone']); ?></td>
+                                            <td class="text-capitalize"><?php echo htmlspecialchars($user['n_dossier']); ?></td>
                                             <td class="text-capitalize">
                                                 <?php
                                                 if ($user['genre'] === 'M') {
@@ -142,6 +145,7 @@ $conn->close();
                                     <th>Nom et Prénom</th>
                                     <th>CIN</th>
                                     <th>Numéro GSM</th>
+                                    <th>N° Dossier</th>
                                     <th>Genre</th>
                                     <th>Email</th>
                                     <th>Type d'abonnement</th>
