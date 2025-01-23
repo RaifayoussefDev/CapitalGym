@@ -57,12 +57,13 @@ $prenom = $_POST['prenom'];
 $cin = $_POST['cin'];
 $badge_number = $_POST['badge_number'];
 $note = $_POST['note'];
+$n_dossier = $_POST['n_dossier'];
 
 // SQL to update user details
 $user_sql = "UPDATE `users` SET 
     `nom` = ?, `prenom` = ?, `cin` = ?, `phone` = ?, `email` = ?,date_naissance = ?, 
     `photo` = ?, `adresse` = ?, `fonction` = ?, `num_urgence` = ?, 
-    `employeur` = ?, `updated_by` = ?, `id_card` = ? , `note` = ?
+    `employeur` = ?, `updated_by` = ?, `id_card` = ? , `note` = ? , `N_dossier`=?
     WHERE `id` = ?";
 
 $stmt = $conn->prepare($user_sql);
@@ -70,7 +71,7 @@ if (!$stmt) {
     $conn->rollback();
     throw new Exception("Failed to prepare user update: " . $conn->error);
 }
-$stmt->bind_param("sssssssssssissi", $nom, $prenom, $cin, $phone, $email, $date_naissance, $photo_name, $adresse, $fonction, $num_urgence, $employeur, $changer_par, $badge_number, $note, $user_id);
+$stmt->bind_param("sssssssssssisssi", $nom, $prenom, $cin, $phone, $email, $date_naissance, $photo_name, $adresse, $fonction, $num_urgence, $employeur, $changer_par, $badge_number, $note,$n_dossier , $user_id);
 if (!$stmt->execute()) {
     $conn->rollback();
     throw new Exception("User update failed: " . $stmt->error);
