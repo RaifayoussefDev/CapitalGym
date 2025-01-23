@@ -172,6 +172,12 @@ $conn->close();
                                     <span><?= $user['genre'] === 'M' ? 'Mâle' : 'Femelle' ?></span>
                                 </div>
                             </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>N° Dossier:</label>
+                                    <span><?php echo $user['N_dossier']; ?></span>
+                                </div>
+                            </div>
                         </div>
                     </section>
 
