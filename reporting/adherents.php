@@ -26,6 +26,12 @@ JOIN
     packages p ON a.type_abonnement = p.id
 LEFT JOIN 
     user_activites ua ON ua.user_id = u.id
+WHERE
+ a.id = (
+    SELECT MAX(a2.id)
+    FROM abonnements a2
+    WHERE a2.user_id = u.id
+)
 GROUP BY 
     u.id;";
 $users_result = $conn->query($users_sql);

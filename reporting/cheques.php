@@ -4,7 +4,7 @@ require "../inc/conn_db.php";
 
 // Fetch cheques using your SQL query
 $cheques_sql = "
-    SELECT C.id, u.nom, u.prenom, `nomTitulaire`, `numeroCheque`, montant_paye, `dateEmission`, `banqueEmettrice`, `numeroCompte`, `id_utilisateur`, `payment_id`, `statut`
+    SELECT C.id, u.nom, u.prenom, u.n_dossier, `nomTitulaire`, `numeroCheque`, montant_paye, `dateEmission`, `banqueEmettrice`, `numeroCompte`, `id_utilisateur`, `payment_id`, `statut`
     FROM `cheque` C
     JOIN users u ON C.id_utilisateur = u.id
     JOIN abonnements a ON C.abonnement_id = a.id
@@ -50,6 +50,7 @@ $conn->close();
                                 <tr>
                                     <th>Numéro de Chèque</th>
                                     <th>Adhérent</th>
+                                    <th>N° Dossier</th>
                                     <th>Date d'Émission</th>
                                     <th>Banque</th>
                                     <th>Montant Payer</th>
@@ -62,6 +63,7 @@ $conn->close();
                                         <tr data-cheque-id="<?php echo $cheque['id']; ?>">
                                             <td class="text-capitalize"><?php echo htmlspecialchars($cheque['numeroCheque']); ?></td>
                                             <td class="text-capitalize"><?php echo htmlspecialchars($cheque['nom']); ?> <?php echo htmlspecialchars($cheque['prenom']); ?></td>
+                                            <td class="text-capitalize"><?php echo htmlspecialchars($cheque['n_dossier']); ?></td>
                                             <td class="text-capitalize"><?php echo htmlspecialchars($cheque['dateEmission']); ?></td>
                                             <td class="text-capitalize"><?php echo htmlspecialchars($cheque['banqueEmettrice']); ?></td>
                                             <td class="text-capitalize"><?php echo htmlspecialchars($cheque['montant_paye']); ?> MAD</td>
@@ -78,6 +80,7 @@ $conn->close();
                                 <tr>
                                     <th>Numéro de Chèque</th>
                                     <th>Adhérent</th>
+                                    <th>N° Dossier</th>
                                     <th>Date d'Émission</th>
                                     <th>Banque</th>
                                     <th>Montant Payer</th>

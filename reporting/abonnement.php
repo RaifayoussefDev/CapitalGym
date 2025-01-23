@@ -3,7 +3,11 @@ require "../inc/app.php";
 require "../inc/conn_db.php";
 
 // Fetch users using your SQL query
-$users_sql = "SELECT u.id, nom , prenom , phone ,cin , email , u.genre, p.pack_name , etat , matricule , a.date_fin ,a.date_debut FROM `users` u , abonnements a , packages p WHERE u.id=a.user_id and a.type_abonnement=p.id;";
+$users_sql = "SELECT u.id, nom , prenom , phone ,cin ,n_dossier, email , u.genre, p.pack_name , etat , matricule , a.date_fin ,a.date_debut FROM `users` u , abonnements a , packages p WHERE u.id=a.user_id and a.type_abonnement=p.id AND a.id = (
+    SELECT MAX(a2.id)
+    FROM abonnements a2
+    WHERE a2.user_id = u.id
+);";
 $users_result = $conn->query($users_sql);
 
 $users = [];
@@ -49,6 +53,7 @@ $conn->close();
                                     <th>Matricule</th>
                                     <th>Nom et Prénom</th>
                                     <th>Numéro GSM</th>
+                                    <th>N° Dossier</th>
                                     <th>Type d'abonnement</th>
                                     <th>Date début</th>
                                     <th>Date fin</th>
@@ -61,6 +66,7 @@ $conn->close();
                                             <td class="text-capitalize"><?php echo htmlspecialchars($user['matricule']); ?> </td>
                                             <td class="text-capitalize"><?php echo htmlspecialchars($user['nom']); ?> <?php echo htmlspecialchars($user['prenom']); ?></td>
                                             <td class="text-capitalize"><?php echo htmlspecialchars($user['phone']); ?></td>
+                                            <td class="text-capitalize"><?php echo htmlspecialchars($user['n_dossier']); ?></td>
                                             <td class="text-capitalize"><?php echo htmlspecialchars($user['pack_name']); ?></td>
                                             <td class="text-capitalize"><?php echo htmlspecialchars($user['date_debut']); ?></td>
                                             <td class="text-capitalize"><?php echo htmlspecialchars($user['date_fin']); ?></td>
@@ -77,6 +83,7 @@ $conn->close();
                                     <th>Matricule</th>
                                     <th>Nom et Prénom</th>
                                     <th>Numéro GSM</th>
+                                    <th>N° Dossier</th>
                                     <th>Type d'abonnement</th>
                                     <th>Date début</th>
                                     <th>Date fin</th>

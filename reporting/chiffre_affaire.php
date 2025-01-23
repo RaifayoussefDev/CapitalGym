@@ -3,7 +3,7 @@ require "../inc/app.php";
 require "../inc/conn_db.php";
 
 // Fetch users using your SQL query
-    $users_sql = "SELECT u.id, u.nom, u.prenom, p.pack_name, a.date_abonnement, u.matricule, a.date_debut, a.date_fin,
+    $users_sql = "SELECT u.id, u.nom,u.n_dossier , u.prenom, p.pack_name, a.date_abonnement, u.matricule, a.date_debut, a.date_fin,
         SUM(
             CASE 
                 -- If payment is by cheque and cheque status is 'payer' or 'en cours', include montant_paye in the sum
@@ -66,6 +66,7 @@ $conn->close();
                                 <tr>
                                     <th>Matricule</th>
                                     <th>Nom et Prénom</th>
+                                    <th>N° Dossier</th>
                                     <th>Date Abonnement</th>
                                     <th>Commerçant</th>
                                     <th>Type d'abonnement</th>
@@ -80,6 +81,7 @@ $conn->close();
                                         <tr data-user-id="<?php echo $user['id']; ?>">
                                             <td class="text-capitalize"><?php echo htmlspecialchars($user['matricule']); ?> </td>
                                             <td class="text-capitalize"><?php echo htmlspecialchars($user['nom']); ?> <?php echo htmlspecialchars($user['prenom']); ?></td>
+                                            <td class="text-capitalize"><?php echo htmlspecialchars($user['n_dossier']); ?></td>
                                             <td class="text-capitalize"><?php echo htmlspecialchars($user['date_abonnement']); ?></td>
                                             <td class="text-capitalize"><?php echo htmlspecialchars($user['saisie_par_nom']); ?> <?php echo htmlspecialchars($user['saisie_par_prenom']); ?></td>
                                             <td class="text-capitalize"><?php echo htmlspecialchars($user['pack_name']); ?></td>
@@ -98,6 +100,7 @@ $conn->close();
                                 <tr>
                                     <th>Matricule</th>
                                     <th>Nom et Prénom</th>
+                                    <th>N° Dossier</th>
                                     <th>Date Abonnement</th>
                                     <th>Commerçant</th>
                                     <th>Type d'abonnement</th>
