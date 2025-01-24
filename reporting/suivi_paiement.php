@@ -93,7 +93,7 @@ $conn->close();
                                     <?php endforeach; ?>
                                 <?php else : ?>
                                     <tr>
-                                        <td colspan="6">Aucun chèque disponible</td>
+                                        <td colspan="7">Aucun chèque disponible</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
