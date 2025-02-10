@@ -19,6 +19,13 @@ if (isset($_GET['id_coach'])) {
         users.matricule,
         users.email,
         users.phone,
+        sessions.start_time,
+        sessions.date,
+        sessions.end_time,
+        sessions.location_id,
+        sessions.max_attendees,
+        sessions.remaining_slots,
+        activites.nom AS activite_nom,
         users.photo
     FROM 
         coaches
@@ -118,7 +125,7 @@ if (isset($_GET['id_coach'])) {
                     
                     <?php if (!empty($sessions)) : ?>
                         <h5>Sessions animées par le Coach</h5>
-                        <section>
+                        <!-- <section>
                             <div class="table-responsive">
                                 <table class="table table-striped table-hover">
                                     <thead>
@@ -147,7 +154,7 @@ if (isset($_GET['id_coach'])) {
                                     </tbody>
                                 </table>
                             </div>
-                        </section>
+                        </section> -->
                     <?php else : ?>
                         <p>Ce coach n'anime actuellement aucune session.</p>
                     <?php endif; ?>
