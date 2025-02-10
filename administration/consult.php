@@ -20,7 +20,7 @@ if (isset($_GET['id_coach'])) {
         users.email,
         users.phone,
         users.photo,
-                activites.nom AS activite_nom,
+                activites.nom AS activite_nom
 
     FROM 
         coaches
