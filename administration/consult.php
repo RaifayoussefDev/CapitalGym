@@ -19,7 +19,9 @@ if (isset($_GET['id_coach'])) {
         users.matricule,
         users.email,
         users.phone,
-        users.photo
+        users.photo,
+                activites.nom AS activite_nom,
+
     FROM 
         coaches
     JOIN 
@@ -30,7 +32,7 @@ if (isset($_GET['id_coach'])) {
         sessions ON coaches.id = sessions.coach_id
     WHERE 
         coaches.id = ?";
-    
+
     // Prepare statement
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('i', $id_coach);
@@ -115,9 +117,9 @@ if (isset($_GET['id_coach'])) {
                             </div>
                         </div>
                     </section>
-                    
+
                     <?php if (!empty($sessions)) : ?>
-                        <h5>Sessions animées par le Coach</h5>
+                        <!-- <h5>Sessions animées par le Coach</h5> -->
                         <!-- <section>
                             <div class="table-responsive">
                                 <table class="table table-striped table-hover">
