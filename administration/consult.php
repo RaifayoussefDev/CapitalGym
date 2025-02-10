@@ -27,7 +27,7 @@ if (isset($_GET['id_coach'])) {
     JOIN 
         activites ON coaches.activite_id = activites.id
     LEFT JOIN
-        sessions ON coaches.id = sessions.coach_id;
+        sessions ON coaches.id = sessions.coach_id
     WHERE 
         coaches.id = ?";
     
