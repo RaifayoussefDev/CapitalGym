@@ -19,13 +19,6 @@ if (isset($_GET['id_coach'])) {
         users.matricule,
         users.email,
         users.phone,
-        sessions.start_time,
-        sessions.date,
-        sessions.end_time,
-        sessions.location_id,
-        sessions.max_attendees,
-        sessions.remaining_slots,
-        activites.nom AS activite_nom,
         users.photo
     FROM 
         coaches
@@ -34,7 +27,7 @@ if (isset($_GET['id_coach'])) {
     JOIN 
         activites ON coaches.activite_id = activites.id
     LEFT JOIN
-        sessions ON coaches.id = sessions.coach_id
+        sessions ON coaches.id = sessions.coach_id;
     WHERE 
         coaches.id = ?";
     
